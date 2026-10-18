@@ -18,6 +18,11 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Results screen for Sprint: WPM, accuracy, errors, XP gained, restart.
 - Zen mode: continuous text replenishment, uninterrupted typing, XP awarded incrementally.
 
+## Interface refinement (2026-10-18)
+- Center the typing workspace in the initial viewport; no page scrolling should be needed to reach it at common laptop and phone sizes.
+- Keep the screen to the compact header, passage, timer, word input, and Restart. Omit promotional headings, motivational slogans, feature cards, and footer copy.
+- The input shows only the active word. Space commits the word and clears the field while feedback and scoring history remain in the passage. Backspace from an empty field reopens the previous word for correction.
+
 ## Modes
 ### Sprint
 - 15s, 30s, 60s durations.

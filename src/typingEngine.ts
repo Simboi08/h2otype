@@ -87,3 +87,9 @@ export function getMetrics(state: Session, passage: string) {
         : 100,
   };
 }
+
+// Only the active word is displayed in the input. Completed text stays in session history.
+export function getWordInput(typed: string) {
+  const boundary = typed.lastIndexOf(" ") + 1;
+  return { prefix: typed.slice(0, boundary), word: typed.slice(boundary) };
+}

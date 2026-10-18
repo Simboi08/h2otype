@@ -20,13 +20,19 @@ Milestones 0 and 1 are complete. The React + TypeScript + Vite foundation now ha
 - Live WPM/accuracy remain hidden by default. A minimal end-of-session readout exposes the engine's calculated WPM, accuracy, and incorrect attempts; no dedicated results screen or record persistence yet.
 - Updated README with gameplay, scoring conventions, scope, and validation commands. Marked Milestone 1 complete in ROADMAP.md.
 
+## Post–Milestone 1 interface refinements
+- Removed the hero slogans, subtitles, feature cards, footer, and decorative passage container. Appearance copy is now functional and brief.
+- Centered the typing workspace in the first viewport, with responsive passage height for phones and short windows.
+- Input now shows only the active word and clears on Space. Completed words remain in the passage and scoring history. Backspace from an empty input reopens the previous word; restart and session finish clear the input.
+- Recorded these user-requested interface decisions in DESIGN.md and updated README gameplay instructions. No later milestone features added.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 16 tests passed (8 pure engine tests and 8 browser tests).
+- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 18 tests passed (8 pure engine tests and 10 browser tests).
 - Engine coverage: first-input start, idle state, WPM/accuracy, correction history, no-callback deadline expiry, completion freezing, zero elapsed time, invalid edits/overflow, untimed mode, reset, and Unicode input positions.
 - Browser coverage: existing foundation/theme checks; typing/correction and caret; deadline expiry while Appearance is open; read-only finish; restart during/after a session; mode reset; untimed practice; native input events at mobile width; repeat/paste prevention; composition drafts and commit.
-- Production app returned HTTP 200 with no JavaScript errors during typing, correction feedback, restart, and mobile scrolling. Desktop and mobile screenshots were reviewed; the active caret remained within the scrollable passage. Timer visibility is checked at 320px.
+- Production app returned HTTP 200 with no JavaScript errors during typing, correction feedback, restart, and mobile scrolling. Desktop and mobile screenshots were reviewed; the active caret remained within the scrollable passage. Timer visibility is checked at 320px. Additional regressions check word clearing/cross-word correction and viewport centering without page scrolling at laptop, phone, and landscape sizes.
 
 ## Scope and known limitations
 - Sprint duration selection, a dedicated results screen, personal bests, and improved restart flow are Milestone 2.

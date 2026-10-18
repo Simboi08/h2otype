@@ -4,6 +4,7 @@ import {
   editSession,
   emptySession,
   getMetrics,
+  getWordInput,
 } from "./typingEngine";
 
 const passages = {
@@ -25,6 +26,7 @@ export default function TypingPractice({ mode }: { mode: "sprint" | "zen" }) {
   const metrics = getMetrics(session, passage);
   const finished = session.endedAt !== null;
   const typedCharacters = [...session.typed];
+  const { prefix, word } = getWordInput(session.typed);
 
   useEffect(() => {
     if (session.startedAt === null || finished) return;
@@ -55,7 +57,7 @@ export default function TypingPractice({ mode }: { mode: "sprint" | "zen" }) {
   function edit(value: string) {
     const now = performance.now();
     setSession((current) =>
-      editSession(current, value, passage, now, durationMs),
+      editSession(current, prefix + value, passage, now, durationMs),
     );
   }
 
@@ -71,10 +73,7 @@ export default function TypingPractice({ mode }: { mode: "sprint" | "zen" }) {
   return (
     <div className="passage-card">
       <div className="passage-meta">
-        <span>
-          {mode.toUpperCase()} <span className="meta-divider">/</span> TYPING
-          PRACTICE
-        </span>
+        <span>{mode === "sprint" ? "Sprint" : "Zen · single passage"}</span>
         <span
           className="mode-detail"
           role="timer"
@@ -124,8 +123,8 @@ export default function TypingPractice({ mode }: { mode: "sprint" | "zen" }) {
         id="typing-input"
         ref={input}
         className="typing-input"
-        value={finished ? session.typed : (compositionDraft ?? session.typed)}
-        placeholder="Click here or Tab to focus, then type…"
+        value={finished ? "" : (compositionDraft ?? word)}
+        placeholder="Type here"
         readOnly={finished}
         autoComplete="off"
         autoCorrect="off"
@@ -137,7 +136,26 @@ export default function TypingPractice({ mode }: { mode: "sprint" | "zen" }) {
         onPaste={(event) => event.preventDefault()}
         onDrop={(event) => event.preventDefault()}
         onKeyDown={(event) => {
-          if (event.repeat && event.key !== "Backspace") event.preventDefault();
+          if (event.repeat && event.key.length === 1) event.preventDefault();
+          if (
+            event.key === "Backspace" &&
+            !composing.current &&
+            !finished &&
+            word === "" &&
+            prefix
+          ) {
+            event.preventDefault();
+            const now = performance.now();
+            setSession((current) =>
+              editSession(
+                current,
+                current.typed.slice(0, -1),
+                passage,
+                now,
+                durationMs,
+              ),
+            );
+          }
         }}
         onSelect={(event) => {
           if (!composing.current)
@@ -163,12 +181,12 @@ export default function TypingPractice({ mode }: { mode: "sprint" | "zen" }) {
       <div className="passage-footer practice-footer">
         <p id="typing-hint" role="status">
           {finished
-            ? "Session finished. Restart whenever you’re ready."
+            ? "Finished."
             : session.startedAt === null
-              ? "First character starts the timer. Backspace to correct."
+              ? "Space advances · Backspace corrects"
               : focused
-                ? "Keep going, one word at a time."
-                : "Focus the typing field to continue. The clock keeps running."}
+                ? "Space advances · Backspace corrects"
+                : "Click the field to continue · Timer running"}
         </p>
         <button className="restart-button" onClick={restart}>
           Restart
@@ -179,11 +197,6 @@ export default function TypingPractice({ mode }: { mode: "sprint" | "zen" }) {
           {metrics.wpm} WPM <span>·</span> {metrics.accuracy}% accuracy{" "}
           <span>·</span> {metrics.errors} incorrect{" "}
           {metrics.errors === 1 ? "attempt" : "attempts"}
-        </p>
-      )}
-      {mode === "zen" && (
-        <p className="practice-note">
-          Single-passage practice for now. Endless Zen is coming later.
         </p>
       )}
     </div>

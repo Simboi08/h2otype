@@ -5,15 +5,15 @@ test("mode navigation switches practice without starting the timer", async ({
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Find your flow." }),
-  ).toBeVisible();
+    page.getByRole("heading", { name: "h2otype typing practice" }),
+  ).toBeAttached();
   await expect(
     page.getByRole("button", { name: "Sprint", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Take your time." }),
-  ).toBeVisible();
+    page.getByRole("heading", { name: "h2otype typing practice" }),
+  ).toBeAttached();
   await expect(
     page.getByRole("button", { name: "Zen", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
@@ -22,8 +22,8 @@ test("mode navigation switches practice without starting the timer", async ({
   ).toHaveValue("");
   await page.getByRole("button", { name: "Sprint", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Find your flow." }),
-  ).toBeVisible();
+    page.getByRole("heading", { name: "h2otype typing practice" }),
+  ).toBeAttached();
 });
 
 test("theme follows the system, persists overrides, and supports keyboard dismissal", async ({
