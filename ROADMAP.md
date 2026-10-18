@@ -13,26 +13,28 @@
 - [x] Test WPM, accuracy, and edge cases
 
 ## Milestone 2 — Sprint mode
-- [ ] 15/30/60-second selection
-- [ ] Results summary and local personal bests
-- [ ] Smooth restart flow
+- [x] 15/30/60-second selection
+- [x] Results summary and local personal bests
+- [x] Smooth restart flow
 
 ## Milestone 3 — Zen mode
-- [ ] Seamless text continuation without time limit
-- [ ] Session stats and optional summary
-- [ ] Reliable pause and persistence behavior
+- [x] Seamless text continuation without time limit
+- [x] Session stats and optional summary
+- [x] Reliable pause and persistence behavior
 
 ## Milestone 4 — Progression
-- [ ] Determine and document XP formula and level curve
-- [ ] Award XP once for valid correct typing
-- [ ] Save total XP/level and show unobtrusive level-up notifications
-- [ ] Add accurate session accounting and anti-farming checks
+- [x] Determine and document XP formula and level curve
+- [x] Award XP once for valid correct typing
+- [x] Save total XP/level and show unobtrusive level-up notifications
+- [x] Add accurate session accounting and anti-farming checks
 
 ## Milestone 5 — Preferences and polish
-- [ ] Toggle live WPM, accuracy, XP UI, notifications
-- [ ] Persist all preferences
-- [ ] Light/dark/system themes
-- [ ] Responsive layout, accessibility, motion preferences, visual refinement
+- [x] Toggle live WPM, accuracy, XP UI, notifications
+- [x] Persist all preferences
+- [x] Light/dark/system themes
+- [x] Responsive layout, accessibility, motion preferences, visual refinement
+
+The planned MVP milestones are complete. Later possibilities remain optional and require a separate task.
 
 ## Later possibilities
 - [ ] Performance history/charts

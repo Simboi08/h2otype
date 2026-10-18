@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import ProgressIndicator from "./ProgressIndicator";
+import ZenPractice from "./ZenPractice";
 import TypingPractice from "./TypingPractice";
+import type { SprintDuration } from "./sprintRecords";
+import { setPreference, usePreferences } from "./preferences";
+import type { Preferences } from "./preferences";
 import { useTheme } from "./useTheme";
 
-function AppearanceIcon() {
+function SettingsIcon() {
   return (
     <svg
       width="18"
@@ -13,22 +18,41 @@ function AppearanceIcon() {
       strokeWidth="1.6"
       aria-hidden="true"
     >
-      <circle cx="12" cy="12" r="8" />
-      <path d="M12 4a8 8 0 0 1 0 16Z" fill="currentColor" stroke="none" />
+      <path d="M3 6h18M3 12h18M3 18h18" />
+      <circle cx="8" cy="6" r="2" fill="var(--background)" />
+      <circle cx="16" cy="12" r="2" fill="var(--background)" />
+      <circle cx="10" cy="18" r="2" fill="var(--background)" />
     </svg>
   );
 }
 
 export default function App() {
   const [mode, setMode] = useState<"sprint" | "zen">("sprint");
-  const { theme, setTheme } = useTheme();
+  const [duration, setDuration] = useState<SprintDuration>(30);
+  const [zenExitRequested, setZenExitRequested] = useState(false);
+  const [focusPractice, setFocusPractice] = useState(false);
+  const { preferences, storageAvailable } = usePreferences();
+  const returnFocus = useRef<HTMLElement | null>(null);
+  const {
+    theme,
+    setTheme,
+    storageAvailable: themeStorageAvailable,
+  } = useTheme();
   const dialog = useRef<HTMLDialogElement>(null);
   const appearanceButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const element = dialog.current;
     if (!element) return;
-    const restoreFocus = () => appearanceButton.current?.focus();
+    const restoreFocus = () => {
+      const target = returnFocus.current;
+      if (
+        target?.isConnected &&
+        !(target instanceof HTMLInputElement && target.readOnly)
+      )
+        target.focus({ preventScroll: true });
+      else appearanceButton.current?.focus({ preventScroll: true });
+    };
     element.addEventListener("close", restoreFocus);
     return () => element.removeEventListener("close", restoreFocus);
   }, []);
@@ -39,14 +63,20 @@ export default function App() {
         Skip to content
       </a>
       <header className="header">
-        <a className="wordmark" href="./" aria-label="h2otype home">
-          h<span className="wordmark-two">2</span>otype
-          <span className="brand-dot" />
-        </a>
+        <div className="brand-group">
+          <a className="wordmark" href="./" aria-label="h2otype home">
+            h<span className="wordmark-two">2</span>otype
+            <span className="brand-dot" />
+          </a>
+          <ProgressIndicator />
+        </div>
         <nav className="mode-switch" aria-label="Typing mode">
           <button
             aria-pressed={mode === "sprint"}
-            onClick={() => setMode("sprint")}
+            onClick={() => {
+              if (mode === "zen") setZenExitRequested(true);
+              else setMode("sprint");
+            }}
           >
             Sprint
           </button>
@@ -57,100 +87,76 @@ export default function App() {
         <button
           className="appearance-button"
           ref={appearanceButton}
+          onPointerDown={() => {
+            returnFocus.current =
+              document.activeElement instanceof HTMLInputElement &&
+              document.activeElement.classList.contains("typing-input")
+                ? document.activeElement
+                : null;
+          }}
+          onKeyDown={() => {
+            returnFocus.current = null;
+          }}
           onClick={() => dialog.current?.showModal()}
-          aria-label="Open appearance settings"
+          aria-label="Open settings"
           aria-haspopup="dialog"
         >
-          <AppearanceIcon />
-          <span>Appearance</span>
+          <SettingsIcon />
+          <span>Settings</span>
         </button>
       </header>
 
       <main id="main" tabIndex={-1}>
-        <section className="typing-space" aria-labelledby="mode-title">
-          <div className="eyebrow">
-            <span className="status-dot" /> A LITTLE SPACE TO FOCUS
-          </div>
-          <h1 id="mode-title">
-            {mode === "sprint" ? "Find your flow." : "Take your time."}
-          </h1>
-          <p className="intro">
-            {mode === "sprint"
-              ? "A few words. A clear mind. One moment at a time."
-              : "No clock to chase. Just you and the words ahead."}
-          </p>
-
-          <TypingPractice key={mode} mode={mode} />
-          <p className="mode-note" aria-live="polite">
-            {mode === "sprint"
-              ? "Make a little time for a little progress."
-              : "Stay a while. There’s nowhere else to be."}
-          </p>
-        </section>
-
-        <section className="coming-next" aria-label="What’s ahead">
-          <div className="feature">
-            <svg
-              className="feature-symbol"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              aria-hidden="true"
-            >
-              <path d="m5 18 13-13M7 5h11v11" />
-            </svg>
-            <div>
-              <h2>A pace for every day</h2>
-              <p>Quick Sprints or open-ended Zen.</p>
-            </div>
-          </div>
-          <div className="feature">
-            <svg
-              className="feature-symbol"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              aria-hidden="true"
-            >
-              <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z" />
-            </svg>
-            <div>
-              <h2>Small steps add up</h2>
-              <p>XP and levels, coming as you grow.</p>
-            </div>
-          </div>
-          <div className="feature">
-            <svg
-              className="feature-symbol"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              aria-hidden="true"
-            >
-              <path d="M3 7c6-5 12 5 18 0M3 12c6-5 12 5 18 0M3 17c6-5 12 5 18 0" />
-            </svg>
-            <div>
-              <h2>Less noise. More focus.</h2>
-              <p>Your statistics, on your terms.</p>
-            </div>
-          </div>
+        <section
+          className="typing-space"
+          aria-label={`${mode === "sprint" ? "Sprint" : "Zen"} typing practice`}
+        >
+          <h1 className="sr-only">h2otype typing practice</h1>
+          {mode === "zen" ? (
+            <ZenPractice
+              exitRequested={zenExitRequested}
+              onCancelExit={() => setZenExitRequested(false)}
+              onExit={() => {
+                setZenExitRequested(false);
+                setMode("sprint");
+              }}
+            />
+          ) : (
+            <TypingPractice
+              key={`${mode}-${duration}`}
+              mode={mode}
+              duration={duration}
+              focusOnMount={focusPractice}
+              onDurationChange={(value) => {
+                setFocusPractice(true);
+                setDuration(value);
+              }}
+            />
+          )}
         </section>
       </main>
-
-      <footer className="footer">
-        <span>A quieter kind of typing.</span>
-        <span className="foundation-label">
-          h2otype <span aria-hidden="true">·</span> Typing practice
-        </span>
-      </footer>
 
       <dialog
         ref={dialog}
         className="settings-dialog"
-        aria-labelledby="appearance-title"
+        aria-labelledby="settings-title"
+        onKeyDown={(event) => {
+          if (event.key !== "Tab") return;
+          const controls = Array.from(
+            event.currentTarget.querySelectorAll<
+              HTMLButtonElement | HTMLInputElement
+            >("button:not([disabled]), input:not([disabled])"),
+          ).filter((control) => control.getClientRects().length > 0);
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last?.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first?.focus({ preventScroll: true });
+          }
+        }}
         onClick={(event) => {
           const bounds = event.currentTarget.getBoundingClientRect();
           if (
@@ -165,20 +171,17 @@ export default function App() {
       >
         <div className="dialog-heading">
           <div>
-            <p className="eyebrow">MAKE YOURSELF AT HOME</p>
-            <h2 id="appearance-title">Appearance</h2>
+            <h2 id="settings-title">Settings</h2>
           </div>
           <button
             className="close-button"
             onClick={() => dialog.current?.close()}
-            aria-label="Close appearance settings"
+            aria-label="Close settings"
           >
             ×
           </button>
         </div>
-        <p className="dialog-description">
-          A little light, a little dark. Whatever feels right.
-        </p>
+        <h3 className="settings-section-title">Appearance</h3>
         <fieldset className="theme-options">
           <legend className="sr-only">Color theme</legend>
           {(["light", "dark", "system"] as const).map((option) => (
@@ -203,9 +206,61 @@ export default function App() {
           ))}
         </fieldset>
         <p className="settings-note">
-          System follows your device’s appearance. Your choice is saved on this
-          device.
+          System follows your device’s appearance.
         </p>
+        <fieldset className="preference-options">
+          <legend>While typing</legend>
+          {(
+            [
+              ["liveWpm", "Live WPM", "Show your current typing speed."],
+              ["liveAccuracy", "Live accuracy", "Show accuracy as you type."],
+              [
+                "xpProgress",
+                "XP progress",
+                "Show your level and progress bar.",
+              ],
+              [
+                "levelNotifications",
+                "Level-up notifications",
+                "Show a brief notice when you level up.",
+              ],
+            ] satisfies [keyof Preferences, string, string][]
+          ).map(([key, label, description]) => (
+            <label className="preference-row" key={key}>
+              <span>
+                <span className="preference-label" id={`${key}-label`}>
+                  {label}
+                </span>
+                <span
+                  className="preference-description"
+                  id={`${key}-description`}
+                >
+                  {description}
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                checked={preferences[key]}
+                onChange={(event) =>
+                  setPreference(key, event.currentTarget.checked)
+                }
+                aria-labelledby={`${key}-label`}
+                aria-describedby={`${key}-description`}
+              />
+            </label>
+          ))}
+        </fieldset>
+        <p className="settings-note">
+          Display preferences apply to both modes. XP keeps accruing when its
+          indicator is hidden.
+        </p>
+        {(!storageAvailable || !themeStorageAvailable) && (
+          <p className="settings-storage-note" role="status">
+            Preferences apply for this visit, but cannot be saved in this
+            browser.
+          </p>
+        )}
       </dialog>
     </div>
   );

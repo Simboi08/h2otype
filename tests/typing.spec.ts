@@ -17,22 +17,23 @@ test("typing marks characters, supports correction, and expires with honest accu
   await input.press("o");
   await expect(page.locator(".character.correct")).toHaveCount(3);
   await expect(page.locator(".character.incorrect")).toHaveCount(0);
-  await page.getByRole("button", { name: "Open appearance settings" }).click();
+  await page.getByRole("button", { name: "Open settings" }).click();
   await page.clock.fastForward(30_000);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("timer")).toHaveText("0s remaining");
-  await expect(input).toHaveAttribute("readonly", "");
-  await expect(page.locator(".session-metrics")).toContainText("75% accuracy");
-  await expect(page.locator(".session-metrics")).toContainText(
-    "1 incorrect attempt",
-  );
-  await input.press("w");
-  await expect(input).toHaveValue("slo");
+  await expect(input).toHaveCount(0);
+  await expect(page.locator(".sprint-results")).toContainText("75%");
+  await expect(
+    page
+      .locator(".result-grid div")
+      .filter({ hasText: "Errors" })
+      .locator("dd"),
+  ).toHaveText("1");
   await page.getByRole("button", { name: "Restart", exact: true }).click();
   await expect(input).toBeFocused();
   await expect(input).toHaveValue("");
   await expect(page.getByRole("timer")).toHaveText("30s remaining");
-  await expect(page.locator(".session-metrics")).toHaveCount(0);
+  await expect(page.locator(".sprint-results")).toHaveCount(0);
   await input.press("s");
   await page.clock.fastForward(1000);
   await expect(page.getByRole("timer")).toHaveText("29s remaining");
@@ -81,8 +82,8 @@ test("mobile input events work, repeat/paste are blocked, and a passage can comp
   await expect(page.locator(".character.correct")).toHaveCount(4);
   const passage = await page.locator(".passage").innerText();
   await input.fill(passage);
-  await expect(input).toHaveAttribute("readonly", "");
-  await expect(page.locator(".session-metrics")).toContainText("100% accuracy");
+  await expect(input).toHaveCount(0);
+  await expect(page.locator(".sprint-results")).toContainText("100%");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -114,6 +115,9 @@ test("composition commits once and keeps intermediate text out of scoring", asyn
     );
   });
   await expect(input).toHaveValue("x");
+  await expect(
+    page.getByRole("progressbar", { name: "Level XP" }),
+  ).toHaveAttribute("aria-valuenow", "0");
   await expect(page.locator(".character.incorrect")).toHaveCount(0);
   await expect(page.getByRole("timer")).toHaveText("30s remaining");
   await input.evaluate((element) => {
@@ -126,6 +130,75 @@ test("composition commits once and keeps intermediate text out of scoring", asyn
     );
   });
   await expect(input).toHaveValue("s");
+  await expect(
+    page.getByRole("progressbar", { name: "Level XP" }),
+  ).toHaveAttribute("aria-valuenow", "1");
   await expect(page.locator(".character.correct")).toHaveCount(1);
   await expect(page.locator(".character.incorrect")).toHaveCount(0);
+});
+
+test("completed words clear the field, preserve progress, and can be corrected across spaces", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/");
+  const input = page.getByRole("textbox", { name: "Type the passage" });
+  await input.pressSequentially("slow ");
+  await expect(input).toHaveValue("");
+  await expect(page.locator(".character.correct")).toHaveCount(5);
+  await expect(page.locator(".character.current")).toHaveText("d");
+  await input.press("Backspace");
+  await expect(input).toHaveValue("slow");
+  await expect(page.locator(".character.correct")).toHaveCount(4);
+  await input.pressSequentially(" doxn ");
+  await expect(input).toHaveValue("");
+  await expect(page.locator(".character.incorrect")).toHaveCount(1);
+  await input.press("Backspace");
+  await expect(input).toHaveValue("doxn");
+  await input.press("Backspace");
+  await input.press("Backspace");
+  await input.pressSequentially("wn and ");
+  await expect(input).toHaveValue("");
+  await expect(page.locator(".character.incorrect")).toHaveCount(0);
+  await expect(page.locator(".character.current")).toHaveText("n");
+  await page.clock.fastForward(30_000);
+  await expect(
+    page
+      .locator(".result-grid div")
+      .filter({ hasText: "Errors" })
+      .locator("dd"),
+  ).toHaveText("1");
+  await page.getByRole("button", { name: "Restart", exact: true }).click();
+  await input.pressSequentially("slow ");
+  await expect(page.locator(".character.correct")).toHaveCount(5);
+});
+
+test("practice is centered and fully visible without page scrolling", async ({
+  page,
+}) => {
+  for (const viewport of [
+    { width: 1280, height: 720 },
+    { width: 1366, height: 768 },
+    { width: 320, height: 568 },
+    { width: 844, height: 390 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    const bounds = await page.locator(".typing-space").boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.y).toBeGreaterThanOrEqual(0);
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(viewport.height);
+    expect(
+      Math.abs(bounds!.y + bounds!.height / 2 - viewport.height / 2),
+    ).toBeLessThan(35);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollHeight <= innerHeight,
+      ),
+    ).toBe(true);
+    await expect(
+      page.getByText("Find your flow.", { exact: true }),
+    ).toHaveCount(0);
+    await expect(page.locator(".coming-next, .footer")).toHaveCount(0);
+  }
 });

@@ -2,17 +2,20 @@ import { useEffect, useState } from "react";
 
 export type Theme = "system" | "light" | "dark";
 
-function readTheme(): Theme {
+function readTheme(): { theme: Theme; storageAvailable: boolean } {
   try {
     const saved = localStorage.getItem("h2otype.theme");
-    return saved === "light" || saved === "dark" ? saved : "system";
+    return {
+      theme: saved === "light" || saved === "dark" ? saved : "system",
+      storageAvailable: true,
+    };
   } catch {
-    return "system";
+    return { theme: "system", storageAvailable: false };
   }
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(readTheme);
+  const [{ theme, storageAvailable }, setState] = useState(readTheme);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -27,13 +30,18 @@ export function useTheme() {
     };
     apply();
     media.addEventListener("change", apply);
-    try {
-      localStorage.setItem("h2otype.theme", theme);
-    } catch {
-      // Appearance still works for this visit if browser storage is unavailable.
-    }
     return () => media.removeEventListener("change", apply);
   }, [theme]);
 
-  return { theme, setTheme };
+  function setTheme(next: Theme) {
+    let available = true;
+    try {
+      localStorage.setItem("h2otype.theme", next);
+    } catch {
+      available = false;
+    }
+    setState({ theme: next, storageAvailable: available });
+  }
+
+  return { theme, setTheme, storageAvailable };
 }

@@ -5,15 +5,15 @@ test("mode navigation switches practice without starting the timer", async ({
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Find your flow." }),
-  ).toBeVisible();
+    page.getByRole("heading", { name: "h2otype typing practice" }),
+  ).toBeAttached();
   await expect(
     page.getByRole("button", { name: "Sprint", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Take your time." }),
-  ).toBeVisible();
+    page.getByRole("heading", { name: "h2otype typing practice" }),
+  ).toBeAttached();
   await expect(
     page.getByRole("button", { name: "Zen", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
@@ -22,8 +22,12 @@ test("mode navigation switches practice without starting the timer", async ({
   ).toHaveValue("");
   await page.getByRole("button", { name: "Sprint", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Find your flow." }),
+    page.getByRole("heading", { name: "Zen session", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Go to Sprint", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "h2otype typing practice" }),
+  ).toBeAttached();
 });
 
 test("theme follows the system, persists overrides, and supports keyboard dismissal", async ({
@@ -34,7 +38,7 @@ test("theme follows the system, persists overrides, and supports keyboard dismis
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.getByRole("button", { name: "Open appearance settings" }).click();
+  await page.getByRole("button", { name: "Open settings" }).click();
   await expect(
     page.getByRole("radio", { name: "System", exact: true }),
   ).toBeChecked();
@@ -43,11 +47,11 @@ test("theme follows the system, persists overrides, and supports keyboard dismis
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Open appearance settings" }),
+    page.getByRole("button", { name: "Open settings" }),
   ).toBeFocused();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await page.getByRole("button", { name: "Open appearance settings" }).click();
+  await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("radio", { name: "Dark", exact: true }).check();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.getByRole("radio", { name: "System", exact: true }).check();
@@ -66,7 +70,7 @@ test("appearance works when local storage is blocked", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.getByRole("button", { name: "Open appearance settings" }).click();
+  await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("radio", { name: "Light", exact: true }).check();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
@@ -83,9 +87,9 @@ test("mobile layout fits the viewport and appearance remains usable", async ({
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
-  await page.getByRole("button", { name: "Open appearance settings" }).click();
+  await page.getByRole("button", { name: "Open settings" }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.getByRole("radio", { name: "Dark", exact: true }).check();
-  await page.getByRole("button", { name: "Close appearance settings" }).click();
+  await page.getByRole("button", { name: "Close settings" }).click();
   await expect(page.getByRole("dialog")).not.toBeVisible();
 });
