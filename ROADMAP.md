@@ -29,10 +29,12 @@
 - [x] Add accurate session accounting and anti-farming checks
 
 ## Milestone 5 — Preferences and polish
-- [ ] Toggle live WPM, accuracy, XP UI, notifications
-- [ ] Persist all preferences
-- [ ] Light/dark/system themes
-- [ ] Responsive layout, accessibility, motion preferences, visual refinement
+- [x] Toggle live WPM, accuracy, XP UI, notifications
+- [x] Persist all preferences
+- [x] Light/dark/system themes
+- [x] Responsive layout, accessibility, motion preferences, visual refinement
+
+The planned MVP milestones are complete. Later possibilities remain optional and require a separate task.
 
 ## Later possibilities
 - [ ] Performance history/charts

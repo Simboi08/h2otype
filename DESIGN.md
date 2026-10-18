@@ -39,9 +39,9 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - XP persists periodically and when finishing/pausing the session.
 - Exiting Zen should offer a session summary without penalizing the user.
 - Milestone 3: Escape/Pause freezes active time; Finish opens a resumable summary. Enter from the summary heading resumes. New session explicitly clears the draft. Switching to Sprint first offers the summary with a Go to Sprint action.
-- Hiding the page pauses Zen. Reloaded sessions restore paused, excluding offline time. Ordinary field blur and Appearance leave active time running.
+- Hiding the page pauses Zen. Reloaded sessions restore paused, excluding offline time. Ordinary field blur and Settings leave active time running.
 - Keep a single versioned local draft, autosaving every five seconds and on lifecycle/explicit pause or finish. Failed storage must not interrupt the current session.
-- Retain at least 200 recent characters for correction and finalize older correct characters into totals, keeping text and DOM bounded. Live WPM/accuracy stay hidden; pause/finish shows session statistics. Session XP is included in the summary from Milestone 4.
+- Retain at least 200 recent characters for correction and finalize older correct characters into totals, keeping text and DOM bounded. Live WPM/accuracy are off by default and can be enabled independently; pause/finish always shows session statistics. Session XP is included in the summary from Milestone 4.
 
 ## Progression
 - Correctly completed characters earn base XP, exactly once per character.
@@ -52,7 +52,7 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Milestone 4 rule: award 1 XP per character position the first time it is typed correctly in that session, including spaces and punctuation. A correction from wrong to correct can earn its first XP; deleting/retyping a credited position cannot. Composition earns only after commit; paste/drop and held character repeats remain blocked. No speed, accuracy, or flow bonuses yet.
 - XP is retained when text is deleted or a session is abandoned. Restart/new session alone awards nothing; actual correct typing in a new session is fresh practice and can earn XP.
 - Level 1 begins at 0 XP. Advancing from level L costs 100 × L XP; lifetime threshold for level L is 50 × L × (L−1). Thus levels 2/3/4 begin at 100/300/600 XP. Level is derived from lifetime XP rather than stored independently.
-- Keep a small level/bar by the wordmark and a brief polite level-up notice that never steals focus. Results/summaries include session XP. Respect reduced motion; preference toggles stay in Milestone 5.
+- Keep a small level/bar by the wordmark and a brief polite level-up notice that never steals focus. Results/summaries include session XP. Respect reduced motion; Milestone 5 provides independent display and notification toggles.
 - Save lifetime XP and the credited Zen draft together in one versioned localStorage envelope on each accepted edit. This keeps a reload from restoring older credit history against a newer XP balance. Older pre-XP Zen drafts migrate without granting retroactive XP; their already-correct retained positions are marked credited.
 
 ## Preferences
@@ -61,7 +61,10 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - XP progress indicator: on by default, visually unobtrusive.
 - Level-up notifications: on by default.
 - Theme: system/light/dark, default system.
-- Settings persist locally.
+- Settings persist locally; changes apply immediately in both modes without restarting the session.
+- Milestone 5 groups theme radios and display switches into one Settings dialog. Hiding XP progress does not stop earning XP or hide results; disabling notifications suppresses and dismisses notices without changing level calculation.
+- Live statistics use a compact, non-announcing row near the timer and wrap on phones. The default interface keeps both live statistics hidden.
+- Keep keyboard focus inside the modal, Escape dismissal, sensible focus return, larger control hit areas, and reduced-motion support. On short screens, scroll the modal internally with Close remaining reachable.
 
 ## Accessibility
 - Contrast and visible caret in either theme.

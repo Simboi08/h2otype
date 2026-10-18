@@ -17,7 +17,7 @@ test("typing marks characters, supports correction, and expires with honest accu
   await input.press("o");
   await expect(page.locator(".character.correct")).toHaveCount(3);
   await expect(page.locator(".character.incorrect")).toHaveCount(0);
-  await page.getByRole("button", { name: "Open appearance settings" }).click();
+  await page.getByRole("button", { name: "Open settings" }).click();
   await page.clock.fastForward(30_000);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("timer")).toHaveText("0s remaining");

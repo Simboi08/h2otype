@@ -3,7 +3,7 @@
 Updated: 2026-10-18
 
 ## Current state
-Milestones 0–4 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen replenishes continuously, pauses/resumes with active-time statistics, and saves a resumable local session. Correct typing earns persistent XP and levels in both modes, with subtle header progress and session XP in results.
+Milestones 0–5 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen replenishes continuously, pauses/resumes with active-time statistics, and saves a resumable local session. Correct typing earns persistent XP and levels in both modes, with subtle header progress and session XP in results. Settings now controls live WPM/accuracy, the XP indicator, notifications, and appearance. The planned MVP roadmap is complete.
 
 ## Completed
 ### Milestone 0
@@ -57,15 +57,26 @@ Milestones 0–4 are complete. Sprint supports 15/30/60-second tests, a dedicate
 - Restart/New session clears the session ledger but retains lifetime XP. The action alone awards nothing; actual correct typing in a fresh session can earn XP as normal practice.
 - Updated README.md/ROADMAP.md. Preference toggles and configurable live stats remain Milestone 5.
 
+## Milestone 5 — Preferences and polish
+- Added a versioned display-preference store (`preferences.ts`, `h2otype.preferences.v1`) with validated boolean defaults, immediate shared updates, storage-failure feedback, and display preference synchronization between tabs. Existing theme/XP/session/best-score storage remains intact.
+- Expanded Appearance into a Settings modal with theme radios and labeled switches: live WPM/accuracy default off; XP progress/level-up notices default on.
+- Added shared `LiveStats.tsx` using existing Sprint/Zen metrics, including correction history and active-time accounting. Live stats are hidden in results/paused summaries and do not announce every update.
+- Hiding the XP indicator does not change XP accrual or results. Notification preference suppresses new notices and dismisses an existing notice so toggling back on cannot replay it.
+- Polished focus return, keyboard modal navigation, switch hit areas, internally scrolling small-screen settings, larger action targets, responsive stats wrapping, and reduced-motion behavior. Default typing UI remains minimal and centered; no slogans or feature cards returned.
+- Theme writes now occur on explicit changes, with honest storage-failure feedback; system tracking and startup flash prevention remain supported.
+- Scoring, XP rules, timers, and local personal-best logic are unchanged. No later-possibility features or deployment work added.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 57 tests passed (23 pure logic tests and 34 browser tests).
+- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 66 tests passed (24 pure logic tests and 42 browser tests).
+- Milestone 5 production smoke: HTTP 200 with no JavaScript errors; 50 correct characters over 10 active seconds displayed 60 WPM and 100% accuracy; dark theme persisted after reload; a live-WPM preference change from another tab propagated. Desktop and 320px Settings/live-stat screenshots were reviewed.
 - Milestone 4 production smoke: HTTP 200 with no JavaScript errors; 100 correct Sprint characters earned 100 XP and level 2, the level-up kept input focus, results showed +100 XP, and reload retained level/XP. Desktop and 320px screenshots were visually reviewed.
 - Milestone 3 production smoke: HTTP 200, no browser JavaScript errors, desktop/320px summaries visually reviewed, and reload/resume restored 18 correct characters with exactly 10 seconds of active time.
 - Milestone 2 production smoke: HTTP 200, no browser JavaScript errors, a controlled 15-second run produced 80 WPM/100% accuracy, saved its 15-second best, and Enter returned focus to fresh input. Desktop and 320px results screenshots were reviewed.
 - Zen validation: boundary replenishment, bounded long-session history, cumulative/error/Unicode totals, pause/resume active time, restore validation, new-session reset, word clearing, summary/exit draft retention, hidden-tab pause, periodic saves, active reload after unsaved edits, and malformed/blocked/quota-limited storage. Phone summary layout is checked at 320px.
 - Progression coverage: level boundaries, first-correct credits, wrong/repeated corrections, invalid/late input, Unicode/spaces, bounded Zen retirement, legacy migration, malformed profile/credit validation, held repeats, immediate persistence, restart/new-session accounting, reload/replay prevention, nonblocking level-ups, results XP, and storage failures.
+- Preferences checks: documented defaults, independent toggles, reload/theme persistence, accurate Sprint correction/live stats, Zen active-time stats, display-only XP hiding, notification suppression/dismissal, keyboard focus/switches/skip link, malformed/blocked storage, and phone/landscape layouts with all displays and reduced motion.
 - Engine coverage: first-input start, idle state, WPM/accuracy, correction history, no-callback deadline expiry, completion freezing, zero elapsed time, invalid edits/overflow, untimed mode, reset, and Unicode input positions.
 - Sprint regressions: all three deadlines with a controlled clock, first-input start, duration changes, Enter/button restart and focus, record reload persistence and duration separation, slower-run retention, corrupt/blocked/quota-limited storage, early-completion exclusion, and compact results at phone/landscape sizes.
 - Browser coverage: existing foundation/theme checks; typing/correction and caret; deadline expiry while Appearance is open; input removal on Sprint finish; restart during/after a session; mode reset; untimed practice; native input events at mobile width; repeat/paste prevention; composition drafts and commit.
@@ -74,10 +85,10 @@ Milestones 0–4 are complete. Sprint supports 15/30/60-second tests, a dedicate
 ## Scope and known limitations
 - Sprint uses a long, fixed repeating passage rather than generated text. Unusually fast early completion is shown as a result but excluded from records. Duration defaults to 30 after page reload; personal bests persist per browser and origin.
 - Zen uses a small cycling local text collection. Only recent history remains editable; older characters are finalized into totals. The local XP/draft profile is intended for one active tab (last save wins); each edit saves text/XP atomically, while a hard crash can lose up to five seconds of active elapsed time. No cloud sync or multi-tab conflict handling.
-- Live-statistics/XP/notification preference toggles remain Milestone 5. No bonuses or cosmetic rewards are implemented; progression is local to this browser/origin.
+- All MVP preference toggles are implemented. No bonuses, cosmetic rewards, accounts, or cloud sync are included; progression stays local to this browser/origin.
 - Input is end-editing only; click/arrow selection cannot edit the middle of a session. Native text input is intentionally visible beneath the character-feedback passage for predictable keyboard/mobile behavior.
 - Only Chromium automation has run. Real mobile keyboards, Safari, Firefox, screen-reader usability, and platform-specific IME behavior need broader testing; simulated composition and native input events pass here.
 - Dependencies/lockfile remain from Milestone 0. This cloud machine uses the writable npm cache documented in README and preinstalled `/usr/bin/chromium`; Playwright's browser-download host was blocked during setup.
 
 ## Next task for Codex
-Start Milestone 5 only: add persistent preferences for live WPM/accuracy (default off), XP progress (default on), and level-up notifications (default on); polish accessibility, responsiveness, and reduced-motion behavior while preserving the minimal centered interface. Extend regression tests around preferences without changing scoring or XP rules.
+The planned MVP milestones are complete. Gather user feedback and choose a concrete refinement, bug fix, or release/deployment task. Later possibilities remain optional. Preserve the minimal centered interface, word-clearing input, scoring/XP rules, and existing local data unless the user requests a change.

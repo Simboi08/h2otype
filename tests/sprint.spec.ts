@@ -6,7 +6,7 @@ for (const duration of [15, 30, 60]) {
     page,
   }) => {
     await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
-    await page.clock.pauseAt(new Date("2026-10-18T12:00:00Z"));
+    await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
     await page.goto("/");
     await page
       .getByRole("button", { name: `${duration}s`, exact: true })
@@ -44,7 +44,7 @@ test("duration changes discard an active run without saving and reset the clock"
   page,
 }) => {
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-18T12:00:00Z"));
+  await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await input.pressSequentially("slow");
@@ -65,7 +65,7 @@ test("personal bests survive reload, stay separate by duration, and retain faste
   page,
 }) => {
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-18T12:00:00Z"));
+  await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await page.getByRole("button", { name: "15s", exact: true }).click();
@@ -106,7 +106,7 @@ test("blocked storage does not prevent results or restart", async ({
     });
   });
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-18T12:00:00Z"));
+  await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
   await page.getByRole("textbox").pressSequentially("slow");
   await page.clock.fastForward(30_000);
@@ -177,7 +177,7 @@ test("results fit small screens and storage write failures are reported", async 
     };
   });
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-18T12:00:00Z"));
+  await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   for (const viewport of [
     { width: 320, height: 568 },
     { width: 844, height: 390 },

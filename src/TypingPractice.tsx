@@ -7,6 +7,7 @@ import {
   getWordInput,
 } from "./typingEngine";
 
+import LiveStats from "./LiveStats";
 import { commitProgress } from "./progressStore";
 import TypingPassage from "./TypingPassage";
 import SprintResults from "./SprintResults";
@@ -109,6 +110,9 @@ export default function TypingPractice({
           </div>
         ) : (
           <span>Zen · single passage</span>
+        )}
+        {!finished && (
+          <LiveStats wpm={metrics.wpm} accuracy={metrics.accuracy} />
         )}
         <span
           className="mode-detail"

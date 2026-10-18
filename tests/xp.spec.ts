@@ -49,7 +49,7 @@ test("a level-up never takes typing focus and session XP appears in results", as
     key,
   );
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-18T12:00:00Z"));
+  await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
   const input = page.getByRole("textbox");
   await input.press("s");

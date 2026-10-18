@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import LiveStats from "./LiveStats";
 import TypingPassage from "./TypingPassage";
 import { getWordInput } from "./typingEngine";
 import {
@@ -125,6 +126,9 @@ export default function ZenPractice({
     <div className="passage-card">
       <div className="passage-meta">
         <span>Zen</span>
+        {!stopped && (
+          <LiveStats wpm={metrics.wpm} accuracy={metrics.accuracy} />
+        )}
         <span role="timer" aria-label="Active time">
           {Math.floor(metrics.elapsedMs / 1000)}s elapsed
         </span>

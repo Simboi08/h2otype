@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { getPreferences } from "./preferences";
 import { MAX_XP, getLevel } from "./progression";
 import { parseZen, pauseZen } from "./zenEngine";
 import type { ZenState } from "./zenEngine";
@@ -75,7 +76,11 @@ export function commitProgress(xpAdded: number, zen?: ZenState | null) {
     ...previous,
     totalXp,
     zen: zen === undefined ? previous.zen : zen,
-    notice: newLevel > oldLevel ? newLevel : previous.notice,
+    notice: !getPreferences().levelNotifications
+      ? null
+      : newLevel > oldLevel
+        ? newLevel
+        : previous.notice,
   };
   try {
     localStorage.setItem(
@@ -88,7 +93,7 @@ export function commitProgress(xpAdded: number, zen?: ZenState | null) {
   }
   snapshot = next;
   emit();
-  if (newLevel > oldLevel) {
+  if (newLevel > oldLevel && next.notice !== null) {
     clearTimeout(noticeTimer);
     noticeTimer = setTimeout(() => {
       snapshot = { ...getSnapshot(), notice: null };
@@ -123,4 +128,11 @@ function subscribe(listener: () => void) {
 }
 export function useProgress() {
   return useSyncExternalStore(subscribe, getSnapshot);
+}
+
+export function dismissLevelNotice() {
+  if (getSnapshot().notice === null) return;
+  clearTimeout(noticeTimer);
+  snapshot = { ...getSnapshot(), notice: null };
+  emit();
 }
