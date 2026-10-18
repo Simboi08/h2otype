@@ -23,10 +23,10 @@
 - [x] Reliable pause and persistence behavior
 
 ## Milestone 4 — Progression
-- [ ] Determine and document XP formula and level curve
-- [ ] Award XP once for valid correct typing
-- [ ] Save total XP/level and show unobtrusive level-up notifications
-- [ ] Add accurate session accounting and anti-farming checks
+- [x] Determine and document XP formula and level curve
+- [x] Award XP once for valid correct typing
+- [x] Save total XP/level and show unobtrusive level-up notifications
+- [x] Add accurate session accounting and anti-farming checks
 
 ## Milestone 5 — Preferences and polish
 - [ ] Toggle live WPM, accuracy, XP UI, notifications

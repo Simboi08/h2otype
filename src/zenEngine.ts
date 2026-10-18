@@ -95,7 +95,13 @@ export function editZen(state: ZenState, next: string, now: number): ZenState {
         ...result,
         bankedCorrect: result.bankedCorrect + correct,
         passage: passage.slice(cut),
-        session: { ...session, typed: typedCharacters.slice(cut).join("") },
+        session: {
+          ...session,
+          typed: typedCharacters.slice(cut).join(""),
+          credited: session.credited
+            .filter((index) => index >= cut)
+            .map((index) => index - cut),
+        },
       };
     }
   }
@@ -165,9 +171,40 @@ export function parseZen(raw: string | null): ZenState | null {
     )
       return null;
     if (state.session.attempts === 0) return null;
+    const legacy =
+      state.session.credited === undefined &&
+      state.session.xpEarned === undefined;
+    const credited = legacy
+      ? [...state.session.typed].flatMap((char, index) =>
+          char === state.passage[index] ? [index] : [],
+        )
+      : state.session.credited;
+    const xpEarned = legacy ? 0 : state.session.xpEarned;
+    if (
+      !Array.isArray(credited) ||
+      credited.length > state.passage.length ||
+      credited.some(
+        (index) =>
+          !Number.isInteger(index) ||
+          index < 0 ||
+          index >= state.passage.length,
+      ) ||
+      new Set(credited).size !== credited.length ||
+      !Number.isSafeInteger(xpEarned) ||
+      xpEarned < 0 ||
+      xpEarned > state.session.correctAttempts
+    )
+      return null;
     return {
       ...state,
-      session: { ...state.session, startedAt: 0, endedAt: null, now: 0 },
+      session: {
+        ...state.session,
+        credited,
+        xpEarned,
+        startedAt: 0,
+        endedAt: null,
+        now: 0,
+      },
       paused: true,
       runningSince: null,
     };

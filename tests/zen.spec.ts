@@ -117,10 +117,10 @@ test("hidden tabs pause and periodic saves retain active progress", async ({
   await page.getByRole("textbox").pressSequentially("there");
   await page.clock.fastForward(5000);
   const snapshot = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem("h2otype.zen-session.v1")!),
+    JSON.parse(localStorage.getItem("h2otype.progress.v1")!),
   );
-  expect(snapshot.state.session.typed).toBe("there");
-  expect(snapshot.state.elapsedMs).toBe(5000);
+  expect(snapshot.zen.session.typed).toBe("there");
+  expect(snapshot.zen.elapsedMs).toBe(5000);
   await page.evaluate(() => {
     Object.defineProperty(document, "hidden", {
       configurable: true,
@@ -144,7 +144,7 @@ test("blocked storage keeps Zen playable and corrupt saves are ignored", async (
     }),
   );
   await setupClock(page);
-  await expect(page.getByRole("status")).toContainText(
+  await expect(page.locator(".storage-note")).toContainText(
     "Browser storage is unavailable",
   );
   await page.getByRole("textbox").pressSequentially("there");
@@ -203,7 +203,7 @@ test("corrupt saves recover and failed writes do not lose in-memory progress", a
   await expect(page.getByRole("textbox")).toHaveValue("");
   await page.getByRole("textbox").pressSequentially("there");
   await page.getByRole("button", { name: "Pause", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText(
+  await expect(page.locator(".storage-note")).toContainText(
     "Browser storage is unavailable",
   );
   await page.getByRole("button", { name: "Resume", exact: true }).click();

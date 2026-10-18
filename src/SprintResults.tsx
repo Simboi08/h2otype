@@ -7,9 +7,15 @@ type Props = {
   duration: SprintDuration;
   metrics: ReturnType<typeof getMetrics>;
   onRestart: () => void;
+  xpEarned: number;
 };
 
-export default function SprintResults({ duration, metrics, onRestart }: Props) {
+export default function SprintResults({
+  duration,
+  metrics,
+  onRestart,
+  xpEarned,
+}: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
   const recorded = useRef(false);
   const [record, setRecord] = useState<ReturnType<typeof recordSprint> | null>(
@@ -60,6 +66,7 @@ export default function SprintResults({ duration, metrics, onRestart }: Props) {
           </dd>
         </div>
       </dl>
+      <p className="session-xp">+{xpEarned} XP this run</p>
       <div className="record-summary" role="status">
         {record?.best ? (
           <p>

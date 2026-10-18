@@ -115,6 +115,9 @@ test("composition commits once and keeps intermediate text out of scoring", asyn
     );
   });
   await expect(input).toHaveValue("x");
+  await expect(
+    page.getByRole("progressbar", { name: "Level XP" }),
+  ).toHaveAttribute("aria-valuenow", "0");
   await expect(page.locator(".character.incorrect")).toHaveCount(0);
   await expect(page.getByRole("timer")).toHaveText("30s remaining");
   await input.evaluate((element) => {
@@ -127,6 +130,9 @@ test("composition commits once and keeps intermediate text out of scoring", asyn
     );
   });
   await expect(input).toHaveValue("s");
+  await expect(
+    page.getByRole("progressbar", { name: "Level XP" }),
+  ).toHaveAttribute("aria-valuenow", "1");
   await expect(page.locator(".character.correct")).toHaveCount(1);
   await expect(page.locator(".character.incorrect")).toHaveCount(0);
 });

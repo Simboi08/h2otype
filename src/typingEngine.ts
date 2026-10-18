@@ -5,6 +5,8 @@ export type Session = {
   now: number;
   attempts: number;
   correctAttempts: number;
+  credited: number[];
+  xpEarned: number;
 };
 
 export const emptySession = (): Session => ({
@@ -14,6 +16,8 @@ export const emptySession = (): Session => ({
   now: 0,
   attempts: 0,
   correctAttempts: 0,
+  credited: [],
+  xpEarned: 0,
 });
 
 export function advanceClock(
@@ -53,8 +57,19 @@ export function editSession(
   const correctAdded = [...added].filter(
     (char, index) => char === target[typedLength + index],
   ).length;
+  const credited = new Set(current.credited);
+  let xpAdded = 0;
+  [...added].forEach((char, index) => {
+    const position = typedLength + index;
+    if (char === target[position] && !credited.has(position)) {
+      credited.add(position);
+      xpAdded++;
+    }
+  });
   return {
     ...current,
+    credited: [...credited],
+    xpEarned: current.xpEarned + xpAdded,
     typed: next,
     startedAt,
     now,

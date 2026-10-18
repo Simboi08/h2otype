@@ -12,7 +12,7 @@ A minimalist, Apple-inspired typing game with a calm interface and satisfying pr
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
-Milestones 0–3 are implemented: a React + TypeScript + Vite foundation, persistent light/dark/system appearance, and a working typing engine with character feedback, caret, timer, correction, and restart. Sprint supports 15/30/60-second tests, a results screen, and local personal bests for each duration. Zen now replenishes text continuously, supports pause/resume and a session summary, and saves a resumable session locally. XP, levels, and configurable live statistics remain for later milestones.
+Milestones 0–4 are implemented: a React + TypeScript + Vite foundation, persistent light/dark/system appearance, and a working typing engine with character feedback, caret, timer, correction, and restart. Sprint supports 15/30/60-second tests, a results screen, and local personal bests for each duration. Zen now replenishes text continuously, supports pause/resume and a session summary, and saves a resumable session locally. Correct typing now earns persistent XP and levels, with a small header indicator and nonblocking level-up feedback. Customizable live statistics and notification preferences remain for Milestone 5.
 
 ## Development
 Use Node.js 20.19+ (20.x) or 22.12+ and npm. Node 24 was used for validation.
@@ -48,7 +48,7 @@ In this cloud environment the home npm cache is unwritable. Before npm commands,
 - A native dialog provides the appearance panel’s keyboard focus handling and Escape dismissal. Controls have visible focus styles, the layout adapts to narrow screens, and reduced-motion preferences disable transitions.
 - A real browser text field shows only the active word; Space clears it for the next word while the passage retains correct/error feedback and the current caret. Backspace from an empty field reopens the previous word; pasting, dropping text, mid-passage edits, and held character keys are blocked. Composition drafts are scored only when committed.
 - Timing uses a monotonic clock and an absolute deadline rather than counting interval callbacks, so delayed callbacks do not extend a test. Sprint keeps running through focus changes and Appearance; switching away discards the Sprint run. Zen pauses when the tab is hidden and offers a summary before switching to Sprint, preserving a resumable session.
-- Gameplay rules live in pure functions, separate from React, so timing and scoring can be tested directly. No backend or progression system has been added.
+- Gameplay rules live in pure functions, separate from React, so timing and scoring can be tested directly. Progression stays local to this browser; no backend or account system is required.
 
 ## Trying the typing engine
 Choose Sprint or Zen, click the typing field (or reach it with Tab), and type the passage above it. The first committed character starts time. Correct characters darken; mistakes are colored and underlined. Press Space after each word to clear the field and continue. Backspace to fix mistakes, including returning to the previous word from an empty input. The workspace is centered on screen without promotional copy or feature cards. The passage scrolls to keep the caret visible on small screens.
@@ -62,16 +62,25 @@ Personal bests are saved per duration in this browser's localStorage (`h2otype.s
 Scoring conventions:
 - WPM = correctly retained characters ÷ 5 ÷ elapsed minutes, rounded to a whole number. Spaces and punctuation count. Zero elapsed time gives 0 WPM.
 - Accuracy = correct character attempts ÷ all character attempts, rounded to a percentage. Backspace does not erase previous mistakes; retyping is another attempt. An untouched session defaults to 100% accuracy.
-- The incorrect-attempt count includes corrected mistakes. No XP or rewards are awarded yet.
+- The incorrect-attempt count includes corrected mistakes. XP uses a separate first-correct-position ledger, so repeated corrections cannot earn more XP for the same position.
 
 ## Zen sessions
 Zen starts time on the first committed character. Press Escape in the input or click Pause to stop active time and view WPM, accuracy, incorrect attempts, and correctly retained characters. Resume (or Enter from the focused summary heading) continues the same session and refocuses input. Finish shows the summary without deleting progress; New session explicitly clears it. Clicking Sprint offers the summary with Go to Sprint or Resume.
 
 Zen automatically pauses when the page becomes hidden. Appearance and ordinary input blur do not pause it. Session time counts only active periods; reloads, paused time, and time away never inflate the denominator. Live WPM and accuracy remain hidden while typing.
 
-One resumable draft is stored per browser/origin in `h2otype.zen-session.v1`. It saves every five seconds, on pause/finish, before leaving Zen, and on page hide/unmount. Reloaded sessions open paused when you select Zen. A hard crash can lose up to the last five seconds of edits. New session clears the saved draft. Multiple tabs share one draft; the last save wins. Corrupt saves are ignored; read/write failures show a message and play continues in memory.
+One resumable draft is stored with lifetime XP in `h2otype.progress.v1`. Each edit saves its text, credit history, and total XP together in one write; periodic saves every five seconds also capture active elapsed time, with additional saves on pause/finish, leaving Zen, page hide, and unmount. Reloaded sessions open paused when you select Zen. A hard crash can lose up to the last five seconds of active elapsed time. New session clears the saved draft while retaining lifetime XP. Progress is intended for one active tab; tabs share one local profile and the last save wins. Corrupt saves are ignored; read/write failures show a message and play continues in memory.
 
-To keep long sessions responsive, Zen appends short local text batches and retires older history. At least the last 200 characters remain available for Backspace correction; older characters are finalized into session totals. Attempts and errors remain cumulative across batches and reloads. The current local text collection cycles; varied/generated content can be expanded later. No XP is awarded yet.
+To keep long sessions responsive, Zen appends short local text batches and retires older history. At least the last 200 characters remain available for Backspace correction; older characters are finalized into session totals. Attempts and errors remain cumulative across batches and reloads. The current local text collection cycles; varied/generated content can be expanded later. XP credit follows the same character positions through retirement and resume without being awarded again.
+
+## XP and levels
+- Each character position earns **1 XP the first time it is typed correctly in a session**, including spaces and punctuation. Correcting a mistake can earn that position's first XP. Deleting and retyping a credited character does not earn more.
+- Held character-key repeats, incorrect attempts, paste/drop, uncommitted composition, paused input, and post-deadline input do not award XP. There are no speed/accuracy bonuses yet.
+- Earned XP stays earned after Backspace, restart, mode changes, or abandoning a run. Restarting or opening results does not grant XP. Fresh correct typing in a new session is legitimate practice and can earn XP again.
+- Level 1 starts at 0 XP. Reaching level 2 costs 100 XP; the next level costs 200 more, then 300 more. Lifetime thresholds for levels 2/3/4/5 are 100/300/600/1000 XP. Levels are calculated from total XP.
+- The small indicator below the wordmark shows level and progress toward the next level. Hover for exact XP; its accessible progressbar exposes the same information. A four-second level-up notice never moves keyboard focus. Sprint results and Zen summaries show XP earned in that session.
+- Lifetime XP and the current Zen credit history share one versioned `h2otype.progress.v1` storage value, so a reload cannot pay again from an older saved draft. Milestone 3 drafts from `h2otype.zen-session.v1` migrate automatically without retroactive XP; existing correct positions are marked credited. Sprint personal bests and appearance settings remain intact.
+- If storage fails, play and XP continue in memory and the header says **XP not saved**. Closing/reloading can lose unsaved progress. Malformed saved data is ignored. Progress is local to this browser/origin, with no cloud sync; use one active tab to avoid concurrent writes overwriting each other.
 
 ## Stack
 React + TypeScript + Vite. For the initial version, use localStorage rather than accounts or a backend.
@@ -85,6 +94,6 @@ React + TypeScript + Vite. For the initial version, use localStorage rather than
 ## Starting work with Codex
 1. Open this GitHub repository in Codex.
 2. Ask Codex to read README.md, DESIGN.md, ROADMAP.md, PROGRESS.md and AGENTS.md.
-3. Start **Milestone 4 only** and request tested changes and a PROGRESS.md update.
+3. Start **Milestone 5 only** and request tested changes and a PROGRESS.md update.
 
 Keep changes small and review them before merging.

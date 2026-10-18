@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import ProgressIndicator from "./ProgressIndicator";
 import ZenPractice from "./ZenPractice";
 import TypingPractice from "./TypingPractice";
 import type { SprintDuration } from "./sprintRecords";
@@ -44,10 +45,13 @@ export default function App() {
         Skip to content
       </a>
       <header className="header">
-        <a className="wordmark" href="./" aria-label="h2otype home">
-          h<span className="wordmark-two">2</span>otype
-          <span className="brand-dot" />
-        </a>
+        <div className="brand-group">
+          <a className="wordmark" href="./" aria-label="h2otype home">
+            h<span className="wordmark-two">2</span>otype
+            <span className="brand-dot" />
+          </a>
+          <ProgressIndicator />
+        </div>
         <nav className="mode-switch" aria-label="Typing mode">
           <button
             aria-pressed={mode === "sprint"}

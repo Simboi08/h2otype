@@ -39,11 +39,12 @@ export default function ZenPractice({
   const metrics = zenMetrics(state, now);
   const stopped = state.paused || state.summary;
 
-  function update(next: ZenState, timestamp: number, persist = false) {
+  function update(next: ZenState, timestamp: number) {
     latest.current = next;
     setState(next);
     setNow(timestamp);
-    if (persist) setStorageAvailable(saveZen(next, timestamp));
+    // Persist every accepted edit with its XP; autosaves also capture active time.
+    setStorageAvailable(saveZen(next, timestamp));
   }
 
   useEffect(() => {
@@ -101,14 +102,14 @@ export default function ZenPractice({
     const timestamp = performance.now();
     setDraft(null);
     composing.current = false;
-    update(pauseZen(latest.current, timestamp, summary), timestamp, true);
+    update(pauseZen(latest.current, timestamp, summary), timestamp);
   }
 
   function resume() {
     const timestamp = performance.now();
     focusInput.current = true;
     onCancelExit();
-    update(resumeZen(latest.current, timestamp), timestamp, true);
+    update(resumeZen(latest.current, timestamp), timestamp);
   }
 
   function newSession() {
@@ -117,7 +118,7 @@ export default function ZenPractice({
     setDraft(null);
     composing.current = false;
     onCancelExit();
-    update(createZen(), timestamp, true);
+    update(createZen(), timestamp);
   }
 
   return (
@@ -160,6 +161,9 @@ export default function ZenPractice({
               <dd>{metrics.correctCharacters}</dd>
             </div>
           </dl>
+          <p className="session-xp">
+            +{state.session.xpEarned} XP this session
+          </p>
           <div className="results-footer">
             <p>Active time only. Enter to resume.</p>
             <div className="zen-actions">

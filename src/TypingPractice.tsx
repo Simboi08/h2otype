@@ -7,6 +7,7 @@ import {
   getWordInput,
 } from "./typingEngine";
 
+import { commitProgress } from "./progressStore";
 import TypingPassage from "./TypingPassage";
 import SprintResults from "./SprintResults";
 import { sprintDurations } from "./sprintRecords";
@@ -36,6 +37,7 @@ export default function TypingPractice({
       : passages.zen;
   const durationMs = mode === "sprint" ? duration * 1000 : null;
   const [session, setSession] = useState(emptySession);
+  const latest = useRef(session);
   const [focused, setFocused] = useState(false);
   const [compositionDraft, setCompositionDraft] = useState<string | null>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -49,7 +51,9 @@ export default function TypingPractice({
     if (session.startedAt === null || finished) return;
     const tick = () => {
       const now = performance.now();
-      setSession((current) => advanceClock(current, now, durationMs));
+      const next = advanceClock(latest.current, now, durationMs);
+      latest.current = next;
+      setSession(next);
     };
     const interval = window.setInterval(tick, 100);
     document.addEventListener("visibilitychange", tick);
@@ -64,14 +68,19 @@ export default function TypingPractice({
   }, [focusOnMount]);
 
   function edit(value: string, now: number) {
-    setSession((current) =>
-      editSession(current, prefix + value, passage, now, durationMs),
-    );
+    const current = latest.current;
+    const next = editSession(current, prefix + value, passage, now, durationMs);
+    latest.current = next;
+    setSession(next);
+    if (next.xpEarned > current.xpEarned)
+      commitProgress(next.xpEarned - current.xpEarned);
   }
 
   function restart() {
     focusOnAttach.current = true;
-    setSession(emptySession());
+    const next = emptySession();
+    latest.current = next;
+    setSession(next);
     setCompositionDraft(null);
     composing.current = false;
     input.current?.focus();
@@ -115,6 +124,7 @@ export default function TypingPractice({
         <SprintResults
           duration={duration}
           metrics={metrics}
+          xpEarned={session.xpEarned}
           onRestart={restart}
         />
       ) : (
@@ -166,15 +176,15 @@ export default function TypingPractice({
               ) {
                 event.preventDefault();
                 const now = performance.now();
-                setSession((current) =>
-                  editSession(
-                    current,
-                    current.typed.slice(0, -1),
-                    passage,
-                    now,
-                    durationMs,
-                  ),
+                const next = editSession(
+                  latest.current,
+                  latest.current.typed.slice(0, -1),
+                  passage,
+                  now,
+                  durationMs,
                 );
+                latest.current = next;
+                setSession(next);
               }
             }}
             onSelect={(event) => {
