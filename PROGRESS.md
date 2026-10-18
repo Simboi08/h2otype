@@ -3,7 +3,7 @@
 Updated: 2026-10-18
 
 ## Current state
-Milestones 0–2 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen remains untimed single-passage practice until Milestone 3.
+Milestones 0–3 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen now replenishes continuously, pauses/resumes with active-time statistics, and saves a resumable local session.
 
 ## Completed
 ### Milestone 0
@@ -38,23 +38,34 @@ Milestones 0–2 are complete. Sprint supports 15/30/60-second tests, a dedicate
 - Attached trailing spaces to the preceding rendered word so wrapped lines share the same left edge. Space characters still retain their original typing positions, caret, and feedback.
 - Added a browser regression covering 320/375/768/1280px widths; it reproduced an 11.4px indentation before the fix.
 
+## Milestone 3 — Zen
+- Added `ZenPractice.tsx`, pure transitions/metrics in `zenEngine.ts`, and versioned persistence in `zenStorage.ts`. Sprint continues to use the existing `TypingPractice.tsx` path.
+- Replenishes batches before the caret reaches the boundary. Once history grows, old words are retired while at least 200 recent characters remain editable. Correct retained characters from retired history are banked into totals; attempts/errors remain cumulative. Sixty-batch pure tests verify bounded text and no lost counts, including Unicode input.
+- Escape/Pause freezes active time and opens statistics; Finish opens a resumable session summary. Resume/Enter continues and focuses input. New session clears all state and saved progress.
+- Switching to Sprint first offers a summary with Go to Sprint or Resume. The draft survives mode switches; returning to Zen restores it paused.
+- Hidden tabs auto-pause. Saves run every five seconds and on explicit pause/finish, pagehide, and unmount. Snapshots store elapsed active time, never reuse page-specific timestamps, and restore paused.
+- Malformed snapshots are rejected. Unavailable/read-only/full storage reports a status message while the current session stays playable in memory. Uncommitted composition drafts are discarded when pausing; committed text is retained.
+- Shared character rendering preserves the fixed left alignment, word clearing, and viewport-centered layout. WPM/accuracy remain hidden during play; no XP or later-stage preferences added.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 28 tests passed (9 pure logic tests and 19 browser tests).
+- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 44 tests passed (16 pure logic tests and 28 browser tests).
+- Milestone 3 production smoke: HTTP 200, no browser JavaScript errors, desktop/320px summaries visually reviewed, and reload/resume restored 18 correct characters with exactly 10 seconds of active time.
 - Milestone 2 production smoke: HTTP 200, no browser JavaScript errors, a controlled 15-second run produced 80 WPM/100% accuracy, saved its 15-second best, and Enter returned focus to fresh input. Desktop and 320px results screenshots were reviewed.
+- Zen validation: boundary replenishment, bounded long-session history, cumulative/error/Unicode totals, pause/resume active time, restore validation, new-session reset, word clearing, summary/exit draft retention, hidden-tab pause, periodic saves, active reload after unsaved edits, and malformed/blocked/quota-limited storage. Phone summary layout is checked at 320px.
 - Engine coverage: first-input start, idle state, WPM/accuracy, correction history, no-callback deadline expiry, completion freezing, zero elapsed time, invalid edits/overflow, untimed mode, reset, and Unicode input positions.
 - Sprint regressions: all three deadlines with a controlled clock, first-input start, duration changes, Enter/button restart and focus, record reload persistence and duration separation, slower-run retention, corrupt/blocked/quota-limited storage, early-completion exclusion, and compact results at phone/landscape sizes.
-- Browser coverage: existing foundation/theme checks; typing/correction and caret; deadline expiry while Appearance is open; read-only finish; restart during/after a session; mode reset; untimed practice; native input events at mobile width; repeat/paste prevention; composition drafts and commit.
+- Browser coverage: existing foundation/theme checks; typing/correction and caret; deadline expiry while Appearance is open; input removal on Sprint finish; restart during/after a session; mode reset; untimed practice; native input events at mobile width; repeat/paste prevention; composition drafts and commit.
 - Production app returned HTTP 200 with no JavaScript errors during typing, correction feedback, restart, and mobile scrolling. Desktop and mobile screenshots were reviewed; the active caret remained within the scrollable passage. Timer visibility is checked at 320px. Additional regressions check word clearing/cross-word correction and viewport centering without page scrolling at laptop, phone, and landscape sizes.
 
 ## Scope and known limitations
 - Sprint uses a long, fixed repeating passage rather than generated text. Unusually fast early completion is shown as a result but excluded from records. Duration defaults to 30 after page reload; personal bests persist per browser and origin.
-- Zen currently has one passage and no pause/resume feature. Endless replenishment, session summaries, and persistence are Milestone 3.
+- Zen uses a small cycling local text collection. Only recent history remains editable; older characters are finalized into totals. One local draft is shared across tabs (last save wins), and a hard crash can lose up to five seconds of edits. No cloud sync or multi-tab conflict handling.
 - No XP, levels, rewards, or live-statistics settings have been added. XP formula remains undecided until Milestone 4.
 - Input is end-editing only; click/arrow selection cannot edit the middle of a session. Native text input is intentionally visible beneath the character-feedback passage for predictable keyboard/mobile behavior.
 - Only Chromium automation has run. Real mobile keyboards, Safari, Firefox, screen-reader usability, and platform-specific IME behavior need broader testing; simulated composition and native input events pass here.
 - Dependencies/lockfile remain from Milestone 0. This cloud machine uses the writable npm cache documented in README and preinstalled `/usr/bin/chromium`; Playwright's browser-download host was blocked during setup.
 
 ## Next task for Codex
-Start Milestone 3 only: add continuous Zen text replenishment, a session summary, and reliable pause/resume and session persistence. Reuse the typing engine and preserve the minimal centered layout and word-clearing input. Keep XP/levels and scoring rewards for Milestone 4.
+Start Milestone 4 only: first document XP thresholds and scoring rules, then award XP once per valid correct character, persist total XP/level, and add unobtrusive progress/level-up feedback. Cover held keys, corrections/retyping, Zen history retirement, reload/resume, and restart so XP cannot be farmed. Preserve the minimal centered layout; customizable live-statistic preferences remain Milestone 5.

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import ZenPractice from "./ZenPractice";
 import TypingPractice from "./TypingPractice";
 import type { SprintDuration } from "./sprintRecords";
 import { useTheme } from "./useTheme";
@@ -23,6 +24,7 @@ function AppearanceIcon() {
 export default function App() {
   const [mode, setMode] = useState<"sprint" | "zen">("sprint");
   const [duration, setDuration] = useState<SprintDuration>(30);
+  const [zenExitRequested, setZenExitRequested] = useState(false);
   const [focusPractice, setFocusPractice] = useState(false);
   const { theme, setTheme } = useTheme();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -49,7 +51,10 @@ export default function App() {
         <nav className="mode-switch" aria-label="Typing mode">
           <button
             aria-pressed={mode === "sprint"}
-            onClick={() => setMode("sprint")}
+            onClick={() => {
+              if (mode === "zen") setZenExitRequested(true);
+              else setMode("sprint");
+            }}
           >
             Sprint
           </button>
@@ -75,16 +80,27 @@ export default function App() {
           aria-label={`${mode === "sprint" ? "Sprint" : "Zen"} typing practice`}
         >
           <h1 className="sr-only">h2otype typing practice</h1>
-          <TypingPractice
-            key={`${mode}-${duration}`}
-            mode={mode}
-            duration={duration}
-            focusOnMount={focusPractice}
-            onDurationChange={(value) => {
-              setFocusPractice(true);
-              setDuration(value);
-            }}
-          />
+          {mode === "zen" ? (
+            <ZenPractice
+              exitRequested={zenExitRequested}
+              onCancelExit={() => setZenExitRequested(false)}
+              onExit={() => {
+                setZenExitRequested(false);
+                setMode("sprint");
+              }}
+            />
+          ) : (
+            <TypingPractice
+              key={`${mode}-${duration}`}
+              mode={mode}
+              duration={duration}
+              focusOnMount={focusPractice}
+              onDurationChange={(value) => {
+                setFocusPractice(true);
+                setDuration(value);
+              }}
+            />
+          )}
         </section>
       </main>
 

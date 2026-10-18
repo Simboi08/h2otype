@@ -38,6 +38,10 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Advance through generated word batches continuously; typing should not freeze on a batch boundary.
 - XP persists periodically and when finishing/pausing the session.
 - Exiting Zen should offer a session summary without penalizing the user.
+- Milestone 3: Escape/Pause freezes active time; Finish opens a resumable summary. Enter from the summary heading resumes. New session explicitly clears the draft. Switching to Sprint first offers the summary with a Go to Sprint action.
+- Hiding the page pauses Zen. Reloaded sessions restore paused, excluding offline time. Ordinary field blur and Appearance leave active time running.
+- Keep a single versioned local draft, autosaving every five seconds and on lifecycle/explicit pause or finish. Failed storage must not interrupt the current session.
+- Retain at least 200 recent characters for correction and finalize older correct characters into totals, keeping text and DOM bounded. Live WPM/accuracy stay hidden; pause/finish shows session statistics. XP waits for Milestone 4.
 
 ## Progression
 - Correctly completed characters earn base XP, exactly once per character.

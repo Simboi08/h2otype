@@ -18,9 +18,9 @@
 - [x] Smooth restart flow
 
 ## Milestone 3 — Zen mode
-- [ ] Seamless text continuation without time limit
-- [ ] Session stats and optional summary
-- [ ] Reliable pause and persistence behavior
+- [x] Seamless text continuation without time limit
+- [x] Session stats and optional summary
+- [x] Reliable pause and persistence behavior
 
 ## Milestone 4 — Progression
 - [ ] Determine and document XP formula and level curve
