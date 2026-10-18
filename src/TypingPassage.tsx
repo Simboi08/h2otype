@@ -33,6 +33,7 @@ const TypingPassage = memo(function TypingPassage({
     if (target.top < bounds.top)
       container.scrollTop -= bounds.top - target.top + 12;
   }, [typed]);
+  // Trailing spaces travel with their word instead of indenting the next line.
   let position = 0;
   return (
     <div
@@ -40,7 +41,7 @@ const TypingPassage = memo(function TypingPassage({
       ref={windowRef}
     >
       <p className="passage" aria-hidden="true">
-        {passage.split(/( )/).map((word, wordIndex) => (
+        {(passage.match(/\S+\s*|\s+/g) ?? []).map((word, wordIndex) => (
           <span className="passage-word" key={wordIndex}>
             {[...word].map((char) => {
               const index = position++;

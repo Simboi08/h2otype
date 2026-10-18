@@ -34,10 +34,14 @@ Milestones 0–2 are complete. Sprint supports 15/30/60-second tests, a dedicate
 - Extended Sprint's fixed passage for normal full-duration runs. Reaching its end early shows results but cannot earn a best. Extracted a memoized character passage so timer ticks do not redraw unchanged text. The screen-reader description covers the upcoming excerpt rather than the entire long passage.
 - Updated DESIGN.md, README.md, and ROADMAP.md. No XP or endless Zen features added.
 
+## Text alignment correction
+- Attached trailing spaces to the preceding rendered word so wrapped lines share the same left edge. Space characters still retain their original typing positions, caret, and feedback.
+- Added a browser regression covering 320/375/768/1280px widths; it reproduced an 11.4px indentation before the fix.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 27 tests passed (9 pure logic tests and 18 browser tests).
+- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 28 tests passed (9 pure logic tests and 19 browser tests).
 - Milestone 2 production smoke: HTTP 200, no browser JavaScript errors, a controlled 15-second run produced 80 WPM/100% accuracy, saved its 15-second best, and Enter returned focus to fresh input. Desktop and 320px results screenshots were reviewed.
 - Engine coverage: first-input start, idle state, WPM/accuracy, correction history, no-callback deadline expiry, completion freezing, zero elapsed time, invalid edits/overflow, untimed mode, reset, and Unicode input positions.
 - Sprint regressions: all three deadlines with a controlled clock, first-input start, duration changes, Enter/button restart and focus, record reload persistence and duration separation, slower-run retention, corrupt/blocked/quota-limited storage, early-completion exclusion, and compact results at phone/landscape sizes.
