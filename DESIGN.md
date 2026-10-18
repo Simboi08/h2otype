@@ -66,6 +66,13 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Live statistics use a compact, non-announcing row near the timer and wrap on phones. The default interface keeps both live statistics hidden.
 - Keep keyboard focus inside the modal, Escape dismissal, sensible focus return, larger control hit areas, and reduced-motion support. On short screens, scroll the modal internally with Close remaining reachable.
 
+## Post-MVP controls and WPM refresh
+- Unmodified Tab restarts from the typing input or focused results/summary heading, returning focus to a fresh input. Sprint retains its selected duration; Zen clears its resumable draft. Lifetime XP and personal bests remain intact.
+- Tab does not cycle through page controls while typing. Shift+Tab leaves the field for keyboard navigation. Tab remains normal on other controls and inside Settings; modified shortcuts, held Tab repeats, and active composition cannot trigger restart.
+- WPM refresh choices: Instant (every existing metric update), 0.5 seconds (default), 1 second, or 2 seconds. Persist this choice with existing preferences and apply it to both modes without clearing the session.
+- Slower choices hold the displayed WPM until the next active-time interval. Accuracy, session clocks, scoring, XP, and final results remain independent of that display cadence. Restart resets the live display immediately; pausing hides it and resuming shows a fresh sample.
+- Optional fonts/interface sizing, sound styles, and particle effects are tracked in NOTES.md for separate work. Particle effects are a future opt-in exception to the MVP's restrained-effects policy, not part of this update.
+
 ## Accessibility
 - Contrast and visible caret in either theme.
 - Keyboard operability, meaningful focus indicators, reduced motion, and descriptive control labels.

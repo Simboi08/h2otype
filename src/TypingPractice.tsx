@@ -8,6 +8,7 @@ import {
 } from "./typingEngine";
 
 import LiveStats from "./LiveStats";
+import { restartOnTab } from "./restartShortcut";
 import { commitProgress } from "./progressStore";
 import TypingPassage from "./TypingPassage";
 import SprintResults from "./SprintResults";
@@ -112,7 +113,12 @@ export default function TypingPractice({
           <span>Zen · single passage</span>
         )}
         {!finished && (
-          <LiveStats wpm={metrics.wpm} accuracy={metrics.accuracy} />
+          <LiveStats
+            key={session.startedAt ?? "idle"}
+            wpm={metrics.wpm}
+            accuracy={metrics.accuracy}
+            elapsedMs={metrics.elapsedMs}
+          />
         )}
         <span
           className="mode-detail"
@@ -164,11 +170,13 @@ export default function TypingPractice({
             autoCapitalize="off"
             spellCheck={false}
             aria-describedby="typing-hint passage-text"
+            aria-keyshortcuts="Tab"
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onPaste={(event) => event.preventDefault()}
             onDrop={(event) => event.preventDefault()}
             onKeyDown={(event) => {
+              restartOnTab(event, restart, composing.current);
               if (event.repeat && event.key.length === 1)
                 event.preventDefault();
               if (
@@ -218,9 +226,9 @@ export default function TypingPractice({
               {finished
                 ? "Finished."
                 : session.startedAt === null
-                  ? "Space advances · Backspace corrects"
+                  ? "Space advances · Tab restarts"
                   : focused
-                    ? "Space advances · Backspace corrects"
+                    ? "Space advances · Tab restarts"
                     : "Click the field to continue · Timer running"}
             </p>
             <button className="restart-button" onClick={restart}>

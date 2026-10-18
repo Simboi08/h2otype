@@ -646,6 +646,18 @@ main {
   font-size: 13px;
   color: var(--text);
 }
+.preference-select {
+  min-height: 40px;
+  max-width: 45%;
+  flex-shrink: 0;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 12px;
+}
 .preference-description {
   display: block;
   font-size: 11px;

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { recordSprint } from "./sprintRecords";
+import { restartOnTab } from "./restartShortcut";
 import type { SprintDuration } from "./sprintRecords";
 import type { getMetrics } from "./typingEngine";
 
@@ -42,7 +43,13 @@ export default function SprintResults({
         }
       }}
     >
-      <h2 id="results-title" tabIndex={-1} ref={heading}>
+      <h2
+        id="results-title"
+        tabIndex={-1}
+        ref={heading}
+        aria-keyshortcuts="Tab Enter"
+        onKeyDown={(event) => restartOnTab(event, onRestart)}
+      >
         Sprint results
       </h2>
       <dl className="result-grid">
@@ -88,7 +95,7 @@ export default function SprintResults({
         )}
       </div>
       <div className="results-footer">
-        <p>Errors include corrected mistakes. Enter to restart.</p>
+        <p>Errors include corrected mistakes. Tab or Enter to restart.</p>
         <button className="restart-button" onClick={onRestart}>
           Restart
         </button>

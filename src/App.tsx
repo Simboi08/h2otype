@@ -3,8 +3,13 @@ import ProgressIndicator from "./ProgressIndicator";
 import ZenPractice from "./ZenPractice";
 import TypingPractice from "./TypingPractice";
 import type { SprintDuration } from "./sprintRecords";
-import { setPreference, usePreferences } from "./preferences";
-import type { Preferences } from "./preferences";
+import {
+  isWpmRefreshMs,
+  setPreference,
+  usePreferences,
+  wpmRefreshOptions,
+} from "./preferences";
+import type { BooleanPreferenceKey } from "./preferences";
 import { useTheme } from "./useTheme";
 
 function SettingsIcon() {
@@ -144,8 +149,10 @@ export default function App() {
           if (event.key !== "Tab") return;
           const controls = Array.from(
             event.currentTarget.querySelectorAll<
-              HTMLButtonElement | HTMLInputElement
-            >("button:not([disabled]), input:not([disabled])"),
+              HTMLButtonElement | HTMLInputElement | HTMLSelectElement
+            >(
+              "button:not([disabled]), input:not([disabled]), select:not([disabled])",
+            ),
           ).filter((control) => control.getClientRects().length > 0);
           const first = controls[0];
           const last = controls[controls.length - 1];
@@ -210,6 +217,35 @@ export default function App() {
         </p>
         <fieldset className="preference-options">
           <legend>While typing</legend>
+          <label className="preference-row">
+            <span>
+              <span className="preference-label" id="wpm-refresh-label">
+                WPM refresh rate
+              </span>
+              <span
+                className="preference-description"
+                id="wpm-refresh-description"
+              >
+                How often live WPM changes. Results stay exact.
+              </span>
+            </span>
+            <select
+              className="preference-select"
+              value={preferences.wpmRefreshMs}
+              aria-labelledby="wpm-refresh-label"
+              aria-describedby="wpm-refresh-description"
+              onChange={(event) => {
+                const value = Number(event.currentTarget.value);
+                if (isWpmRefreshMs(value)) setPreference("wpmRefreshMs", value);
+              }}
+            >
+              {wpmRefreshOptions.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
           {(
             [
               ["liveWpm", "Live WPM", "Show your current typing speed."],
@@ -224,7 +260,7 @@ export default function App() {
                 "Level-up notifications",
                 "Show a brief notice when you level up.",
               ],
-            ] satisfies [keyof Preferences, string, string][]
+            ] satisfies [BooleanPreferenceKey, string, string][]
           ).map(([key, label, description]) => (
             <label className="preference-row" key={key}>
               <span>
@@ -254,6 +290,11 @@ export default function App() {
         <p className="settings-note">
           Display preferences apply to both modes. XP keeps accruing when its
           indicator is hidden.
+        </p>
+        <p className="settings-note">
+          Tab restarts from the typing field or summary heading. In Zen it
+          clears the draft; earned XP stays. Shift+Tab navigates out of the
+          field. Tab works normally elsewhere, including here in Settings.
         </p>
         {(!storageAvailable || !themeStorageAvailable) && (
           <p className="settings-storage-note" role="status">

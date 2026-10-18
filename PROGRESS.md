@@ -5,6 +5,8 @@ Updated: 2026-10-18
 ## Current state
 Milestones 0–5 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen replenishes continuously, pauses/resumes with active-time statistics, and saves a resumable local session. Correct typing earns persistent XP and levels in both modes, with subtle header progress and session XP in results. Settings now controls live WPM/accuracy, the XP indicator, notifications, and appearance. The planned MVP roadmap is complete.
 
+The first feedback update adds Tab restart in both modes and a persistent WPM refresh-rate selector. The remaining wishlist is in NOTES.md.
+
 ## Completed
 ### Milestone 0
 - Responsive Cupertino-inspired layout, shared CSS tokens, system fonts, Sprint/Zen navigation, and light/dark/system appearance.
@@ -66,10 +68,19 @@ Milestones 0–5 are complete. Sprint supports 15/30/60-second tests, a dedicate
 - Theme writes now occur on explicit changes, with honest storage-failure feedback; system tracking and startup flash prevention remain supported.
 - Scoring, XP rules, timers, and local personal-best logic are unchanged. No later-possibility features or deployment work added.
 
+## Post-MVP — Tab restart and WPM refresh
+- Added a shared Tab shortcut for both typing fields and focused Sprint/Zen summary headings. Restart returns focus to fresh typing, retains Sprint duration, lifetime XP, and best scores, and clears Zen's resumable draft. Shift+Tab and normal navigation elsewhere remain available; Settings explains the behavior.
+- Restart ignores held Tab repeats, modified keys, and active composition so ordinary shortcuts and composition cannot unexpectedly clear a run. Existing Enter restart/resume behavior is preserved.
+- Added a persistent WPM refresh selector: Instant, 0.5 seconds (default), 1 second, and 2 seconds. Slower choices sample on active-time intervals rather than on each keystroke, keeping the number steady between updates without delaying the actual timer, accuracy, XP, or final results.
+- New runs reset the displayed WPM immediately. Existing saved preferences safely receive the new default, and invalid interval values are ignored. Appearance, XP, bests, and Zen storage are preserved.
+- Recorded all remaining feedback in NOTES.md: font/interface-size choices, standard/bitcrushed typing sounds, and optional regular/pixel particles. Those features are deferred as requested.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 66 tests passed (24 pure logic tests and 42 browser tests).
+- `CHROMIUM_PATH=/usr/bin/chromium npm test -- --workers=4`: 73 tests passed (25 pure logic tests and 48 browser tests).
+- Post-MVP checks: Tab restart during Sprint/Zen and from results/pause, deadline reset, focus return, retained duration/XP/bests, cleared Zen draft across reload, Shift+Tab escape, normal Settings navigation, held/modified/composing Tab suppression, preference validation/migration, sampled WPM in both modes, Instant changes, immediate display reset, saved refresh choice, and exact results/XP despite slower display updates.
+- Post-MVP production smoke: HTTP 200 with no JavaScript errors; 320px dark Settings screenshot reviewed with no horizontal overflow; Tab reset/refocus and refresh-preference reload persistence verified.
 - Milestone 5 production smoke: HTTP 200 with no JavaScript errors; 50 correct characters over 10 active seconds displayed 60 WPM and 100% accuracy; dark theme persisted after reload; a live-WPM preference change from another tab propagated. Desktop and 320px Settings/live-stat screenshots were reviewed.
 - Milestone 4 production smoke: HTTP 200 with no JavaScript errors; 100 correct Sprint characters earned 100 XP and level 2, the level-up kept input focus, results showed +100 XP, and reload retained level/XP. Desktop and 320px screenshots were visually reviewed.
 - Milestone 3 production smoke: HTTP 200, no browser JavaScript errors, desktop/320px summaries visually reviewed, and reload/resume restored 18 correct characters with exactly 10 seconds of active time.
@@ -91,4 +102,4 @@ Milestones 0–5 are complete. Sprint supports 15/30/60-second tests, a dedicate
 - Dependencies/lockfile remain from Milestone 0. This cloud machine uses the writable npm cache documented in README and preinstalled `/usr/bin/chromium`; Playwright's browser-download host was blocked during setup.
 
 ## Next task for Codex
-The planned MVP milestones are complete. Gather user feedback and choose a concrete refinement, bug fix, or release/deployment task. Later possibilities remain optional. Preserve the minimal centered interface, word-clearing input, scoring/XP rules, and existing local data unless the user requests a change.
+The planned MVP milestones are complete. User feedback is captured in [NOTES.md](NOTES.md). The requested first update implements Tab restart and WPM refresh controls. Remaining wishlist: font/interface-size controls, typing sounds, and optional particle effects later, as separate tested changes. Preserve the minimal centered interface, word-clearing input, scoring/XP rules, and existing local data unless the user requests a change.

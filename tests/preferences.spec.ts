@@ -21,6 +21,9 @@ async function enableStats(page: import("@playwright/test").Page) {
   await page
     .getByRole("switch", { name: "Live accuracy", exact: true })
     .check();
+  await page
+    .getByRole("combobox", { name: "WPM refresh rate" })
+    .selectOption("0");
   await closeSettings(page);
 }
 const stat = (page: import("@playwright/test").Page, name: string) =>
@@ -55,7 +58,31 @@ test("preferences validate partial boolean fields and fall back safely for inval
     liveAccuracy: false,
     xpProgress: false,
     levelNotifications: true,
+    wpmRefreshMs: 500,
   });
+});
+
+test("WPM refresh validation accepts supported intervals and migrates existing preferences", () => {
+  for (const value of [0, 500, 1000, 2000]) {
+    expect(
+      parsePreferences(
+        JSON.stringify({
+          version: 1,
+          preferences: { liveWpm: true, wpmRefreshMs: value },
+        }),
+      ),
+    ).toEqual({ ...defaultPreferences, liveWpm: true, wpmRefreshMs: value });
+  }
+  for (const value of [null, true, "1000", -1, 1, 250, 1e10]) {
+    expect(
+      parsePreferences(
+        JSON.stringify({
+          version: 1,
+          preferences: { liveWpm: true, wpmRefreshMs: value },
+        }),
+      ),
+    ).toEqual({ ...defaultPreferences, liveWpm: true });
+  }
 });
 
 test("defaults stay quiet and every display preference and theme survive reload", async ({

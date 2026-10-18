@@ -1,13 +1,26 @@
 import { useSyncExternalStore } from "react";
 
 export const preferencesKey = "h2otype.preferences.v1";
+export const wpmRefreshOptions = [
+  { value: 0, label: "Instant" },
+  { value: 500, label: "0.5 seconds" },
+  { value: 1000, label: "1 second" },
+  { value: 2000, label: "2 seconds" },
+] as const;
+type WpmRefreshMs = (typeof wpmRefreshOptions)[number]["value"];
 export const defaultPreferences = {
   liveWpm: false,
   liveAccuracy: false,
   xpProgress: true,
   levelNotifications: true,
+  wpmRefreshMs: 500 as WpmRefreshMs,
 };
 export type Preferences = typeof defaultPreferences;
+export type BooleanPreferenceKey = Exclude<keyof Preferences, "wpmRefreshMs">;
+
+export function isWpmRefreshMs(value: unknown): value is WpmRefreshMs {
+  return wpmRefreshOptions.some((option) => option.value === value);
+}
 type Snapshot = { preferences: Preferences; storageAvailable: boolean };
 let snapshot: Snapshot | null = null;
 const listeners = new Set<() => void>();
@@ -25,10 +38,17 @@ export function parsePreferences(raw: string | null): Preferences {
       typeof data.preferences !== "object"
     )
       return preferences;
-    for (const key of Object.keys(preferences) as (keyof Preferences)[]) {
+    for (const key of [
+      "liveWpm",
+      "liveAccuracy",
+      "xpProgress",
+      "levelNotifications",
+    ] as const) {
       const value = data.preferences[key];
       if (typeof value === "boolean") preferences[key] = value;
     }
+    if (isWpmRefreshMs(data.preferences.wpmRefreshMs))
+      preferences.wpmRefreshMs = data.preferences.wpmRefreshMs;
   } catch {
     /* Invalid or older data falls back to the documented defaults. */
   }
@@ -58,7 +78,10 @@ function emit() {
   for (const listener of listeners) listener();
 }
 
-export function setPreference(key: keyof Preferences, value: boolean) {
+export function setPreference<K extends keyof Preferences>(
+  key: K,
+  value: Preferences[K],
+) {
   const preferences = { ...getSnapshot().preferences, [key]: value };
   let storageAvailable = true;
   try {

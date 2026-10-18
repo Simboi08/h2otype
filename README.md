@@ -57,6 +57,8 @@ Choose 15s, 30s (default), or 60s for Sprint. Changing duration discards the cur
 
 At the end of Sprint, the passage is replaced by results showing WPM, accuracy, incorrect attempts, elapsed time, and the personal best for that duration. Press Enter while the results heading is focused, or click Restart, to reset and focus the input. Restart during practice also clears the run, clock, and counts. Live WPM and accuracy are off by default and can be enabled independently in Settings.
 
+**Quick restart:** press Tab in the typing field or from the focused results/summary heading. It starts a fresh Sprint with the same duration, or clears the current Zen draft for a new session. Earned lifetime XP and personal bests stay saved. Shift+Tab leaves the field for keyboard navigation; Tab works normally on other controls and inside Settings. Held Tab repeats and active composition do not restart the session.
+
 Personal bests are saved per duration in this browser's localStorage (`h2otype.sprint-bests.v1`). Higher WPM wins; equal WPM uses higher accuracy as the tie-breaker. Only full-duration runs with at least one correct character qualify. Restarting/changing mode or duration does not save a partial run. Corrupt records are ignored, and unavailable/full browser storage shows a message without breaking results or restart. Records are local to this browser and origin; they are not online accounts or leaderboards.
 
 Scoring conventions:
@@ -88,6 +90,7 @@ Open **Settings** in the header. Changes take effect immediately in both Sprint 
 | Preference | Default | Behavior |
 | --- | --- | --- |
 | Live WPM | Off | Shows current speed using the existing correct-character/active-time calculation. |
+| WPM refresh rate | 0.5 seconds | Choose Instant, 0.5 seconds, 1 second, or 2 seconds between live WPM updates. Slower choices hold the number steady between active-time intervals; final results and scoring remain exact. |
 | Live accuracy | Off | Shows correct attempts divided by all attempts, including corrected mistakes. |
 | XP progress | On | Shows the header level/progress indicator; hiding it keeps XP accruing and leaves session XP in results. |
 | Level-up notifications | On | Shows brief, nonblocking notices; turning it off dismisses an active notice and suppresses new ones. |
@@ -101,6 +104,7 @@ Keyboard users can Tab/Shift+Tab through the modal, use Space on switches, arrow
 React + TypeScript + Vite. For the initial version, use localStorage rather than accounts or a backend.
 
 ## Project documents
+- [NOTES.md](NOTES.md): user feedback and the wishlist for future improvements.
 - [DESIGN.md](DESIGN.md): product and visual specification.
 - [ROADMAP.md](ROADMAP.md): staged implementation milestones.
 - [PROGRESS.md](PROGRESS.md): current development state and handoff notes.

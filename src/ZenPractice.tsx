@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import LiveStats from "./LiveStats";
+import { restartOnTab } from "./restartShortcut";
 import TypingPassage from "./TypingPassage";
 import { getWordInput } from "./typingEngine";
 import {
@@ -120,6 +121,7 @@ export default function ZenPractice({
     composing.current = false;
     onCancelExit();
     update(createZen(), timestamp);
+    input.current?.focus({ preventScroll: true });
   }
 
   return (
@@ -127,7 +129,12 @@ export default function ZenPractice({
       <div className="passage-meta">
         <span>Zen</span>
         {!stopped && (
-          <LiveStats wpm={metrics.wpm} accuracy={metrics.accuracy} />
+          <LiveStats
+            key={state.session.startedAt ?? "idle"}
+            wpm={metrics.wpm}
+            accuracy={metrics.accuracy}
+            elapsedMs={metrics.elapsedMs}
+          />
         )}
         <span role="timer" aria-label="Active time">
           {Math.floor(metrics.elapsedMs / 1000)}s elapsed
@@ -144,7 +151,13 @@ export default function ZenPractice({
             }
           }}
         >
-          <h2 id="zen-title" tabIndex={-1} ref={heading}>
+          <h2
+            id="zen-title"
+            tabIndex={-1}
+            ref={heading}
+            aria-keyshortcuts="Tab Enter"
+            onKeyDown={(event) => restartOnTab(event, newSession)}
+          >
             {state.summary ? "Zen session" : "Zen paused"}
           </h2>
           <dl className="result-grid">
@@ -169,7 +182,7 @@ export default function ZenPractice({
             +{state.session.xpEarned} XP this session
           </p>
           <div className="results-footer">
-            <p>Active time only. Enter to resume.</p>
+            <p>Active time only. Enter resumes · Tab starts a new session.</p>
             <div className="zen-actions">
               {exitRequested && (
                 <button className="restart-button" onClick={onExit}>
@@ -217,11 +230,13 @@ export default function ZenPractice({
             autoCapitalize="off"
             spellCheck={false}
             aria-describedby="zen-hint zen-passage"
+            aria-keyshortcuts="Tab"
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             onPaste={(event) => event.preventDefault()}
             onDrop={(event) => event.preventDefault()}
             onKeyDown={(event) => {
+              restartOnTab(event, newSession, composing.current);
               if (event.repeat && event.key.length === 1)
                 event.preventDefault();
               if (event.key === "Escape") {
@@ -268,7 +283,7 @@ export default function ZenPractice({
             }}
           />
           <div className="practice-footer">
-            <p id="zen-hint">Space advances · Esc pauses</p>
+            <p id="zen-hint">Tab restarts · Esc pauses</p>
             <div className="zen-actions">
               <button className="restart-button" onClick={() => stop(false)}>
                 Pause
