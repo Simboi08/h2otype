@@ -1,16 +1,16 @@
 # h2otype — Roadmap
 
 ## Milestone 0 — Project foundation
-- [ ] Set up Vite + React + TypeScript project and scripts
-- [ ] Create basic design tokens and theme switching
-- [ ] Establish app layout and basic navigation
-- [ ] Ensure build/lint succeeds
+- [x] Set up Vite + React + TypeScript project and scripts
+- [x] Create basic design tokens and theme switching
+- [x] Establish app layout and basic navigation
+- [x] Ensure build/lint succeeds
 
 ## Milestone 1 — Typing engine
-- [ ] Focusable keyboard-first passage component
-- [ ] Per-character correct/error state and caret
-- [ ] Reliable timer and restart
-- [ ] Test WPM, accuracy, and edge cases
+- [x] Focusable keyboard-first passage component
+- [x] Per-character correct/error state and caret
+- [x] Reliable timer and restart
+- [x] Test WPM, accuracy, and edge cases
 
 ## Milestone 2 — Sprint mode
 - [ ] 15/30/60-second selection
