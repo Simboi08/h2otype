@@ -12,7 +12,7 @@ A minimalist, Apple-inspired typing game with a calm interface and satisfying pr
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
-Milestones 0 and 1 are implemented: a React + TypeScript + Vite foundation, persistent light/dark/system appearance, and a working typing engine with character feedback, caret, timer, correction, and restart. Sprint currently uses a fixed 30-second limit; Zen is untimed single-passage practice. Full Sprint features, endless Zen, XP, levels, and configurable live statistics remain for later milestones.
+Milestones 0–2 are implemented: a React + TypeScript + Vite foundation, persistent light/dark/system appearance, and a working typing engine with character feedback, caret, timer, correction, and restart. Sprint supports 15/30/60-second tests, a results screen, and local personal bests for each duration. Zen is untimed single-passage practice. Endless Zen, XP, levels, and configurable live statistics remain for later milestones.
 
 ## Development
 Use Node.js 20.19+ (20.x) or 22.12+ and npm. Node 24 was used for validation.
@@ -53,7 +53,11 @@ In this cloud environment the home npm cache is unwritable. Before npm commands,
 ## Trying the typing engine
 Choose Sprint or Zen, click the typing field (or reach it with Tab), and type the passage above it. The first committed character starts time. Correct characters darken; mistakes are colored and underlined. Press Space after each word to clear the field and continue. Backspace to fix mistakes, including returning to the previous word from an empty input. The workspace is centered on screen without promotional copy or feature cards. The passage scrolls to keep the caret visible on small screens.
 
-Sprint ends after 30 seconds or at the passage boundary, whichever comes first. Zen currently ends at the passage boundary without a time limit; endless text is Milestone 3. Restart clears the text, timer, and counts and returns focus to the input. WPM and accuracy are hidden while typing and shown in a small readout after finishing; the dedicated Sprint results screen and personal bests belong to Milestone 2.
+Choose 15s, 30s (default), or 60s for Sprint. Changing duration discards the current run and focuses a fresh input. The selected duration stays active across restarts and mode switches for this visit. A long fixed passage supplies enough text for normal timed runs; reaching its end early also finishes the run. Zen currently ends at the passage boundary without a time limit; endless text is Milestone 3.
+
+At the end of Sprint, the passage is replaced by results showing WPM, accuracy, incorrect attempts, elapsed time, and the personal best for that duration. Press Enter while the results heading is focused, or click Restart, to reset and focus the input. Restart during practice also clears the run, clock, and counts. Live WPM and accuracy remain hidden while typing.
+
+Personal bests are saved per duration in this browser's localStorage (`h2otype.sprint-bests.v1`). Higher WPM wins; equal WPM uses higher accuracy as the tie-breaker. Only full-duration runs with at least one correct character qualify. Restarting/changing mode or duration does not save a partial run. Corrupt records are ignored, and unavailable/full browser storage shows a message without breaking results or restart. Records are local to this browser and origin; they are not online accounts or leaderboards.
 
 Scoring conventions:
 - WPM = correctly retained characters ÷ 5 ÷ elapsed minutes, rounded to a whole number. Spaces and punctuation count. Zero elapsed time gives 0 WPM.
@@ -72,6 +76,6 @@ React + TypeScript + Vite. For the initial version, use localStorage rather than
 ## Starting work with Codex
 1. Open this GitHub repository in Codex.
 2. Ask Codex to read README.md, DESIGN.md, ROADMAP.md, PROGRESS.md and AGENTS.md.
-3. Start **Milestone 2 only** and request tested changes and a PROGRESS.md update.
+3. Start **Milestone 3 only** and request tested changes and a PROGRESS.md update.
 
 Keep changes small and review them before merging.

@@ -13,9 +13,9 @@
 - [x] Test WPM, accuracy, and edge cases
 
 ## Milestone 2 — Sprint mode
-- [ ] 15/30/60-second selection
-- [ ] Results summary and local personal bests
-- [ ] Smooth restart flow
+- [x] 15/30/60-second selection
+- [x] Results summary and local personal bests
+- [x] Smooth restart flow
 
 ## Milestone 3 — Zen mode
 - [ ] Seamless text continuation without time limit

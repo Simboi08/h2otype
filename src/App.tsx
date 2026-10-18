@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import TypingPractice from "./TypingPractice";
+import type { SprintDuration } from "./sprintRecords";
 import { useTheme } from "./useTheme";
 
 function AppearanceIcon() {
@@ -21,6 +22,8 @@ function AppearanceIcon() {
 
 export default function App() {
   const [mode, setMode] = useState<"sprint" | "zen">("sprint");
+  const [duration, setDuration] = useState<SprintDuration>(30);
+  const [focusPractice, setFocusPractice] = useState(false);
   const { theme, setTheme } = useTheme();
   const dialog = useRef<HTMLDialogElement>(null);
   const appearanceButton = useRef<HTMLButtonElement>(null);
@@ -72,7 +75,16 @@ export default function App() {
           aria-label={`${mode === "sprint" ? "Sprint" : "Zen"} typing practice`}
         >
           <h1 className="sr-only">h2otype typing practice</h1>
-          <TypingPractice key={mode} mode={mode} />
+          <TypingPractice
+            key={`${mode}-${duration}`}
+            mode={mode}
+            duration={duration}
+            focusOnMount={focusPractice}
+            onDurationChange={(value) => {
+              setFocusPractice(true);
+              setDuration(value);
+            }}
+          />
         </section>
       </main>
 

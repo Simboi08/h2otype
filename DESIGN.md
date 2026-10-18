@@ -29,6 +29,9 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Timer begins with first typing input.
 - Live WPM and accuracy are OFF by default, optionally shown through Settings.
 - End-of-test performance summary and personal-best tracking.
+- Milestone 2: default to 30 seconds; changing duration resets the run. Keep the duration control compact and keep live WPM/accuracy hidden.
+- Results replace the passage and show WPM, accuracy, incorrect attempts (including corrected mistakes), time, and the duration-specific personal best. Enter from the focused results heading or Restart returns focus to typing.
+- Personal bests compare WPM first and accuracy on ties. Only full-duration runs with at least one correct character qualify; partial/early-completed runs are excluded. Store records locally per browser. XP gained will join results after Milestone 4 implements XP.
 
 ### Zen
 - No hard time limit or mandatory completion.

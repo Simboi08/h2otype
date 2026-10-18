@@ -3,7 +3,7 @@
 Updated: 2026-10-18
 
 ## Current state
-Milestones 0 and 1 are complete. The React + TypeScript + Vite foundation now has a working typing engine. Sprint is fixed 30-second, single-passage practice; Zen is untimed single-passage practice until its endless mode milestone.
+Milestones 0–2 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen remains untimed single-passage practice until Milestone 3.
 
 ## Completed
 ### Milestone 0
@@ -26,21 +26,31 @@ Milestones 0 and 1 are complete. The React + TypeScript + Vite foundation now ha
 - Input now shows only the active word and clears on Space. Completed words remain in the passage and scoring history. Backspace from an empty input reopens the previous word; restart and session finish clear the input.
 - Recorded these user-requested interface decisions in DESIGN.md and updated README gameplay instructions. No later milestone features added.
 
+## Milestone 2 — Sprint
+- Added compact 15/30/60-second controls, defaulting to 30. Changing duration resets the session and focuses input; restart keeps the selected duration.
+- Results replace the passage and show WPM, accuracy, error attempts (including corrected mistakes), elapsed time, and the selected duration's personal best.
+- Results focus their heading for keyboard access; Enter there or the Restart button resets and focuses the input. Existing restarts during play still work.
+- Personal bests use versioned localStorage, separately for each duration. Higher WPM wins; accuracy breaks ties. Only full-duration runs with at least one correct retained character qualify. Read/write failures are reported and corrupt records are ignored without breaking play.
+- Extended Sprint's fixed passage for normal full-duration runs. Reaching its end early shows results but cannot earn a best. Extracted a memoized character passage so timer ticks do not redraw unchanged text. The screen-reader description covers the upcoming excerpt rather than the entire long passage.
+- Updated DESIGN.md, README.md, and ROADMAP.md. No XP or endless Zen features added.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 18 tests passed (8 pure engine tests and 10 browser tests).
+- `CHROMIUM_PATH=/usr/bin/chromium npm test`: 27 tests passed (9 pure logic tests and 18 browser tests).
+- Milestone 2 production smoke: HTTP 200, no browser JavaScript errors, a controlled 15-second run produced 80 WPM/100% accuracy, saved its 15-second best, and Enter returned focus to fresh input. Desktop and 320px results screenshots were reviewed.
 - Engine coverage: first-input start, idle state, WPM/accuracy, correction history, no-callback deadline expiry, completion freezing, zero elapsed time, invalid edits/overflow, untimed mode, reset, and Unicode input positions.
+- Sprint regressions: all three deadlines with a controlled clock, first-input start, duration changes, Enter/button restart and focus, record reload persistence and duration separation, slower-run retention, corrupt/blocked/quota-limited storage, early-completion exclusion, and compact results at phone/landscape sizes.
 - Browser coverage: existing foundation/theme checks; typing/correction and caret; deadline expiry while Appearance is open; read-only finish; restart during/after a session; mode reset; untimed practice; native input events at mobile width; repeat/paste prevention; composition drafts and commit.
 - Production app returned HTTP 200 with no JavaScript errors during typing, correction feedback, restart, and mobile scrolling. Desktop and mobile screenshots were reviewed; the active caret remained within the scrollable passage. Timer visibility is checked at 320px. Additional regressions check word clearing/cross-word correction and viewport centering without page scrolling at laptop, phone, and landscape sizes.
 
 ## Scope and known limitations
-- Sprint duration selection, a dedicated results screen, personal bests, and improved restart flow are Milestone 2.
+- Sprint uses a long, fixed repeating passage rather than generated text. Unusually fast early completion is shown as a result but excluded from records. Duration defaults to 30 after page reload; personal bests persist per browser and origin.
 - Zen currently has one passage and no pause/resume feature. Endless replenishment, session summaries, and persistence are Milestone 3.
-- No XP, levels, rewards, live-statistics settings, or personal-best storage has been added. XP formula remains undecided until Milestone 4.
+- No XP, levels, rewards, or live-statistics settings have been added. XP formula remains undecided until Milestone 4.
 - Input is end-editing only; click/arrow selection cannot edit the middle of a session. Native text input is intentionally visible beneath the character-feedback passage for predictable keyboard/mobile behavior.
 - Only Chromium automation has run. Real mobile keyboards, Safari, Firefox, screen-reader usability, and platform-specific IME behavior need broader testing; simulated composition and native input events pass here.
 - Dependencies/lockfile remain from Milestone 0. This cloud machine uses the writable npm cache documented in README and preinstalled `/usr/bin/chromium`; Playwright's browser-download host was blocked during setup.
 
 ## Next task for Codex
-Start Milestone 2 only: add 15/30/60-second Sprint selection, a proper results summary with local personal bests, and a smooth restart flow. Reuse the pure typing engine and extend its tests. Keep endless Zen and XP for their own milestones.
+Start Milestone 3 only: add continuous Zen text replenishment, a session summary, and reliable pause/resume and session persistence. Reuse the typing engine and preserve the minimal centered layout and word-clearing input. Keep XP/levels and scoring rewards for Milestone 4.

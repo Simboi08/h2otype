@@ -21,18 +21,19 @@ test("typing marks characters, supports correction, and expires with honest accu
   await page.clock.fastForward(30_000);
   await page.keyboard.press("Escape");
   await expect(page.getByRole("timer")).toHaveText("0s remaining");
-  await expect(input).toHaveAttribute("readonly", "");
-  await expect(page.locator(".session-metrics")).toContainText("75% accuracy");
-  await expect(page.locator(".session-metrics")).toContainText(
-    "1 incorrect attempt",
-  );
-  await input.press("w");
-  await expect(input).toHaveValue("");
+  await expect(input).toHaveCount(0);
+  await expect(page.locator(".sprint-results")).toContainText("75%");
+  await expect(
+    page
+      .locator(".result-grid div")
+      .filter({ hasText: "Errors" })
+      .locator("dd"),
+  ).toHaveText("1");
   await page.getByRole("button", { name: "Restart", exact: true }).click();
   await expect(input).toBeFocused();
   await expect(input).toHaveValue("");
   await expect(page.getByRole("timer")).toHaveText("30s remaining");
-  await expect(page.locator(".session-metrics")).toHaveCount(0);
+  await expect(page.locator(".sprint-results")).toHaveCount(0);
   await input.press("s");
   await page.clock.fastForward(1000);
   await expect(page.getByRole("timer")).toHaveText("29s remaining");
@@ -81,8 +82,8 @@ test("mobile input events work, repeat/paste are blocked, and a passage can comp
   await expect(page.locator(".character.correct")).toHaveCount(4);
   const passage = await page.locator(".passage").innerText();
   await input.fill(passage);
-  await expect(input).toHaveAttribute("readonly", "");
-  await expect(page.locator(".session-metrics")).toContainText("100% accuracy");
+  await expect(input).toHaveCount(0);
+  await expect(page.locator(".sprint-results")).toContainText("100%");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -155,9 +156,12 @@ test("completed words clear the field, preserve progress, and can be corrected a
   await expect(page.locator(".character.incorrect")).toHaveCount(0);
   await expect(page.locator(".character.current")).toHaveText("n");
   await page.clock.fastForward(30_000);
-  await expect(page.locator(".session-metrics")).toContainText(
-    "1 incorrect attempt",
-  );
+  await expect(
+    page
+      .locator(".result-grid div")
+      .filter({ hasText: "Errors" })
+      .locator("dd"),
+  ).toHaveText("1");
   await page.getByRole("button", { name: "Restart", exact: true }).click();
   await input.pressSequentially("slow ");
   await expect(page.locator(".character.correct")).toHaveCount(5);
