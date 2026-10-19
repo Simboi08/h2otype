@@ -69,9 +69,9 @@ test("combo impacts reward tier changes and longer streak milestones instead of 
   expect(comboImpact(10, 11)).toBe(0);
   expect(comboImpact(24, 25)).toBe(2);
   expect(comboImpact(49, 50)).toBe(3);
-  expect(comboImpact(59, 60)).toBe(3);
+  expect(comboImpact(59, 60)).toBe(0);
   expect(comboImpact(60, 61)).toBe(0);
-  expect(comboImpact(69, 70)).toBe(3);
+  expect(comboImpact(69, 70)).toBe(0);
   expect(impactProfile(2, 5)).toEqual({
     strength: 7.5,
     duration: 220,
@@ -242,7 +242,7 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).totalXp,
     ),
-  ).toBe(100);
+  ).toBe(121);
   await page.reload();
   await expect(input).toBeFocused();
   await page.keyboard.press("F2");

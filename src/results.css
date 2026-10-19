@@ -1,0 +1,300 @@
+.results-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.results-context {
+  color: var(--secondary);
+  font-size: 11px;
+  margin: 0;
+}
+.results-updated .result-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+  gap: 12px;
+  margin: 22px 0 18px;
+}
+.results-updated .result-grid dd {
+  font-size: 28px;
+}
+.results-updated .result-primary dd {
+  font-size: 48px;
+  color: var(--accent);
+}
+.reward-summary {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 12px 14px;
+  background: var(--surface);
+}
+.reward-summary .session-xp {
+  margin: 0 0 10px;
+}
+.reward-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.reward-details dt {
+  color: var(--secondary);
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+.reward-details dd {
+  margin: 0;
+  font: 12px var(--hud);
+}
+.reward-details small {
+  font: 11px monospace;
+  color: var(--secondary);
+}
+.reward-details [data-testid="bonus-xp"] {
+  color: var(--accent);
+}
+.results-actions {
+  display: flex;
+  gap: 8px;
+}
+.daily-label {
+  font-size: 11px;
+}
+.daily-label small {
+  display: block;
+  color: var(--secondary);
+  font: 10px monospace;
+  margin-top: 6px;
+}
+.daily-score {
+  margin: 10px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.daily-score > span {
+  color: var(--secondary);
+  font: 11px var(--hud);
+  margin-right: 14px;
+}
+.daily-score strong {
+  font: 36px var(--hud);
+  color: var(--accent);
+}
+.daily-score small {
+  display: block;
+  font-size: 11px;
+  color: var(--secondary);
+  margin-top: 6px;
+}
+.combo-heading strong small {
+  font: 10px monospace;
+  margin-left: 4px;
+}
+.daily-rankings {
+  width: min(560px, calc(100vw - 32px));
+}
+.daily-rankings h3 {
+  font: 13px var(--hud);
+  margin-top: 22px;
+}
+.daily-rankings table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 12px;
+}
+.daily-rankings th {
+  color: var(--secondary);
+  font-weight: 500;
+}
+.daily-rankings th,
+.daily-rankings td {
+  text-align: left;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+.current-score {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.daily-submit {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+.daily-submit label {
+  font-size: 13px;
+}
+.daily-submit small {
+  display: block;
+  color: var(--secondary);
+  font-size: 11px;
+  margin-top: 5px;
+}
+.daily-submit input {
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 10px;
+  width: 100%;
+  font: inherit;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+@media (min-width: 701px) and (max-width: 1050px) {
+  .header-tools .appearance-button span {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .results-heading {
+    display: block;
+  }
+  .results-context {
+    margin: 6px 0;
+  }
+  .results-updated .result-grid {
+    gap: 7px;
+    margin: 14px 0;
+  }
+  .results-updated .result-grid dd {
+    font-size: 18px;
+  }
+  .results-updated .result-primary dd {
+    font-size: 28px;
+  }
+  .results-updated .result-grid dt {
+    font-size: 10px;
+  }
+  .reward-summary {
+    padding: 10px;
+  }
+  .reward-details dt,
+  .reward-details small {
+    font-size: 10px;
+  }
+  .reward-details dd {
+    font-size: 10px;
+  }
+  .results-updated .results-footer {
+    align-items: start;
+    gap: 10px;
+  }
+  .daily-results .results-footer {
+    flex-direction: column;
+  }
+  .daily-results .results-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .daily-score strong {
+    font-size: 28px;
+  }
+  .combo-heading strong small {
+    display: inline-block;
+    font-size: 9px;
+  }
+}
+@media (max-width: 380px) {
+  .wordmark {
+    font-size: 13px;
+  }
+  .mode-switch button {
+    font-size: 8px;
+    padding: 8px 6px;
+  }
+  .header {
+    column-gap: 4px;
+  }
+}
+@media (max-height: 650px) {
+  .typing-space:has(.results-updated) .progress-hud {
+    display: none;
+  }
+}
+@media (max-height: 500px) {
+  .results-updated {
+    padding: 8px 0;
+  }
+  .results-updated .results-heading {
+    display: flex;
+  }
+  .results-updated .results-heading h2 {
+    font-size: 13px;
+    margin: 0;
+  }
+  .results-updated .result-grid {
+    margin: 8px 0;
+  }
+  .results-updated .result-primary dd {
+    font-size: 26px;
+  }
+  .reward-summary {
+    padding: 7px 10px;
+  }
+  .reward-summary .session-xp {
+    margin: 0 0 6px;
+  }
+  .reward-details dt {
+    margin-bottom: 2px;
+    font-size: 10px;
+  }
+  .reward-details dd {
+    font-size: 10px;
+  }
+  .daily-score {
+    margin: 7px 0;
+    padding-bottom: 7px;
+  }
+  .daily-score strong {
+    font-size: 25px;
+  }
+  .daily-score small {
+    margin-top: 3px;
+    font-size: 10px;
+  }
+  .daily-results .results-footer {
+    flex-direction: row;
+    align-items: center;
+  }
+  .daily-results .results-actions {
+    width: auto;
+  }
+  .results-updated .results-footer {
+    margin-top: 8px;
+  }
+}
+.results-heading h2 {
+  margin: 0;
+}
+.results-updated .results-footer {
+  margin-top: 12px;
+}
+@media (max-width: 700px) {
+  .results-updated {
+    padding-top: 12px;
+  }
+  .results-updated .result-grid {
+    margin: 10px 0;
+  }
+  .reward-summary {
+    padding: 8px 10px;
+  }
+  .daily-score small {
+    font-size: 10px;
+  }
+}
+.passage-card:has(.daily-results) .passage-meta {
+  display: none;
+}
+@media (max-height: 500px) {
+  .daily-results.results-updated {
+    padding: 4px 0 0;
+  }
+  .results-updated .results-footer {
+    margin-top: 8px;
+  }
+}

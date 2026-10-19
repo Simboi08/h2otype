@@ -13,7 +13,7 @@ import { playTypingSound, stopTypingSounds } from "./typingSound";
 import TypingParticles from "./TypingParticles";
 import type { ParticleHandle } from "./TypingParticles";
 import { useReducedMotion } from "./useReducedMotion";
-import { advanceCombo, getCombo, comboImpact, impactProfile } from "./combo";
+import { getCombo, comboImpact, impactProfile } from "./combo";
 import ComboMeter from "./ComboMeter";
 import ComboVignette from "./ComboVignette";
 
@@ -54,13 +54,11 @@ export function useTypingFeedback(enabled: boolean) {
 
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
-    const streak = active
-      ? advanceCombo(combo.streak, before, after, passage)
-      : 0;
+    const streak = active ? after.streak : 0;
     setCombo({ active, streak });
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
-    const tier = comboImpact(combo.streak, streak);
+    const tier = active ? comboImpact(before.streak, after.streak) : 0;
     const timestamp = performance.now();
     const profile = impactProfile(preferences.effectIntensity, tier);
     const surface =

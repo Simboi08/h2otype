@@ -63,7 +63,7 @@ The planned MVP milestones are complete. Later possibilities remain optional and
 - [x] Larger, sparser 8-bit particles and a stronger 95ms crunch
 - [x] Grand level-up banner, ring, and pixel burst respecting motion/notification/quality settings
 - [x] Correct-typing combo meter, escalating vignette, and bounded rising sound pitch
-- [x] Keep combos separate from scoring/XP and prevent credit replay through corrections
+- [x] Initial feedback-only combos and correction replay protection (combo rewards added below)
 
 ## Post-MVP — Game feedback and direct navigation
 - [x] Level announcements shrink out as quickly as they scale in
@@ -80,11 +80,20 @@ The planned MVP milestones are complete. Later possibilities remain optional and
 - [x] Replace all flame sprites with a combo-driven edge vignette
 - [x] Stronger Intense shake, with independent intensity/shake and Low/reduced-motion controls
 
-The current implementation requests are complete. Achievements and unlockable themes remain deferred; further notes and future tester feedback can be added in [NOTES.md](NOTES.md).
+## Post-MVP — Results, rewards, and Daily
+- [x] Completion sounds matching the selected sound style, volume and mute
+- [x] Shake only at combo tier upgrades
+- [x] Clearer results with primary statistics, highest combo and base/bonus XP
+- [x] Capped combo XP bonuses with fractional carry, migration and replay protection
+- [x] Shared daily text, fixed time limit and score-ranked local attempts
+- [x] Optional shared leaderboard handlers and private Supabase migration
+- [ ] Connect the user's Supabase project and verify a live hosted submission
+
+The game changes are complete. Shared leaderboard activation needs hosting/database configuration in DEPLOYMENT.md. Achievements and unlockable themes remain deferred; further notes and future tester feedback can be added in [NOTES.md](NOTES.md).
 
 ## Later possibilities
 - [ ] Performance history/charts
-- [ ] Flow/XP bonuses (visual typing streaks are implemented; no bonuses)
+- [x] Capped combo XP bonuses (other bonus types remain optional)
 - [ ] Unlockable themes and caret styles
 - [ ] Achievements and interesting text packs
 

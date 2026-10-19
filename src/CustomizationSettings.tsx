@@ -160,8 +160,8 @@ export default function CustomizationSettings() {
           <span>
             <span className="preference-label">Combo feedback</span>
             <span className="preference-description">
-              Build a combo meter and raise sound pitch with correct streaks. No
-              XP multiplier.
+              Show the combo meter and raise sound pitch. Bonus XP stays active
+              with feedback off.
             </span>
           </span>
           <input

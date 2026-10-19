@@ -40,8 +40,32 @@ export function createSoundSamples(
   return samples;
 }
 
+// A single local buffer holds a short rising finish phrase, rather than queued notes.
+export function createCompletionSamples(
+  style: Exclude<SoundStyle, "off">,
+  sampleRate: number,
+) {
+  const samples = new Float32Array(Math.round(sampleRate * 0.6));
+  const notes = [523.25, 659.25, 783.99, 1046.5];
+  for (let index = 0; index < samples.length; index++) {
+    const time = index / sampleRate;
+    const note = Math.min(3, Math.floor(time / 0.105));
+    const local = time - note * 0.105;
+    const length = note === 3 ? 0.285 : 0.105;
+    const envelope =
+      Math.min(1, local / 0.004) *
+      Math.pow(Math.max(0, 1 - local / length), 1.6);
+    const phase = 2 * Math.PI * notes[note] * local;
+    samples[index] =
+      (style === "bitcrush"
+        ? Math.sign(Math.sin(phase)) * 0.28 + Math.sin(phase / 2) * 0.12
+        : Math.sin(phase) * 0.38 + Math.sin(phase * 2) * 0.06) * envelope;
+  }
+  return samples;
+}
+
 let context: AudioContext | null = null;
-const buffers = new Map<SoundStyle, AudioBuffer>();
+const buffers = new Map<string, AudioBuffer>();
 const voices = new Set<AudioBufferSourceNode>();
 let resuming = false;
 let generation = 0;
@@ -75,6 +99,18 @@ export function stopTypingSounds() {
 }
 
 export function playTypingSound(style: SoundStyle, volume: number, pitch = 1) {
+  playSound(style, volume, pitch, false);
+}
+export function playCompletionSound(style: SoundStyle, volume: number) {
+  stopTypingSounds();
+  playSound(style, volume, 1, true);
+}
+function playSound(
+  style: SoundStyle,
+  volume: number,
+  pitch: number,
+  completion: boolean,
+) {
   if (style === "off" || volume <= 0 || document.hidden) return;
   try {
     if (!context || context.state === "closed") {
@@ -89,16 +125,19 @@ export function playTypingSound(style: SoundStyle, volume: number, pitch = 1) {
     const activeContext = context;
     const emit = () => {
       if (document.hidden || activeContext.state !== "running") return;
-      let buffer = buffers.get(style);
+      const key = `${style}-${completion ? "finish" : "key"}`;
+      let buffer = buffers.get(key);
       if (!buffer) {
-        const samples = createSoundSamples(style, activeContext.sampleRate);
+        const samples = completion
+          ? createCompletionSamples(style, activeContext.sampleRate)
+          : createSoundSamples(style, activeContext.sampleRate);
         buffer = activeContext.createBuffer(
           1,
           samples.length,
           activeContext.sampleRate,
         );
         buffer.getChannelData(0).set(samples);
-        buffers.set(style, buffer);
+        buffers.set(key, buffer);
       }
       // Short envelopes and at most four voices prevent a typing backlog.
       if (voices.size >= 4) {

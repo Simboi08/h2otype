@@ -1,42 +1,84 @@
 import { useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { recordSprint } from "./sprintRecords";
 import type { SprintDuration } from "./sprintRecords";
-import type { getMetrics } from "./typingEngine";
+import type { Session, getMetrics } from "./typingEngine";
 import type { WordSet } from "./wordBank";
+import { wordSets } from "./wordBank";
+import RewardSummary from "./RewardSummary";
+import { dailyScore } from "./dailyChallenge";
+import type { DailyChallenge, DailyEvent } from "./dailyChallenge";
+import { recordDaily } from "./dailyRecords";
+import DailyRankings from "./DailyRankings";
 
 type Props = {
   duration: SprintDuration;
   metrics: ReturnType<typeof getMetrics>;
   onRestart: () => void;
-  xpEarned: number;
+  session: Session;
   wordSet: WordSet;
+  challenge?: DailyChallenge;
+  events: RefObject<DailyEvent[]>;
+  dailyRun: RefObject<Promise<string | null> | null>;
 };
-
 export default function SprintResults({
   duration,
   metrics,
   onRestart,
-  xpEarned,
+  session,
   wordSet,
+  challenge,
+  events,
+  dailyRun,
 }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
   const recorded = useRef(false);
+  const [id] = useState(() => crypto.randomUUID());
   const [record, setRecord] = useState<ReturnType<typeof recordSprint> | null>(
+    null,
+  );
+  const [daily, setDaily] = useState<ReturnType<typeof recordDaily> | null>(
     null,
   );
   const { elapsedMs, correctCharacters, wpm, accuracy, errors } = metrics;
   const eligible = elapsedMs >= duration * 1000 && correctCharacters > 0;
-
+  const entry = {
+    id,
+    day: challenge?.day ?? "",
+    score: dailyScore(session),
+    wpm,
+    accuracy,
+    combo: session.bestCombo,
+  };
   useEffect(() => {
     if (recorded.current) return;
     recorded.current = true;
-    setRecord(recordSprint(duration, { wpm, accuracy }, eligible, wordSet));
+    if (challenge) {
+      if (eligible) {
+        const result = recordDaily({
+          id,
+          day: challenge.day,
+          score: dailyScore(session),
+          wpm,
+          accuracy,
+          combo: session.bestCombo,
+        });
+        queueMicrotask(() => setDaily(result));
+      }
+    } else {
+      const result = recordSprint(
+        duration,
+        { wpm, accuracy },
+        eligible,
+        wordSet,
+      );
+      queueMicrotask(() => setRecord(result));
+    }
     heading.current?.focus({ preventScroll: true });
-  }, [duration, wpm, accuracy, eligible, wordSet]);
-
+  }, [duration, wpm, accuracy, eligible, wordSet, challenge, session, id]);
   return (
     <section
-      className="sprint-results"
+      className={`sprint-results results-updated ${challenge ? "daily-results" : ""}`}
       aria-labelledby="results-title"
       onKeyDown={(event) => {
         if (event.key === "Enter" && event.target === heading.current) {
@@ -45,20 +87,36 @@ export default function SprintResults({
         }
       }}
     >
-      <h2
-        id="results-title"
-        tabIndex={-1}
-        ref={heading}
-        aria-keyshortcuts="Tab Enter"
-      >
-        Sprint results
-      </h2>
+      <div className="results-heading">
+        <h2
+          id="results-title"
+          tabIndex={-1}
+          ref={heading}
+          aria-keyshortcuts="Tab Enter"
+        >
+          {challenge ? "Daily results" : "Sprint results"}
+        </h2>
+        <p className="results-context">
+          {challenge
+            ? `${challenge.day} · English 100`
+            : `${wordSets.find((set) => set.id === wordSet)!.label} · ${duration}s`}
+        </p>
+      </div>
+      {challenge && (
+        <p className="daily-score">
+          <span>Score</span>
+          <strong data-testid="daily-score">
+            {entry.score.toLocaleString()}
+          </strong>
+          <small>10 points per new correct character + combo bonuses</small>
+        </p>
+      )}
       <dl className="result-grid">
-        <div>
+        <div className="result-primary">
           <dt>WPM</dt>
           <dd data-testid="result-wpm">{wpm}</dd>
         </div>
-        <div>
+        <div className="result-primary">
           <dt>Accuracy</dt>
           <dd>{accuracy}%</dd>
         </div>
@@ -74,9 +132,19 @@ export default function SprintResults({
           </dd>
         </div>
       </dl>
-      <p className="session-xp">+{xpEarned} XP this run</p>
+      <RewardSummary session={session} />
       <div className="record-summary" role="status">
-        {record?.best ? (
+        {challenge ? (
+          <p>
+            {daily?.previousBest
+              ? `Previous best · ${daily.previousBest.score.toLocaleString()} pts`
+              : "Your first daily score today"}
+            {daily &&
+            (!daily.previousBest || entry.score > daily.previousBest.score)
+              ? " · New best"
+              : ""}
+          </p>
+        ) : record?.best ? (
           <p>
             {record.newBest ? "New best" : "Personal best"} · {duration}s:{" "}
             <strong>{record.best.wpm} WPM</strong> · {record.best.accuracy}%
@@ -87,19 +155,30 @@ export default function SprintResults({
         )}
         {!eligible && (
           <p>
-            Complete the full timer with at least one correct character to save
-            a best.
+            Complete the full timer with at least one correct character to save{" "}
+            {challenge ? "a daily score" : "a best"}.
           </p>
         )}
-        {record && !record.available && (
+        {((record && !record.available) || (daily && !daily.available)) && (
           <p>Browser storage is unavailable. This result cannot be saved.</p>
         )}
       </div>
       <div className="results-footer">
         <p>Errors include corrected mistakes. Tab or Enter to restart.</p>
-        <button className="restart-button" onClick={onRestart}>
-          Restart
-        </button>
+        <div className="results-actions">
+          {challenge && (
+            <DailyRankings
+              entry={entry}
+              records={daily?.records ?? []}
+              eligible={eligible}
+              events={events}
+              run={dailyRun}
+            />
+          )}
+          <button className="restart-button" onClick={onRestart}>
+            Restart
+          </button>
+        </div>
       </div>
     </section>
   );
