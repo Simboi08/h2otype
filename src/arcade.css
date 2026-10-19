@@ -87,14 +87,6 @@ body {
     0 100%
   );
 }
-.screen-lines {
-  position: fixed;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background: repeating-linear-gradient(transparent 0 3px, #000 3px 4px);
-  opacity: 0.025;
-}
 .header {
   border-bottom: 1px solid var(--border);
 }
@@ -375,14 +367,10 @@ body {
     4px 4px 0 var(--background),
     0 0 32px color-mix(in srgb, var(--pink) 30%, transparent);
 }
-:root[data-graphics="high"] .screen-lines {
-  opacity: 0.055;
-}
 :root[data-graphics="high"] .arcade-stars {
   opacity: 0.65;
 }
-:root[data-graphics="low"] .arcade-backdrop,
-:root[data-graphics="low"] .screen-lines {
+:root[data-graphics="low"] .arcade-backdrop {
   display: none;
 }
 :root[data-graphics="low"] .settings-dialog::backdrop {
@@ -514,8 +502,7 @@ body {
   }
 }
 @media (forced-colors: active) {
-  .arcade-backdrop,
-  .screen-lines {
+  .arcade-backdrop {
     display: none;
   }
   .xp-track > .xp-fill {

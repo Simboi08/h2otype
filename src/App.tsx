@@ -37,7 +37,6 @@ function SettingsIcon() {
 export default function App() {
   const [mode, setMode] = useState<"sprint" | "zen">("sprint");
   const [duration, setDuration] = useState<SprintDuration>(30);
-  const [zenExitRequested, setZenExitRequested] = useState(false);
   const { preferences, storageAvailable } = usePreferences();
   const {
     theme,
@@ -48,7 +47,10 @@ export default function App() {
   const appearanceButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     document.documentElement.dataset.graphics = preferences.graphicsTier;
-  }, [preferences.graphicsTier]);
+    document.documentElement.dataset.effects = String(
+      preferences.effectIntensity,
+    );
+  }, [preferences.graphicsTier, preferences.effectIntensity]);
 
   useEffect(() => {
     const element = dialog.current;
@@ -86,7 +88,6 @@ export default function App() {
         <div className="arcade-stars" />
         <div className="arcade-horizon" />
       </div>
-      <div className="screen-lines" aria-hidden="true" />
       <div className="app-shell">
         <a className="skip-link" href="#main">
           Skip to content
@@ -101,10 +102,7 @@ export default function App() {
           <nav className="mode-switch" aria-label="Typing mode">
             <button
               aria-pressed={mode === "sprint"}
-              onClick={() => {
-                if (mode === "zen") setZenExitRequested(true);
-                else setMode("sprint");
-              }}
+              onClick={() => setMode("sprint")}
             >
               Sprint
             </button>
@@ -147,14 +145,7 @@ export default function App() {
             <h1 className="sr-only">h2otype typing practice</h1>
             <ProgressIndicator />
             {mode === "zen" ? (
-              <ZenPractice
-                exitRequested={zenExitRequested}
-                onCancelExit={() => setZenExitRequested(false)}
-                onExit={() => {
-                  setZenExitRequested(false);
-                  setMode("sprint");
-                }}
-              />
+              <ZenPractice />
             ) : (
               <TypingPractice
                 key={`${mode}-${duration}`}

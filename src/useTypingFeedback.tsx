@@ -13,8 +13,9 @@ import { playTypingSound, stopTypingSounds } from "./typingSound";
 import TypingParticles from "./TypingParticles";
 import type { ParticleHandle } from "./TypingParticles";
 import { useReducedMotion } from "./useReducedMotion";
-import { advanceCombo, getCombo } from "./combo";
+import { advanceCombo, getCombo, comboImpact } from "./combo";
 import ComboMeter from "./ComboMeter";
+import ComboFire from "./ComboFire";
 
 export function useTypingFeedback(enabled: boolean) {
   const { preferences } = usePreferences();
@@ -22,6 +23,14 @@ export function useTypingFeedback(enabled: boolean) {
   const container = useRef<HTMLDivElement>(null);
   const particles = useRef<ParticleHandle>(null);
   const pending = useRef<{ index: number; style: ParticleStyle } | null>(null);
+  const impact = useRef<Animation | null>(null);
+  const lastImpactAt = useRef(-Infinity);
+  const canShake =
+    enabled &&
+    preferences.screenShake &&
+    preferences.effectIntensity > 0 &&
+    preferences.graphicsTier !== "low" &&
+    !reducedMotion;
   const active = enabled && preferences.comboFeedback;
   const [combo, setCombo] = useState({ active, streak: 0 });
   // A stopped/disabled combo must not reappear on resume or re-enable.
@@ -30,8 +39,18 @@ export function useTypingFeedback(enabled: boolean) {
     setCombo((current) => ({ ...current, streak: 0 }));
     pending.current = null;
     particles.current?.clear();
+    impact.current?.cancel();
+    impact.current = null;
+    lastImpactAt.current = -Infinity;
     stopTypingSounds();
   }, []);
+  useEffect(
+    () => () => {
+      impact.current?.cancel();
+      impact.current = null;
+    },
+    [canShake, preferences.effectIntensity],
+  );
 
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
@@ -41,6 +60,38 @@ export function useTypingFeedback(enabled: boolean) {
     setCombo({ active, streak });
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
+    const tier = comboImpact(combo.streak, streak);
+    const timestamp = performance.now();
+    const surface =
+      container.current?.querySelector<HTMLElement>(".practice-surface");
+    if (
+      canShake &&
+      tier &&
+      surface &&
+      !document.hidden &&
+      timestamp - lastImpactAt.current >= 250
+    ) {
+      impact.current?.cancel();
+      const strength =
+        preferences.effectIntensity === 2
+          ? Math.min(3, 0.75 + tier * 0.45)
+          : 0.8;
+      const animation = surface.animate(
+        [
+          { transform: "translate(0, 0)" },
+          { transform: `translate(${-strength}px, ${strength / 2}px)` },
+          { transform: `translate(${strength}px, ${-strength / 2}px)` },
+          { transform: `translate(${-strength / 2}px, 0)` },
+          { transform: "translate(0, 0)" },
+        ],
+        { duration: 160, easing: "ease-out" },
+      );
+      impact.current = animation;
+      lastImpactAt.current = timestamp;
+      animation.onfinish = () => {
+        if (impact.current === animation) impact.current = null;
+      };
+    }
     playTypingSound(
       preferences.soundStyle,
       preferences.soundVolume,
@@ -48,6 +99,7 @@ export function useTypingFeedback(enabled: boolean) {
     );
     if (
       feedback.correctIndex !== null &&
+      preferences.effectIntensity > 0 &&
       preferences.particleStyle !== "off" &&
       !reducedMotion
     )
@@ -63,6 +115,7 @@ export function useTypingFeedback(enabled: boolean) {
     if (
       !burst ||
       !enabled ||
+      preferences.effectIntensity === 0 ||
       reducedMotion ||
       burst.style !== preferences.particleStyle
     )
@@ -97,12 +150,19 @@ export function useTypingFeedback(enabled: boolean) {
     container,
     onEdit,
     reset,
+    fireLayer:
+      active && combo.streak >= 10 && preferences.effectIntensity > 0 ? (
+        <ComboFire tier={getCombo(combo.streak).tier} />
+      ) : null,
     comboMeter:
       active && combo.streak >= 10 ? (
         <ComboMeter streak={combo.streak} />
       ) : null,
     layer:
-      enabled && preferences.particleStyle !== "off" && !reducedMotion ? (
+      enabled &&
+      preferences.effectIntensity > 0 &&
+      preferences.particleStyle !== "off" &&
+      !reducedMotion ? (
         <TypingParticles
           key={`${preferences.particleStyle}-${preferences.graphicsTier}`}
           ref={particles}

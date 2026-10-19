@@ -89,7 +89,7 @@ test("reload restores paused progress and excludes offline time", async ({
   await expect(page.locator(".character.correct")).toHaveCount(8);
 });
 
-test("leaving Zen offers a summary and keeps a resumable draft", async ({
+test("Sprint switches directly from Zen and keeps a paused resumable draft without counting time away", async ({
   page,
 }) => {
   await setupClock(page);
@@ -97,13 +97,14 @@ test("leaving Zen offers a summary and keeps a resumable draft", async ({
   await page.clock.fastForward(5000);
   await page.getByRole("button", { name: "Sprint", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Zen session", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Go to Sprint", exact: true }).click();
+    page.getByRole("button", { name: "Go to Sprint", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("textbox")).toBeFocused();
   await expect(page.getByRole("timer")).toHaveText("30s remaining");
+  await page.clock.fastForward(10_000);
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Zen session", exact: true }),
+    page.getByRole("heading", { name: "Zen paused", exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await expect(page.getByRole("textbox")).toHaveValue("there");
@@ -159,7 +160,7 @@ test("Zen summary stays within the viewport on a small phone", async ({
   await page.setViewportSize({ width: 320, height: 568 });
   await setupClock(page);
   await page.getByRole("textbox").pressSequentially("there");
-  await page.getByRole("button", { name: "Sprint", exact: true }).click();
+  await page.getByRole("button", { name: "Finish", exact: true }).click();
   const bounds = await page.locator(".typing-space").boundingBox();
   expect(bounds!.y).toBeGreaterThanOrEqual(0);
   expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(568);
@@ -192,7 +193,6 @@ test("corrupt saves recover and failed writes do not lose in-memory progress", a
 }) => {
   await setupClock(page);
   await page.getByRole("button", { name: "Sprint", exact: true }).click();
-  await page.getByRole("button", { name: "Go to Sprint", exact: true }).click();
   await page.evaluate(() => {
     localStorage.setItem("h2otype.zen-session.v1", "{broken");
     Storage.prototype.setItem = () => {

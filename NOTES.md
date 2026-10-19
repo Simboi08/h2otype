@@ -54,4 +54,14 @@ Feedback added: 2026-10-19.
 - [ ] Achievements.
 - [ ] Unlockable themes.
 
+## Game feedback and navigation — latest feedback
+- [x] Level announcement has a fast scale-up and matching fast scale-down exit, rather than disappearing abruptly.
+- [x] Clicking Sprint at the top switches directly without a confirmation button; Zen progress stays saved for later Resume.
+- [x] Punchier fire beyond the small meter, with large edge flames and bounded embers.
+- [x] Small screen-shake pulses on by default at combo milestones, with an independent Off switch.
+- [x] Visual effects intensity slider: Off / Balanced / Intense, default Intense, while respecting Low graphics and reduced motion.
+- [x] Remove the screen-wide filter/scanlines and celebration tint.
+- Product direction: make h2otype fun and satisfying as a game while keeping typing readable. Strong earned feedback and clear effect preferences are part of that identity.
+- Planning can happen in this Codex chat or a separate brainstorming chat. Keep agreed decisions and future tester feedback here, then record implementation choices in DESIGN.md and completed/verified work in PROGRESS.md.
+
 See PROGRESS.md for implementation and validation details. Add new feedback here as it comes up.

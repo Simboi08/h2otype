@@ -43,6 +43,8 @@ export type Preferences = {
   wpmScale: number;
   accuracyScale: number;
   comboFeedback: boolean;
+  effectIntensity: number;
+  screenShake: boolean;
   soundStyle: SoundStyle;
   soundVolume: number;
   particleStyle: ParticleStyle;
@@ -61,6 +63,8 @@ export const defaultPreferences: Preferences = {
   wpmScale: 100,
   accuracyScale: 100,
   comboFeedback: true,
+  effectIntensity: 2,
+  screenShake: true,
   soundStyle: "off",
   soundVolume: 35,
   particleStyle: "off",
@@ -111,6 +115,7 @@ export function parsePreferences(raw: string | null): Preferences {
       "xpProgress",
       "levelNotifications",
       "comboFeedback",
+      "screenShake",
     ] as const) {
       const value = data.preferences[key];
       if (typeof value === "boolean") preferences[key] = value;
@@ -131,6 +136,7 @@ export function parsePreferences(raw: string | null): Preferences {
       ["characterSpacing", 0, 3, 0.5],
       ["wpmScale", 80, 200, 10],
       ["accuracyScale", 80, 200, 10],
+      ["effectIntensity", 0, 2, 1],
       ["soundVolume", 0, 100, 5],
     ] as const) {
       const value = data.preferences[key];

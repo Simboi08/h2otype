@@ -52,6 +52,7 @@ export default function TypingPractice({
     reset: resetFeedback,
     layer: particleLayer,
     comboMeter,
+    fireLayer,
   } = useTypingFeedback(!finished);
   const { prefix, word } = getWordInput(session.typed);
   usePracticeKeyboard({ restart, composing, input, enabled: !finished });
@@ -96,167 +97,170 @@ export default function TypingPractice({
   return (
     <div className="passage-card" ref={feedbackRef}>
       {particleLayer}
-      <div className="passage-meta">
-        {mode === "sprint" ? (
-          <div
-            className="duration-switch"
-            role="group"
-            aria-label="Sprint duration"
-          >
-            {sprintDurations.map((value) => (
-              <button
-                key={value}
-                aria-pressed={duration === value}
-                onClick={() => {
-                  if (duration !== value) onDurationChange(value);
-                }}
-              >
-                {value}s
-              </button>
-            ))}
-          </div>
-        ) : (
-          <span>Zen · single passage</span>
-        )}
-        {!finished && (
-          <LiveStats
-            key={session.startedAt ?? "idle"}
-            wpm={metrics.wpm}
-            accuracy={metrics.accuracy}
-            elapsedMs={metrics.elapsedMs}
-          />
-        )}
-        <span
-          className="mode-detail"
-          role="timer"
-          aria-label={durationMs === null ? "Elapsed time" : "Time remaining"}
-        >
-          {durationMs === null
-            ? `${Math.floor(metrics.elapsedMs / 1000)}s elapsed`
-            : `${Math.ceil((durationMs - metrics.elapsedMs) / 1000)}s remaining`}
-        </span>
-      </div>
-      {finished && mode === "sprint" ? (
-        <SprintResults
-          duration={duration}
-          metrics={metrics}
-          xpEarned={session.xpEarned}
-          onRestart={restart}
-        />
-      ) : (
-        <>
-          <TypingPassage
-            passage={passage}
-            typed={session.typed}
-            focused={focused}
-            finished={finished}
-          />
-          <p className="sr-only" id="passage-text">
-            Passage from current word:{" "}
-            {passage.slice(prefix.length, prefix.length + 180)}
-          </p>
-          <label className="sr-only" htmlFor="typing-input">
-            Type the passage
-          </label>
-          <input
-            id="typing-input"
-            ref={(node) => {
-              input.current = node;
-              if (node && focusOnAttach.current) {
-                focusOnAttach.current = false;
-                node.focus({ preventScroll: true });
-              }
-            }}
-            className="typing-input"
-            value={finished ? "" : (compositionDraft ?? word)}
-            placeholder="Type here"
-            readOnly={finished}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            aria-describedby="typing-hint passage-text"
-            aria-keyshortcuts="Tab"
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            onPaste={(event) => event.preventDefault()}
-            onDrop={(event) => event.preventDefault()}
-            onKeyDown={(event) => {
-              if (event.repeat && event.key.length === 1)
-                event.preventDefault();
-              if (
-                event.key === "Backspace" &&
-                !composing.current &&
-                !finished &&
-                word === "" &&
-                prefix
-              ) {
-                event.preventDefault();
-                const now = performance.now();
-                const next = editSession(
-                  latest.current,
-                  latest.current.typed.slice(0, -1),
-                  passage,
-                  now,
-                  durationMs,
-                );
-                emitFeedback(latest.current, next, passage);
-                latest.current = next;
-                setSession(next);
-              }
-            }}
-            onSelect={(event) => {
-              if (!composing.current)
-                event.currentTarget.setSelectionRange(
-                  event.currentTarget.value.length,
-                  event.currentTarget.value.length,
-                );
-            }}
-            onCompositionStart={(event) => {
-              composing.current = true;
-              setCompositionDraft(event.currentTarget.value);
-            }}
-            onCompositionEnd={(event) => {
-              composing.current = false;
-              setCompositionDraft(null);
-              edit(event.currentTarget.value, performance.now());
-            }}
-            onChange={(event) => {
-              if (composing.current)
-                setCompositionDraft(event.currentTarget.value);
-              else edit(event.currentTarget.value, performance.now());
-            }}
-          />
-          <div className="passage-footer practice-footer">
-            <div className="practice-status">
-              {comboMeter}
-              <p
-                id="typing-hint"
-                role="status"
-                className={comboMeter ? "sr-only" : undefined}
-              >
-                {finished
-                  ? "Finished."
-                  : session.startedAt === null
-                    ? "Space advances · Tab restarts"
-                    : focused
-                      ? "Space advances · Tab restarts"
-                      : "Type to continue · Timer running"}
-              </p>
+      {fireLayer}
+      <div className="practice-surface">
+        <div className="passage-meta">
+          {mode === "sprint" ? (
+            <div
+              className="duration-switch"
+              role="group"
+              aria-label="Sprint duration"
+            >
+              {sprintDurations.map((value) => (
+                <button
+                  key={value}
+                  aria-pressed={duration === value}
+                  onClick={() => {
+                    if (duration !== value) onDurationChange(value);
+                  }}
+                >
+                  {value}s
+                </button>
+              ))}
             </div>
-            <button className="restart-button" onClick={restart}>
-              Restart
-            </button>
-          </div>
-          {finished && (
-            <p className="session-metrics" role="status">
-              {metrics.wpm} WPM <span>·</span> {metrics.accuracy}% accuracy{" "}
-              <span>·</span> {metrics.errors} incorrect{" "}
-              {metrics.errors === 1 ? "attempt" : "attempts"}
-            </p>
+          ) : (
+            <span>Zen · single passage</span>
           )}
-        </>
-      )}
+          {!finished && (
+            <LiveStats
+              key={session.startedAt ?? "idle"}
+              wpm={metrics.wpm}
+              accuracy={metrics.accuracy}
+              elapsedMs={metrics.elapsedMs}
+            />
+          )}
+          <span
+            className="mode-detail"
+            role="timer"
+            aria-label={durationMs === null ? "Elapsed time" : "Time remaining"}
+          >
+            {durationMs === null
+              ? `${Math.floor(metrics.elapsedMs / 1000)}s elapsed`
+              : `${Math.ceil((durationMs - metrics.elapsedMs) / 1000)}s remaining`}
+          </span>
+        </div>
+        {finished && mode === "sprint" ? (
+          <SprintResults
+            duration={duration}
+            metrics={metrics}
+            xpEarned={session.xpEarned}
+            onRestart={restart}
+          />
+        ) : (
+          <>
+            <TypingPassage
+              passage={passage}
+              typed={session.typed}
+              focused={focused}
+              finished={finished}
+            />
+            <p className="sr-only" id="passage-text">
+              Passage from current word:{" "}
+              {passage.slice(prefix.length, prefix.length + 180)}
+            </p>
+            <label className="sr-only" htmlFor="typing-input">
+              Type the passage
+            </label>
+            <input
+              id="typing-input"
+              ref={(node) => {
+                input.current = node;
+                if (node && focusOnAttach.current) {
+                  focusOnAttach.current = false;
+                  node.focus({ preventScroll: true });
+                }
+              }}
+              className="typing-input"
+              value={finished ? "" : (compositionDraft ?? word)}
+              placeholder="Type here"
+              readOnly={finished}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              aria-describedby="typing-hint passage-text"
+              aria-keyshortcuts="Tab"
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              onPaste={(event) => event.preventDefault()}
+              onDrop={(event) => event.preventDefault()}
+              onKeyDown={(event) => {
+                if (event.repeat && event.key.length === 1)
+                  event.preventDefault();
+                if (
+                  event.key === "Backspace" &&
+                  !composing.current &&
+                  !finished &&
+                  word === "" &&
+                  prefix
+                ) {
+                  event.preventDefault();
+                  const now = performance.now();
+                  const next = editSession(
+                    latest.current,
+                    latest.current.typed.slice(0, -1),
+                    passage,
+                    now,
+                    durationMs,
+                  );
+                  emitFeedback(latest.current, next, passage);
+                  latest.current = next;
+                  setSession(next);
+                }
+              }}
+              onSelect={(event) => {
+                if (!composing.current)
+                  event.currentTarget.setSelectionRange(
+                    event.currentTarget.value.length,
+                    event.currentTarget.value.length,
+                  );
+              }}
+              onCompositionStart={(event) => {
+                composing.current = true;
+                setCompositionDraft(event.currentTarget.value);
+              }}
+              onCompositionEnd={(event) => {
+                composing.current = false;
+                setCompositionDraft(null);
+                edit(event.currentTarget.value, performance.now());
+              }}
+              onChange={(event) => {
+                if (composing.current)
+                  setCompositionDraft(event.currentTarget.value);
+                else edit(event.currentTarget.value, performance.now());
+              }}
+            />
+            <div className="passage-footer practice-footer">
+              <div className="practice-status">
+                {comboMeter}
+                <p
+                  id="typing-hint"
+                  role="status"
+                  className={comboMeter ? "sr-only" : undefined}
+                >
+                  {finished
+                    ? "Finished."
+                    : session.startedAt === null
+                      ? "Space advances · Tab restarts"
+                      : focused
+                        ? "Space advances · Tab restarts"
+                        : "Type to continue · Timer running"}
+                </p>
+              </div>
+              <button className="restart-button" onClick={restart}>
+                Restart
+              </button>
+            </div>
+            {finished && (
+              <p className="session-metrics" role="status">
+                {metrics.wpm} WPM <span>·</span> {metrics.accuracy}% accuracy{" "}
+                <span>·</span> {metrics.errors} incorrect{" "}
+                {metrics.errors === 1 ? "attempt" : "attempts"}
+              </p>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -65,7 +65,14 @@ The planned MVP milestones are complete. Later possibilities remain optional and
 - [x] Correct-typing combo meter, escalating fire, and bounded rising sound pitch
 - [x] Keep combos separate from scoring/XP and prevent credit replay through corrections
 
-The current implementation requests are complete. Achievements and unlockable themes remain deferred; further notes can be added in [NOTES.md](NOTES.md).
+## Post-MVP — Game feedback and direct navigation
+- [x] Level announcements shrink out as quickly as they scale in
+- [x] Direct Zen-to-Sprint switching with preserved paused drafts and active-time accounting
+- [x] Larger edge fire, bounded embers, and short milestone screen shake on by default
+- [x] Independent Visual effects intensity slider and Screen shake switch
+- [x] Remove the full-screen scanline/filter overlay; retain reduced-motion/Low/Off fallbacks
+
+The current implementation requests are complete. Achievements and unlockable themes remain deferred; further notes and future tester feedback can be added in [NOTES.md](NOTES.md).
 
 ## Later possibilities
 - [ ] Performance history/charts

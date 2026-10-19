@@ -7,7 +7,7 @@ A focused pixel-arcade typing game with satisfying progression. Built for short 
 ## Concept
 - **Sprint:** timed 15, 30, or 60 second typing tests, with WPM/accuracy results and local personal bests.
 - **Zen:** endless uninterrupted typing, cumulative XP and persistent levels.
-- **Progression:** accurate typing earns XP and eventually unlocks levels; restrained, nonblocking feedback.
+- **Progression:** accurate typing earns XP and levels, with fiery combos, brief impacts, and prominent nonblocking level announcements.
 - **Presentation:** pixel HUD typography, crisp cyan/pink panels, atmospheric dark/light themes, system theme by default, and keyboard-first play.
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
@@ -47,7 +47,7 @@ In this cloud environment the home npm cache is unwritable. Before npm commands,
 - Appearance defaults to the device setting, follows changes while open, and saves explicit preferences in localStorage. An early script sets colors before React loads to avoid a bright flash; blocked storage falls back safely to a per-visit choice.
 - A native Settings dialog provides keyboard focus handling and Escape dismissal. Closing it returns focus to active typing or the current summary. F2 opens Settings directly; its controls retain visible focus styles. The layout adapts to narrow screens, and reduced-motion preferences disable transitions.
 - A real browser text field shows only the active word; Space clears it for the next word while the passage retains correct/error feedback and the current caret. Backspace from an empty field reopens the previous word; pasting, dropping text, mid-passage edits, and held character keys are blocked. Composition drafts are scored only when committed.
-- Timing uses a monotonic clock and an absolute deadline rather than counting interval callbacks, so delayed callbacks do not extend a test. Sprint keeps running through focus changes and Settings; switching away discards the Sprint run. Zen pauses when the tab is hidden and offers a summary before switching to Sprint, preserving a resumable session.
+- Timing uses a monotonic clock and an absolute deadline rather than counting interval callbacks, so delayed callbacks do not extend a test. Sprint keeps running through focus changes and Settings; switching away discards the Sprint run. Zen pauses when the tab is hidden and saves a paused draft immediately when switching to Sprint.
 - Gameplay rules live in pure functions, separate from React, so timing and scoring can be tested directly. Progression stays local to this browser; no backend or account system is required.
 
 ## Trying the typing engine
@@ -67,7 +67,7 @@ Scoring conventions:
 - The incorrect-attempt count includes corrected mistakes. XP uses a separate first-correct-position ledger, so repeated corrections cannot earn more XP for the same position.
 
 ## Zen sessions
-Zen starts time on the first committed character. Press Escape in the input or click Pause to stop active time and view WPM, accuracy, incorrect attempts, and correctly retained characters. Resume (or Enter from the focused summary heading) continues the same session and refocuses input. Finish shows the summary without deleting progress; New session explicitly clears it. Clicking Sprint offers the summary with Go to Sprint or Resume.
+Zen starts time on the first committed character. Press Escape in the input or click Pause to stop active time and view WPM, accuracy, incorrect attempts, and correctly retained characters. Resume (or Enter from the focused summary heading) continues the same session and refocuses input. Finish shows the summary without deleting progress; New session explicitly clears it. Clicking the top Sprint button switches directly and saves the paused Zen draft. Return to Zen and Resume to continue; time spent in Sprint does not count toward Zen.
 
 Zen automatically pauses when the page becomes hidden. Settings and ordinary input blur do not pause it. Session time counts only active periods; reloads, paused time, and time away never inflate the denominator. Live WPM and accuracy are off by default and can be enabled independently in Settings.
 
@@ -100,7 +100,9 @@ Open **Settings** in the header or press **F2**. Changes take effect immediately
 | Typing sound | Off | Standard click or 8-bit crush, with Preview sound and a separate volume slider. Accepted character edits play once; controls and Backspace stay silent. |
 | Sound volume | 35% | Adjust from 0% (mute) to 100%. Sounds are generated locally, with at most four simultaneous short voices and no queued backlog. |
 | Typing particles | Off | Regular circles or 8-bit pixels burst from correct characters. Wrong characters and Backspace stay quiet visually; reduced motion suppresses particles. |
-| Graphics quality | Medium | Three-stop slider: Low uses fewer particles and removes scanlines/glow and XP motion. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
+| Graphics quality | Medium | Three-stop slider: Low uses fewer particles, static fire, no shake/glow, and instant XP. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
+| Visual effects | Intense | Off/Balanced/Intense slider, separate from quality. Intense adds larger edge flames, embers, and stronger combo feedback. Off keeps plain meters/notices and disables decorative effects and XP motion. |
+| Screen shake | On | Brief, bounded impacts at combo milestones. Can be turned off independently; Low quality, Effects Off, and reduced motion suppress it. |
 | Combo feedback | On | Consecutive fresh correct characters build a fire meter and progressively higher sound pitch. Turn off for quieter visuals and fixed pitch. No XP multiplier. |
 | Live accuracy | Off | Shows correct attempts divided by all attempts, including corrected mistakes. |
 | XP progress | On | Shows the wide level/XP rail above typing; hiding it keeps XP accruing and leaves session XP in results. |
@@ -111,9 +113,11 @@ Display preferences are stored in `h2otype.preferences.v1`; existing appearance 
 
 Appearance, size, weight, volume, and WPM refresh use labeled native controls. The WPM slider retains the same four intervals as the original dropdown. Changes apply without restarting a run. Correct-letter particles follow the passage after scrolling and font/size changes; they are short-lived and clear on restart or pause. Sound and particles do not change XP or scoring. Some browsers require a user gesture before audio can play; use Preview sound if needed. Audio failures show a status in Settings while typing continues normally.
 
-Particles start just beyond the letter's right edge and fan out through a right-facing 180° semicircle. Graphics tiers change particle count, lifetime, frame/resolution caps, and decoration without changing gameplay. The stronger 8-bit crunch has a sharper attack and fuller body; use volume or Off to suit your preference. The optional scanlines and pixel HUD follow the supplied arcade references; passage fonts and all existing local data remain configurable.
+Particles start just beyond the letter's right edge and fan out through a right-facing 180° semicircle. Graphics tiers change particle count, lifetime, frame/resolution caps, and decoration without changing gameplay. The stronger 8-bit crunch has a sharper attack and fuller body; use volume or Off to suit your preference. The pixel HUD follows the supplied arcade references; the screen-wide scanline/filter overlay is removed. Passage fonts and existing local data remain configurable.
 
 Pixel particles are larger 6×6 sprites with fewer per burst (2/4/6 for Low/Medium/High) and lower caps (12/24/36) to keep the passage readable. Crunch has a stronger 95ms low-end hit. Level-ups now add a larger banner above the passage, an expanding ring, and a short pixel burst; Low/reduced motion keep a static banner, and notification Off hides the whole celebration.
+
+Level announcements scale up quickly (320ms), hold, then shrink over the same 320ms interval before disappearing at four seconds. Visual effects default to Intense: larger pixel flames at the bottom screen corners, bounded embers, and short screen-shake pulses when a combo gains a tier or crosses later streak milestones. Shake lasts 160ms, moves the practice surface by at most 3px, and never accumulates multiple animations. Sound/particle choices stay independent. Choose Balanced, Off, or disable Screen shake in Settings; Low/reduced motion keep gameplay still.
 
 Combos begin at **10 fresh correct characters**, then reach higher tiers at 25, 50, 100, and 200. The footer becomes a combo meter with progressively stronger fire, while the selected sound rises in pitch up to seven semitones. Sound Off stays silent. Errors, Backspace, pause/finish, hiding the page, restart, mode changes, and reload break a streak; correcting an already credited position cannot farm it. Settings and idle time alone do not break it. Combos change feedback only: **XP, WPM, accuracy, and final scores retain their existing rules**. Low/reduced motion keep the fire static; disabling Combo feedback clears the meter and pitch escalation.
 

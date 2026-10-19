@@ -13,7 +13,9 @@ export default function ProgressIndicator() {
   const reducedMotion = useReducedMotion();
   const fill = useXpMotion(
     progress.totalXp,
-    reducedMotion ? 0 : graphicsProfiles[preferences.graphicsTier].xpDuration,
+    reducedMotion || preferences.effectIntensity === 0
+      ? 0
+      : graphicsProfiles[preferences.graphicsTier].xpDuration,
     preferences.xpProgress,
   );
   useEffect(() => {
@@ -67,6 +69,7 @@ export default function ProgressIndicator() {
             level={progress.notice}
             tier={preferences.graphicsTier}
             reducedMotion={reducedMotion}
+            intensity={preferences.effectIntensity}
           />
         ) : null}
       </div>

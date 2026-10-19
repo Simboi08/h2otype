@@ -5,15 +5,17 @@ export default function LevelCelebration({
   level,
   tier,
   reducedMotion,
+  intensity,
 }: {
   level: number;
   tier: GraphicsTier;
   reducedMotion: boolean;
+  intensity: number;
 }) {
   const count = tier === "high" ? 24 : 14;
   return (
     <div className="level-up-event">
-      {tier !== "low" && !reducedMotion && (
+      {tier !== "low" && !reducedMotion && intensity > 0 && (
         <div className="level-celebration" aria-hidden="true">
           <div className="level-halo" />
           <div className="level-shards">

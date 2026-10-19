@@ -22,10 +22,6 @@ test("mode navigation switches practice without starting the timer", async ({
   ).toHaveValue("");
   await page.getByRole("button", { name: "Sprint", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Zen session", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Go to Sprint", exact: true }).click();
-  await expect(
     page.getByRole("heading", { name: "h2otype typing practice" }),
   ).toBeAttached();
 });

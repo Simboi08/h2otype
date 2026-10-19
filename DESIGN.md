@@ -1,4 +1,15 @@
-# h2otype — Design specification v0.4
+# h2otype — Design specification v0.5
+
+## Game feedback and direct navigation — 2026-10-19
+The user wants the experience to feel fun and rewarding as a game. Make earned combo/level feedback visible and satisfying while retaining readable typing and explicit effect controls. This update supersedes the earlier Zen exit confirmation and scanline treatment.
+
+- Clicking the top Sprint button switches immediately from active, paused, finished, or empty Zen. Unmount saves a paused draft and exact active elapsed time through the existing atomic progress store. Returning to an existing Zen draft offers Resume; no extra button gates the Sprint switch. Pause and Finish retain their explicit summaries.
+- Level announcements scale up over 320ms, hold, and shrink over a matching reversed 320ms curve before removal at four seconds. Low graphics, Effects Off, and reduced motion keep a static announcement. Disabling notifications dismisses it immediately as an explicit preference change.
+- Visual effects has a three-stop Off/Balanced/Intense slider, default Intense. Screen shake defaults on and has an independent switch. Saved preferences receive the new defaults without overwriting explicit sound/particle/quality choices, XP, records, or drafts. Effect intensity is separate from graphics quality/performance.
+- Intense combos add large pixel fire jets at the bottom screen corners, six bounded embers, a stronger meter, and taller high-tier flames. Keep the large jets outside the controls so opaque inputs/buttons do not mask them; meter flames remain local. Balanced reduces jet size and removes embers. Off keeps plain combo/progress meters and notices, disables decorative bursts/fire/shake and level-up motion, and settles XP immediately. Combo counting and sound pitch remain independent of visual intensity.
+- Screen shake is a 160ms pulse on the practice surface at tier gains and, from 50 correct characters, crossed 20-character milestones. Strength caps at 3px (Balanced: 0.8px), with at most one animation and a 250ms cooldown. Restart, hiding, pause/finish, unmount, changing intensity, or disabling shake cancel it. No constant per-keystroke shake. Fixed particle/notice layers stay outside the moving surface.
+- Low/reduced motion override shake and moving fire. Low removes embers/glow; reduced motion retains static flames without embers. Decorative effects never intercept pointer events or keyboard focus.
+- Remove the full-screen scanline overlay and celebration tint. The clean navy/sky canvas, pixel HUD, local edge fire, and deliberate motion provide the arcade identity. Do not reintroduce an always-on screen filter.
 
 ## Arcade feel and combos — 2026-10-19
 The latest feedback adds adjustable character spacing and independent live-stat sizes, larger/sparser pixel particles, stronger crunch audio, a grander level-up celebration, a graphics slider, and correct-typing combos. Achievements and unlockable themes remain deferred.
@@ -12,7 +23,7 @@ The latest feedback adds adjustable character spacing and independent live-stat 
 - Crunch is now a 95ms saturated, quantized square/sub-kick with a sharper transient, lower body, and clean zero-amplitude ending. Standard is unchanged. Pitch changes reuse the cached sound buffer; volume, mute, delayed-note suppression, and four-voice headroom still apply.
 
 ## Current direction — arcade refresh, 2026-10-19
-The user's Krillion references replace the original Cupertino presentation with an original pixel-arcade visual system: navy/cyan/pink in dark mode, sky/ink in light mode, pixel HUD typography, crisp panels, subtle scanlines, and a prominent XP rail. Keep the passage central, existing typing controls, theme/preference choices, and all scoring/progression rules. This direction supersedes the earlier small-header-XP and Cupertino styling decisions below.
+The user's Krillion references replace the original Cupertino presentation with an original pixel-arcade visual system: navy/cyan/pink in dark mode, sky/ink in light mode, pixel HUD typography, crisp panels, and a prominent XP rail. Keep the passage central, existing typing controls, theme/preference choices, and all scoring/progression rules. This direction supersedes the earlier small-header-XP and Cupertino styling decisions below. The latest update removes the screen filter and strengthens configurable game effects.
 
 - Particles originate two pixels beyond the letter's right edge, with initial angles −90° to +90° around the positive x-axis.
 - Graphics Low/Medium/High control particle budgets, canvas resolution/frame caps, atmosphere/glow, and XP animation cost. Reduced motion overrides animation on every tier.
@@ -20,7 +31,7 @@ The user's Krillion references replace the original Cupertino presentation with 
 - The 8-bit click gains a stronger quantized attack/body while retaining volume, mute, short duration, and bounded voices.
 
 ## Vision
-A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HUD in dark mode, a sky/ink palette in light mode, sharp panels, and locally bundled pixel labels. The passage remains easy to read while a prominent XP rail and level-up banner make progression satisfying. The user's Krillion screenshots guide the palette, pixel typography, and CRT treatment.
+A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HUD in dark mode, a sky/ink palette in light mode, sharp panels, and locally bundled pixel labels. The passage remains easy to read while fiery combos, brief impacts, a prominent XP rail, and level-up announcements make progression satisfying. The user's Krillion screenshots guide the palette and pixel typography; the later feedback removes CRT filtering.
 
 ## Design principles
 1. The passage is always the focal point.
@@ -56,8 +67,8 @@ A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HU
 - No hard time limit or mandatory completion.
 - Advance through generated word batches continuously; typing should not freeze on a batch boundary.
 - XP persists periodically and when finishing/pausing the session.
-- Exiting Zen should offer a session summary without penalizing the user.
-- Milestone 3: Escape/Pause freezes active time; Finish opens a resumable summary. Enter from the summary heading resumes. New session explicitly clears the draft. Switching to Sprint first offers the summary with a Go to Sprint action.
+- Switching to Sprint is immediate and saves a paused Zen draft without penalizing the user.
+- Milestone 3: Escape/Pause freezes active time; Finish opens a resumable summary. Enter from the summary heading resumes. New session explicitly clears the draft. The latest update removes the original Go to Sprint confirmation step.
 - Hiding the page pauses Zen. Reloaded sessions restore paused, excluding offline time. Ordinary field blur and Settings leave active time running.
 - Keep a single versioned local draft, autosaving every five seconds and on lifecycle/explicit pause or finish. Failed storage must not interrupt the current session.
 - Retain at least 200 recent characters for correction and finalize older correct characters into totals, keeping text and DOM bounded. Live WPM/accuracy are off by default and can be enabled independently; pause/finish always shows session statistics. Session XP is included in the summary from Milestone 4.
@@ -111,9 +122,9 @@ A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HU
 | Medium (default) | 7 | 70 | 400ms | 1.5 | 60fps | 600ms ease-in/out |
 | High | 12 | 144 | 520ms | 2 | 60fps | 850ms ease-in/out |
 
-Low removes the backdrop/scanlines, bloom, modal blur, and level-banner entry motion. Medium has subtle static atmosphere; High increases static glow and atmosphere. Reduced motion makes XP instant and removes particle/banner motion regardless of tier. Graphics choices do not change scoring, XP, or sound volume.
+Low removes the backdrop, bloom, modal blur, and level-banner motion, and keeps fire static. Medium has subtle static atmosphere; High increases static glow and atmosphere. Scanlines are removed at every tier. Reduced motion makes XP instant and removes particle/banner/fire/shake motion regardless of tier. Graphics choices do not change scoring, XP, or sound volume.
 
-Silkscreen Regular is bundled locally under SIL OFL 1.1, with its license in public/fonts. It is used only for the HUD; the passage retains its selectable built-in fonts. Background stars, horizon, scanlines, panels, and glow are CSS; no third-party images or runtime font services are required. Standard audio remains a 35ms click; 8-bit crush uses the stronger 95ms envelope described above, with the existing four-voice cap and volume controls.
+Silkscreen Regular is bundled locally under SIL OFL 1.1, with its license in public/fonts. It is used only for the HUD; the passage retains its selectable built-in fonts. Background stars, horizon, panels, fire, and glow are CSS; no third-party images or runtime font services are required. Standard audio remains a 35ms click; 8-bit crush uses the stronger 95ms envelope described above, with the existing four-voice cap and volume controls.
 
 ## Accessibility
 - Contrast and visible caret in either theme.

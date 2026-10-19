@@ -39,3 +39,13 @@ export function getCombo(streak: number) {
     pitch: Math.pow(2, Math.min(7, Math.max(0, streak - 10) / 25) / 12),
   };
 }
+
+// Impacts are discrete rewards, rather than constant shaking on every key.
+export function comboImpact(before: number, after: number) {
+  if (after <= before || after < 10) return 0;
+  const tier = getCombo(after).tier;
+  return tier > getCombo(before).tier ||
+    (after >= 50 && Math.floor(after / 20) > Math.floor(before / 20))
+    ? tier
+    : 0;
+}

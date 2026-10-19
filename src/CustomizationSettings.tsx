@@ -94,11 +94,42 @@ export default function CustomizationSettings() {
         />
         <p className="settings-note">
           {preferences.graphicsTier === "low"
-            ? "Fewer particles, no scanlines or glow, and instant XP updates."
+            ? "Fewer particles, static fire, no shake or glow, and instant XP updates."
             : preferences.graphicsTier === "high"
               ? "More particles, richer glow, and expressive XP motion."
               : "Balanced particles, subtle atmosphere, and smooth XP motion."}
         </p>
+        <PreferenceSlider
+          label="Visual effects"
+          description="Set the fire, bursts, and level-up motion. Off keeps plain meters and notices."
+          min={0}
+          max={2}
+          step={1}
+          value={preferences.effectIntensity}
+          valueText={
+            ["Off", "Balanced", "Intense"][preferences.effectIntensity]
+          }
+          onChange={(value) => setPreference("effectIntensity", value)}
+          endpoints={["Off", "Intense"]}
+        />
+        <label className="preference-row">
+          <span>
+            <span className="preference-label">Screen shake</span>
+            <span className="preference-description">
+              Brief impacts at combo milestones. Low graphics and reduced motion
+              keep it still.
+            </span>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            aria-label="Screen shake"
+            checked={preferences.screenShake}
+            onChange={(event) =>
+              setPreference("screenShake", event.currentTarget.checked)
+            }
+          />
+        </label>
       </fieldset>
       <fieldset className="preference-options">
         <legend>Live statistics size</legend>
