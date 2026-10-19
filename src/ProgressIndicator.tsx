@@ -5,6 +5,7 @@ import { dismissLevelNotice, useProgress } from "./progressStore";
 import { useReducedMotion } from "./useReducedMotion";
 import { useXpMotion } from "./useXpMotion";
 import { graphicsProfiles } from "./graphics";
+import LevelCelebration from "./LevelCelebration";
 
 export default function ProgressIndicator() {
   const progress = useProgress();
@@ -61,10 +62,12 @@ export default function ProgressIndicator() {
       )}
       <div className="progress-notice" role="status">
         {preferences.levelNotifications && progress.notice !== null ? (
-          <div className="level-up-banner" key={progress.notice}>
-            <span className="level-up-label">Level up</span>
-            <strong>Level {progress.notice}</strong>
-          </div>
+          <LevelCelebration
+            key={progress.notice}
+            level={progress.notice}
+            tier={preferences.graphicsTier}
+            reducedMotion={reducedMotion}
+          />
         ) : null}
       </div>
       {!progress.storageAvailable && (

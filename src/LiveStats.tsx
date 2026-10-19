@@ -32,7 +32,7 @@ export default function LiveStats({
   return (
     <dl className="live-stats" aria-label="Live statistics" aria-live="off">
       {preferences.liveWpm && (
-        <div>
+        <div style={{ fontSize: `${preferences.wpmScale / 100}em` }}>
           <dt>WPM</dt>
           {preferences.wpmRefreshMs === 0 ? (
             <dd>{wpm}</dd>
@@ -47,7 +47,7 @@ export default function LiveStats({
         </div>
       )}
       {preferences.liveAccuracy && (
-        <div>
+        <div style={{ fontSize: `${preferences.accuracyScale / 100}em` }}>
           <dt>Accuracy</dt>
           <dd>{accuracy}%</dd>
         </div>

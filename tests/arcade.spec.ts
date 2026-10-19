@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { easeXp, graphicsProfiles, particleVelocity } from "../src/graphics";
 import { defaultPreferences, parsePreferences } from "../src/preferences";
 import { createSoundSamples } from "../src/typingSound";
+import { setGraphicsQuality } from "./settings";
 
 async function clock(page: Page) {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
@@ -93,9 +94,7 @@ test("particles start beyond the letter's right edge and graphics tiers change d
   await expect(input).toBeFocused();
   for (const tier of ["low", "medium", "high"] as const) {
     await page.keyboard.press("F2");
-    await page
-      .getByRole("combobox", { name: "Graphics quality" })
-      .selectOption(tier);
+    await setGraphicsQuality(page, tier);
     await page
       .getByRole("combobox", { name: "Typing particles", exact: true })
       .selectOption("regular");
@@ -109,7 +108,8 @@ test("particles start beyond the letter's right edge and graphics tiers change d
       probe.length = 0;
     });
     await input.press("s");
-    await page.clock.runFor(48);
+    // Allow a complete Low-quality frame even when the first RAF is skipped.
+    await page.clock.runFor(80);
     const width = await page
       .locator(".typing-particles")
       .evaluate((canvas: HTMLCanvasElement) => canvas.width);
@@ -125,8 +125,8 @@ test("particles start beyond the letter's right edge and graphics tiers change d
   await expect(input).toBeFocused();
   await page.keyboard.press("F2");
   await expect(
-    page.getByRole("combobox", { name: "Graphics quality" }),
-  ).toHaveValue("high");
+    page.getByRole("slider", { name: "Graphics quality" }),
+  ).toHaveAttribute("aria-valuetext", "High");
   await context.close();
 });
 
@@ -186,9 +186,7 @@ test("reduced motion and Low quality use exact fills and hidden XP restores corr
   await page.keyboard.press("Escape");
   await expect(page.getByRole("progressbar")).toHaveCount(0);
   await page.keyboard.press("F2");
-  await page
-    .getByRole("combobox", { name: "Graphics quality" })
-    .selectOption("low");
+  await setGraphicsQuality(page, "low");
   await page.getByRole("switch", { name: "XP progress", exact: true }).check();
   await page.keyboard.press("Escape");
   expect(await scale(page)).toBeCloseTo(0.5, 4);

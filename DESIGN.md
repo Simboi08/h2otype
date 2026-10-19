@@ -1,4 +1,15 @@
-# h2otype — Design specification v0.3
+# h2otype — Design specification v0.4
+
+## Arcade feel and combos — 2026-10-19
+The latest feedback adds adjustable character spacing and independent live-stat sizes, larger/sparser pixel particles, stronger crunch audio, a grander level-up celebration, a graphics slider, and correct-typing combos. Achievements and unlockable themes remain deferred.
+
+- Character spacing: 0–3px in 0.5px steps, default 0. Apply to passage and word input; remeasure the caret after a change. WPM/accuracy size sliders are independent, 80–200% in 10% steps, default 100%, with a 14px base label/value size. These affect live statistics only; their visibility switches stay independent.
+- Graphics quality uses a three-stop Low/Medium/High slider, preserving existing saved tier strings and rendering budgets. Pixel sprites are 6×6 CSS pixels (previously 3×3), with 2/4/6 per burst and caps of 12/24/36; Regular particles retain the table below.
+- Level-ups show a larger centered banner above the passage, a single expanding ring, and 14 (Medium) or 24 (High) pixel rays. Effects never intercept pointers or focus. Low/reduced motion use the large static banner only; notification Off suppresses everything. Compact landscape placement preserves passage visibility.
+- Combos start at 10 fresh correct character positions, including spaces, with tiers at 10/25/50/100/200. The meter replaces the visible footer hint instead of adding another row, grows warmer fire at higher tiers, and progressively raises the selected typing sound up to seven semitones (below 1.5× playback rate). The original hint remains available to screen readers.
+- A mistake, any accepted deletion, pause/finish, hidden page, restart, mode change, or reload breaks the streak. Already credited positions cannot rebuild it through Backspace/retyping. Accepted multi-character commits count their fresh correct positions in order; Zen retirement preserves an active streak. Inactivity and opening Settings alone do not break a streak.
+- Combos are feedback only: no XP or score multiplier, no change to WPM, accuracy, deadlines, persistence, or credit rules. Combo feedback defaults on and can be disabled in Settings; re-enabling starts fresh. Low uses static flames/no glow; reduced motion removes flame/meter animation as well as celebration motion.
+- Crunch is now a 95ms saturated, quantized square/sub-kick with a sharper transient, lower body, and clean zero-amplitude ending. Standard is unchanged. Pitch changes reuse the cached sound buffer; volume, mute, delayed-note suppression, and four-voice headroom still apply.
 
 ## Current direction — arcade refresh, 2026-10-19
 The user's Krillion references replace the original Cupertino presentation with an original pixel-arcade visual system: navy/cyan/pink in dark mode, sky/ink in light mode, pixel HUD typography, crisp panels, subtle scanlines, and a prominent XP rail. Keep the passage central, existing typing controls, theme/preference choices, and all scoring/progression rules. This direction supersedes the earlier small-header-XP and Cupertino styling decisions below.
@@ -102,7 +113,7 @@ A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HU
 
 Low removes the backdrop/scanlines, bloom, modal blur, and level-banner entry motion. Medium has subtle static atmosphere; High increases static glow and atmosphere. Reduced motion makes XP instant and removes particle/banner motion regardless of tier. Graphics choices do not change scoring, XP, or sound volume.
 
-Silkscreen Regular is bundled locally under SIL OFL 1.1, with its license in public/fonts. It is used only for the HUD; the passage retains its selectable built-in fonts. Background stars, horizon, scanlines, panels, and glow are CSS; no third-party images or runtime font services are required. Standard audio remains a 35ms click; 8-bit crush uses a punchier quantized square/kick body and a 75ms envelope, with the existing four-voice cap and volume controls.
+Silkscreen Regular is bundled locally under SIL OFL 1.1, with its license in public/fonts. It is used only for the HUD; the passage retains its selectable built-in fonts. Background stars, horizon, scanlines, panels, and glow are CSS; no third-party images or runtime font services are required. Standard audio remains a 35ms click; 8-bit crush uses the stronger 95ms envelope described above, with the existing four-voice cap and volume controls.
 
 ## Accessibility
 - Contrast and visible caret in either theme.

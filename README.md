@@ -12,7 +12,7 @@ A focused pixel-arcade typing game with satisfying progression. Built for short 
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
-Milestones 0–5 are implemented: a React + TypeScript + Vite foundation, persistent light/dark/system appearance, and a working typing engine with character feedback, caret, timer, correction, and restart. Sprint supports 15/30/60-second tests, a results screen, and local personal bests for each duration. Zen now replenishes text continuously, supports pause/resume and a session summary, and saves a resumable session locally. Correct typing now earns persistent XP and levels, with a small header indicator and nonblocking level-up feedback. Settings now includes persistent live-statistics, XP-display, and notification preferences. The planned MVP milestones are complete.
+Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Streaks build a fiery combo meter and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Achievements and unlockable themes are saved for later.
 
 ## Development
 Use Node.js 20.19+ (20.x) or 22.12+ and npm. Node 24 was used for validation.
@@ -94,10 +94,14 @@ Open **Settings** in the header or press **F2**. Changes take effect immediately
 | Typing font | Monospace | Choose Monospace, System, or Serif using built-in fonts. Applies to the passage and word input. |
 | Font weight | Regular | Choose Regular, Medium, Semibold, or Bold with the slider. |
 | Typing size | 100% | Scale the passage, input, and workspace from 80% to 130%; layout stays within the viewport. |
+| Character spacing | 0px | Add 0–3px between characters in 0.5px steps, applying to the passage and word input. |
+| WPM size | 100% | Scale the live WPM label and number from 80% to 200%, independently of the typing text. |
+| Accuracy size | 100% | Scale live accuracy from 80% to 200%, independently of WPM. |
 | Typing sound | Off | Standard click or 8-bit crush, with Preview sound and a separate volume slider. Accepted character edits play once; controls and Backspace stay silent. |
 | Sound volume | 35% | Adjust from 0% (mute) to 100%. Sounds are generated locally, with at most four simultaneous short voices and no queued backlog. |
 | Typing particles | Off | Regular circles or 8-bit pixels burst from correct characters. Wrong characters and Backspace stay quiet visually; reduced motion suppresses particles. |
-| Graphics quality | Medium | Low uses fewer particles and removes scanlines/glow and XP motion. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
+| Graphics quality | Medium | Three-stop slider: Low uses fewer particles and removes scanlines/glow and XP motion. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
+| Combo feedback | On | Consecutive fresh correct characters build a fire meter and progressively higher sound pitch. Turn off for quieter visuals and fixed pitch. No XP multiplier. |
 | Live accuracy | Off | Shows correct attempts divided by all attempts, including corrected mistakes. |
 | XP progress | On | Shows the wide level/XP rail above typing; hiding it keeps XP accruing and leaves session XP in results. |
 | Level-up notifications | On | Shows brief, nonblocking notices; turning it off dismisses an active notice and suppresses new ones. |
@@ -108,6 +112,10 @@ Display preferences are stored in `h2otype.preferences.v1`; existing appearance 
 Appearance, size, weight, volume, and WPM refresh use labeled native controls. The WPM slider retains the same four intervals as the original dropdown. Changes apply without restarting a run. Correct-letter particles follow the passage after scrolling and font/size changes; they are short-lived and clear on restart or pause. Sound and particles do not change XP or scoring. Some browsers require a user gesture before audio can play; use Preview sound if needed. Audio failures show a status in Settings while typing continues normally.
 
 Particles start just beyond the letter's right edge and fan out through a right-facing 180° semicircle. Graphics tiers change particle count, lifetime, frame/resolution caps, and decoration without changing gameplay. The stronger 8-bit crunch has a sharper attack and fuller body; use volume or Off to suit your preference. The optional scanlines and pixel HUD follow the supplied arcade references; passage fonts and all existing local data remain configurable.
+
+Pixel particles are larger 6×6 sprites with fewer per burst (2/4/6 for Low/Medium/High) and lower caps (12/24/36) to keep the passage readable. Crunch has a stronger 95ms low-end hit. Level-ups now add a larger banner above the passage, an expanding ring, and a short pixel burst; Low/reduced motion keep a static banner, and notification Off hides the whole celebration.
+
+Combos begin at **10 fresh correct characters**, then reach higher tiers at 25, 50, 100, and 200. The footer becomes a combo meter with progressively stronger fire, while the selected sound rises in pitch up to seven semitones. Sound Off stays silent. Errors, Backspace, pause/finish, hiding the page, restart, mode changes, and reload break a streak; correcting an already credited position cannot farm it. Settings and idle time alone do not break it. Combos change feedback only: **XP, WPM, accuracy, and final scores retain their existing rules**. Low/reduced motion keep the fire static; disabling Combo feedback clears the meter and pitch escalation.
 
 Keyboard users can Tab/Shift+Tab through the modal, use Space on switches, arrow keys on theme radios, and Escape to close. The panel scrolls on small screens while Close stays accessible. Live stats are not an announcing live region, so they do not read out every keystroke. Reduced-motion preferences disable caret blinking and transitions. Controls have larger hit areas, and the workspace stays centered with optional stats enabled.
 

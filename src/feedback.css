@@ -1,0 +1,285 @@
+.practice-status {
+  flex: 1;
+  min-width: 0;
+}
+.combo-meter {
+  --fire: #ae4616;
+  position: relative;
+  width: min(100%, 320px);
+  padding: 5px 8px;
+  color: var(--fire);
+  background: var(--surface);
+  border: 1px solid var(--fire);
+  border-left-width: 3px;
+}
+:root[data-theme="dark"] .combo-meter {
+  --fire: #ffb45e;
+}
+.combo-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 10px;
+  margin-bottom: 5px;
+  font: 10px monospace;
+}
+.combo-heading strong {
+  font: 11px var(--hud);
+}
+.combo-heading > span {
+  color: var(--secondary);
+}
+.combo-track {
+  height: 4px;
+  background: var(--border);
+}
+.combo-track > span {
+  display: block;
+  height: 100%;
+  background: var(--fire);
+  transition: width 140ms ease-out;
+}
+.combo-flames {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 0;
+  height: 0;
+  pointer-events: none;
+}
+.combo-flames i {
+  position: absolute;
+  left: 4%;
+  bottom: 0;
+  width: 10px;
+  height: 14px;
+  transform-origin: bottom;
+  background: linear-gradient(#ffed99 15%, #ffab47 60%, #eb553e);
+  clip-path: polygon(
+    50% 0,
+    60% 30%,
+    80% 15%,
+    100% 65%,
+    85% 100%,
+    15% 100%,
+    0 65%,
+    25% 25%,
+    30% 55%
+  );
+  animation: combo-flame 720ms ease-in-out infinite alternate;
+}
+.combo-flames i:nth-child(2) {
+  left: 28%;
+  animation-delay: -250ms;
+}
+.combo-flames i:nth-child(3) {
+  left: 48%;
+  animation-delay: -430ms;
+}
+.combo-flames i:nth-child(4) {
+  left: 70%;
+  animation-delay: -180ms;
+}
+.combo-flames i:nth-child(5) {
+  left: 90%;
+  animation-delay: -510ms;
+}
+.combo-meter[data-tier="1"] .combo-flames i:nth-child(n + 3) {
+  display: none;
+}
+.combo-meter[data-tier="2"] .combo-flames i:nth-child(n + 4) {
+  display: none;
+}
+.combo-meter[data-tier="3"] .combo-flames i {
+  height: 18px;
+}
+.combo-meter[data-tier="4"],
+.combo-meter[data-tier="5"] {
+  box-shadow:
+    0 0 20px #e65e2529,
+    inset 0 0 14px #e65e2514;
+}
+.combo-meter[data-tier="4"] .combo-flames i {
+  height: 22px;
+}
+.combo-meter[data-tier="5"] .combo-flames i {
+  height: 28px;
+  width: 14px;
+}
+@keyframes combo-flame {
+  from {
+    transform: scaleY(0.65) skewX(-7deg);
+  }
+  to {
+    transform: scaleY(1) skewX(6deg);
+  }
+}
+.progress-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+}
+.level-up-banner {
+  position: absolute;
+  top: clamp(88px, 12svh, 120px);
+  left: 50%;
+  min-width: min(340px, calc(100vw - 32px));
+  padding: 16px 28px;
+  transform: translateX(-50%);
+  text-align: center;
+  border-width: 3px;
+  box-shadow:
+    6px 6px 0 var(--background),
+    0 0 48px color-mix(in srgb, var(--pink) 20%, transparent);
+  animation: grand-arrive 560ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.level-up-label {
+  font-size: 14px;
+  letter-spacing: 3px;
+  margin-bottom: 7px;
+}
+.level-up-banner strong {
+  font-size: 42px;
+  text-shadow: 3px 3px 0 var(--background);
+}
+.level-celebration {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  box-shadow: inset 0 0 50px color-mix(in srgb, var(--pink) 14%, transparent);
+  animation: celebration-fade 1800ms ease-out both;
+}
+.level-halo,
+.level-shards {
+  position: absolute;
+  left: 50%;
+  top: clamp(134px, 18svh, 180px);
+}
+.level-halo {
+  width: 60vmin;
+  height: 60vmin;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 30px var(--accent-soft),
+    inset 0 0 20px var(--accent-soft);
+  animation: level-wave 1300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.level-shards i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  animation: level-spark 1250ms var(--burst-delay)
+    cubic-bezier(0.1, 0.6, 0.2, 1) both;
+}
+.level-shards i:nth-child(3n) {
+  background: var(--pink);
+}
+.level-shards i:nth-child(3n + 1) {
+  background: #efbb57;
+  width: 5px;
+  height: 12px;
+}
+@keyframes grand-arrive {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+@keyframes celebration-fade {
+  0%,
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes level-wave {
+  from {
+    opacity: 0.65;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.4);
+  }
+}
+@keyframes level-spark {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--burst-x), var(--burst-y)) rotate(120deg)
+      scale(0.3);
+  }
+}
+@media (max-width: 700px) {
+  .level-up-banner {
+    padding: 14px 18px;
+  }
+  .level-up-banner strong {
+    font-size: 30px;
+  }
+  .level-up-label {
+    font-size: 11px;
+  }
+  .combo-heading {
+    font-size: 9px;
+  }
+  .combo-heading strong {
+    font-size: 10px;
+  }
+}
+@media (max-height: 500px) {
+  .level-up-banner {
+    top: 6px;
+    min-width: 180px;
+    padding: 6px 14px;
+  }
+  .level-up-banner strong {
+    font-size: 24px;
+  }
+  .level-up-label {
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+  .level-halo,
+  .level-shards {
+    top: 40px;
+  }
+}
+:root[data-graphics="low"] .combo-flames i {
+  animation: none;
+  height: 12px;
+}
+:root[data-graphics="low"] .combo-meter,
+:root[data-graphics="low"] .level-up-banner {
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .combo-flames i,
+  .level-up-banner {
+    animation: none;
+  }
+  .combo-track > span {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .level-celebration,
+  .combo-flames {
+    display: none;
+  }
+  .combo-track > span {
+    background: Highlight;
+  }
+}

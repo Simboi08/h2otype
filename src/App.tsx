@@ -139,6 +139,7 @@ export default function App() {
                 )!.family,
                 "--typing-weight": preferences.typingWeight,
                 "--typing-scale": preferences.typingScale / 100,
+                "--typing-spacing": `${preferences.characterSpacing}px`,
               } as CSSProperties
             }
             aria-label={`${mode === "sprint" ? "Sprint" : "Zen"} typing practice`}

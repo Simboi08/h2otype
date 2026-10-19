@@ -1,4 +1,10 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { usePreferences } from "./preferences";
 import type { ParticleStyle } from "./preferences";
 import type { Session } from "./typingEngine";
@@ -7,6 +13,8 @@ import { playTypingSound, stopTypingSounds } from "./typingSound";
 import TypingParticles from "./TypingParticles";
 import type { ParticleHandle } from "./TypingParticles";
 import { useReducedMotion } from "./useReducedMotion";
+import { advanceCombo, getCombo } from "./combo";
+import ComboMeter from "./ComboMeter";
 
 export function useTypingFeedback(enabled: boolean) {
   const { preferences } = usePreferences();
@@ -14,12 +22,30 @@ export function useTypingFeedback(enabled: boolean) {
   const container = useRef<HTMLDivElement>(null);
   const particles = useRef<ParticleHandle>(null);
   const pending = useRef<{ index: number; style: ParticleStyle } | null>(null);
+  const active = enabled && preferences.comboFeedback;
+  const [combo, setCombo] = useState({ active, streak: 0 });
+  // A stopped/disabled combo must not reappear on resume or re-enable.
+  if (combo.active !== active) setCombo({ active, streak: 0 });
+  const reset = useCallback(() => {
+    setCombo((current) => ({ ...current, streak: 0 }));
+    pending.current = null;
+    particles.current?.clear();
+    stopTypingSounds();
+  }, []);
 
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
+    const streak = active
+      ? advanceCombo(combo.streak, before, after, passage)
+      : 0;
+    setCombo({ active, streak });
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
-    playTypingSound(preferences.soundStyle, preferences.soundVolume);
+    playTypingSound(
+      preferences.soundStyle,
+      preferences.soundVolume,
+      getCombo(streak).pitch,
+    );
     if (
       feedback.correctIndex !== null &&
       preferences.particleStyle !== "off" &&
@@ -58,23 +84,23 @@ export function useTypingFeedback(enabled: boolean) {
     )
       stopTypingSounds();
     const hidden = () => {
-      if (document.hidden) stopTypingSounds();
+      if (document.hidden) reset();
     };
     document.addEventListener("visibilitychange", hidden);
     return () => {
       stopTypingSounds();
       document.removeEventListener("visibilitychange", hidden);
     };
-  }, [enabled, preferences.soundStyle, preferences.soundVolume]);
+  }, [enabled, preferences.soundStyle, preferences.soundVolume, reset]);
 
   return {
     container,
     onEdit,
-    reset() {
-      pending.current = null;
-      particles.current?.clear();
-      stopTypingSounds();
-    },
+    reset,
+    comboMeter:
+      active && combo.streak >= 10 ? (
+        <ComboMeter streak={combo.streak} />
+      ) : null,
     layer:
       enabled && preferences.particleStyle !== "off" && !reducedMotion ? (
         <TypingParticles

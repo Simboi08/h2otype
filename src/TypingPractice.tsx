@@ -51,6 +51,7 @@ export default function TypingPractice({
     onEdit: emitFeedback,
     reset: resetFeedback,
     layer: particleLayer,
+    comboMeter,
   } = useTypingFeedback(!finished);
   const { prefix, word } = getWordInput(session.typed);
   usePracticeKeyboard({ restart, composing, input, enabled: !finished });
@@ -199,6 +200,7 @@ export default function TypingPractice({
                   now,
                   durationMs,
                 );
+                emitFeedback(latest.current, next, passage);
                 latest.current = next;
                 setSession(next);
               }
@@ -226,15 +228,22 @@ export default function TypingPractice({
             }}
           />
           <div className="passage-footer practice-footer">
-            <p id="typing-hint" role="status">
-              {finished
-                ? "Finished."
-                : session.startedAt === null
-                  ? "Space advances · Tab restarts"
-                  : focused
+            <div className="practice-status">
+              {comboMeter}
+              <p
+                id="typing-hint"
+                role="status"
+                className={comboMeter ? "sr-only" : undefined}
+              >
+                {finished
+                  ? "Finished."
+                  : session.startedAt === null
                     ? "Space advances · Tab restarts"
-                    : "Type to continue · Timer running"}
-            </p>
+                    : focused
+                      ? "Space advances · Tab restarts"
+                      : "Type to continue · Timer running"}
+              </p>
+            </div>
             <button className="restart-button" onClick={restart}>
               Restart
             </button>

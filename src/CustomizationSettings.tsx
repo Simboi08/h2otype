@@ -3,7 +3,7 @@ import {
   isParticleStyle,
   isSoundStyle,
   isTypingFont,
-  isGraphicsTier,
+  graphicsTiers,
   setPreference,
   typingFonts,
   usePreferences,
@@ -45,6 +45,16 @@ export default function CustomizationSettings() {
           </select>
         </label>
         <PreferenceSlider
+          label="Character spacing"
+          description="Space between letters in the passage and word input."
+          min={0}
+          max={3}
+          step={0.5}
+          value={preferences.characterSpacing}
+          valueText={`${preferences.characterSpacing}px`}
+          onChange={(value) => setPreference("characterSpacing", value)}
+        />
+        <PreferenceSlider
           label="Font weight"
           min={400}
           max={700}
@@ -66,21 +76,22 @@ export default function CustomizationSettings() {
       </fieldset>
       <fieldset className="preference-options">
         <legend>Graphics</legend>
-        <label className="preference-row">
-          <span className="preference-label">Graphics quality</span>
-          <select
-            className="preference-select"
-            value={preferences.graphicsTier}
-            onChange={(event) => {
-              if (isGraphicsTier(event.currentTarget.value))
-                setPreference("graphicsTier", event.currentTarget.value);
-            }}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </label>
+        <PreferenceSlider
+          label="Graphics quality"
+          min={0}
+          max={2}
+          step={1}
+          value={graphicsTiers.indexOf(preferences.graphicsTier)}
+          valueText={
+            { low: "Low", medium: "Medium", high: "High" }[
+              preferences.graphicsTier
+            ]
+          }
+          onChange={(value) =>
+            setPreference("graphicsTier", graphicsTiers[value])
+          }
+          endpoints={["Low", "High"]}
+        />
         <p className="settings-note">
           {preferences.graphicsTier === "low"
             ? "Fewer particles, no scanlines or glow, and instant XP updates."
@@ -90,7 +101,48 @@ export default function CustomizationSettings() {
         </p>
       </fieldset>
       <fieldset className="preference-options">
+        <legend>Live statistics size</legend>
+        <PreferenceSlider
+          label="WPM size"
+          description="Resize the live WPM label and number. Enable Live WPM below to show it."
+          min={80}
+          max={200}
+          step={10}
+          value={preferences.wpmScale}
+          valueText={`${preferences.wpmScale}%`}
+          onChange={(value) => setPreference("wpmScale", value)}
+        />
+        <PreferenceSlider
+          label="Accuracy size"
+          description="Resize the live accuracy label and number."
+          min={80}
+          max={200}
+          step={10}
+          value={preferences.accuracyScale}
+          valueText={`${preferences.accuracyScale}%`}
+          onChange={(value) => setPreference("accuracyScale", value)}
+        />
+      </fieldset>
+      <fieldset className="preference-options">
         <legend>Typing feedback</legend>
+        <label className="preference-row">
+          <span>
+            <span className="preference-label">Combo feedback</span>
+            <span className="preference-description">
+              Build a fire meter and raise sound pitch with correct streaks. No
+              XP multiplier.
+            </span>
+          </span>
+          <input
+            type="checkbox"
+            role="switch"
+            aria-label="Combo feedback"
+            checked={preferences.comboFeedback}
+            onChange={(event) =>
+              setPreference("comboFeedback", event.currentTarget.checked)
+            }
+          />
+        </label>
         <label className="preference-row">
           <span className="preference-label">Typing sound</span>
           <select

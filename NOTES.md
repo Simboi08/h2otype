@@ -41,4 +41,17 @@ Feedback added: 2026-10-19.
 - [x] Give the 8-bit crunch more attack/body while retaining volume, mute, and bounded playback.
 - [x] Adopt the supplied Krillion-style pixel-arcade direction: navy/cyan/pink, pixel HUD labels, crisp panels, and a subtle CRT atmosphere, with a matching light mode.
 
+## Arcade feel and combos — latest feedback
+- [x] Character-spacing slider for the passage and input.
+- [x] More punch in the 8-bit crunch: stronger low end/transient and fuller 95ms body.
+- [x] Larger pixel particles (6px), with fewer per burst and lower total caps for readability.
+- [x] Grander level-up banner, expanding ring, and pixel burst; static alternative for Low/reduced motion.
+- [x] Graphics quality as a Low/Medium/High slider.
+- [x] Independent sliders for live WPM and accuracy sizes.
+- [x] Correct-typing streaks with a combo meter, escalating fire, and progressively higher sound pitch. Feedback only; XP rules stay unchanged.
+
+## Later — explicitly deferred
+- [ ] Achievements.
+- [ ] Unlockable themes.
+
 See PROGRESS.md for implementation and validation details. Add new feedback here as it comes up.

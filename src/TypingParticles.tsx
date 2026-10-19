@@ -62,8 +62,8 @@ export default function TypingParticles({
         ctx.fillRect(
           Math.round(particle.x / 2) * 2,
           Math.round(particle.y / 2) * 2,
-          3,
-          3,
+          6,
+          6,
         );
       else {
         ctx.beginPath();
@@ -84,7 +84,10 @@ export default function TypingParticles({
       const color = getComputedStyle(document.documentElement)
         .getPropertyValue("--accent")
         .trim();
-      for (let index = 0; index < profile.burst; index++) {
+      const burst = style === "pixel" ? profile.pixelBurst : profile.burst;
+      const maximum =
+        style === "pixel" ? profile.pixelMaximum : profile.maximum;
+      for (let index = 0; index < burst; index++) {
         const velocity = particleVelocity(Math.random(), Math.random(), tier);
         particles.current.push({
           x,
@@ -95,7 +98,7 @@ export default function TypingParticles({
           color,
         });
       }
-      particles.current = particles.current.slice(-profile.maximum);
+      particles.current = particles.current.slice(-maximum);
       if (frame.current === null) {
         previous.current = now;
         frame.current = requestAnimationFrame(draw);

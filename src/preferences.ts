@@ -29,6 +29,7 @@ export type TypingFont = (typeof typingFonts)[number]["value"];
 export type SoundStyle = "off" | "standard" | "bitcrush";
 export type ParticleStyle = "off" | "regular" | "pixel";
 export type GraphicsTier = "low" | "medium" | "high";
+export const graphicsTiers: GraphicsTier[] = ["low", "medium", "high"];
 export type Preferences = {
   liveWpm: boolean;
   liveAccuracy: boolean;
@@ -38,6 +39,10 @@ export type Preferences = {
   typingFont: TypingFont;
   typingWeight: number;
   typingScale: number;
+  characterSpacing: number;
+  wpmScale: number;
+  accuracyScale: number;
+  comboFeedback: boolean;
   soundStyle: SoundStyle;
   soundVolume: number;
   particleStyle: ParticleStyle;
@@ -52,6 +57,10 @@ export const defaultPreferences: Preferences = {
   typingFont: "mono",
   typingWeight: 400,
   typingScale: 100,
+  characterSpacing: 0,
+  wpmScale: 100,
+  accuracyScale: 100,
+  comboFeedback: true,
   soundStyle: "off",
   soundVolume: 35,
   particleStyle: "off",
@@ -101,6 +110,7 @@ export function parsePreferences(raw: string | null): Preferences {
       "liveAccuracy",
       "xpProgress",
       "levelNotifications",
+      "comboFeedback",
     ] as const) {
       const value = data.preferences[key];
       if (typeof value === "boolean") preferences[key] = value;
@@ -118,12 +128,15 @@ export function parsePreferences(raw: string | null): Preferences {
     for (const [key, min, max, step] of [
       ["typingWeight", 400, 700, 100],
       ["typingScale", 80, 130, 10],
+      ["characterSpacing", 0, 3, 0.5],
+      ["wpmScale", 80, 200, 10],
+      ["accuracyScale", 80, 200, 10],
       ["soundVolume", 0, 100, 5],
     ] as const) {
       const value = data.preferences[key];
       if (
         typeof value === "number" &&
-        Number.isInteger(value) &&
+        Number.isFinite(value) &&
         value >= min &&
         value <= max &&
         (value - min) % step === 0

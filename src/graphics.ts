@@ -4,6 +4,8 @@ export const graphicsProfiles = {
   low: {
     burst: 3,
     maximum: 24,
+    pixelBurst: 2,
+    pixelMaximum: 12,
     lifetime: 240,
     resolution: 1,
     fps: 30,
@@ -13,6 +15,8 @@ export const graphicsProfiles = {
   medium: {
     burst: 7,
     maximum: 70,
+    pixelBurst: 4,
+    pixelMaximum: 24,
     lifetime: 400,
     resolution: 1.5,
     fps: 60,
@@ -22,6 +26,8 @@ export const graphicsProfiles = {
   high: {
     burst: 12,
     maximum: 144,
+    pixelBurst: 6,
+    pixelMaximum: 36,
     lifetime: 520,
     resolution: 2,
     fps: 60,

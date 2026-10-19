@@ -57,11 +57,19 @@ The planned MVP milestones are complete. Later possibilities remain optional and
 - [x] Pixel-arcade dark/light presentation inspired by the supplied references
 - [x] Preserve typing focus, reduced motion, optional effects, existing scores, and saved progress
 
-The current feedback list is implemented. Further notes can be added in [NOTES.md](NOTES.md).
+## Post-MVP — Arcade feel and combos
+- [x] Persistent character-spacing and independent live WPM/accuracy size sliders
+- [x] Three-stop graphics slider preserving saved quality tiers
+- [x] Larger, sparser 8-bit particles and a stronger 95ms crunch
+- [x] Grand level-up banner, ring, and pixel burst respecting motion/notification/quality settings
+- [x] Correct-typing combo meter, escalating fire, and bounded rising sound pitch
+- [x] Keep combos separate from scoring/XP and prevent credit replay through corrections
+
+The current implementation requests are complete. Achievements and unlockable themes remain deferred; further notes can be added in [NOTES.md](NOTES.md).
 
 ## Later possibilities
 - [ ] Performance history/charts
-- [ ] Streaks/flow bonuses
+- [ ] Flow/XP bonuses (visual typing streaks are implemented; no bonuses)
 - [ ] Unlockable themes and caret styles
 - [ ] Achievements and interesting text packs
 

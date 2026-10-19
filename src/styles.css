@@ -172,7 +172,7 @@ main {
   font-size: calc(clamp(20px, 2.3vw, 25px) * var(--typing-scale, 1));
   font-weight: var(--typing-weight, 400);
   line-height: 1.85;
-  letter-spacing: -0.6px;
+  letter-spacing: var(--typing-spacing, 0px);
   color: var(--secondary);
   margin: 0;
 }
@@ -229,6 +229,9 @@ main {
 .typing-input::placeholder {
   color: var(--muted);
   font-size: 13px;
+}
+.typing-input {
+  letter-spacing: var(--typing-spacing, 0px);
 }
 .practice-footer {
   display: flex;
@@ -763,9 +766,11 @@ main {
 }
 .live-stats {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
-  font-size: 11px;
+  row-gap: 6px;
+  font-size: 14px;
   margin: 0;
   font-variant-numeric: tabular-nums;
 }

@@ -46,6 +46,7 @@ export default function ZenPractice({
     onEdit: emitFeedback,
     reset: resetFeedback,
     layer: particleLayer,
+    comboMeter,
   } = useTypingFeedback(!stopped);
   usePracticeKeyboard({
     restart: newSession,
@@ -267,14 +268,17 @@ export default function ZenPractice({
               ) {
                 event.preventDefault();
                 const timestamp = performance.now();
-                update(
-                  editZen(
-                    latest.current,
-                    latest.current.session.typed.slice(0, -1),
-                    timestamp,
-                  ),
+                const next = editZen(
+                  latest.current,
+                  latest.current.session.typed.slice(0, -1),
                   timestamp,
                 );
+                emitFeedback(
+                  latest.current.session,
+                  next.session,
+                  next.passage,
+                );
+                update(next, timestamp);
               }
             }}
             onSelect={(event) => {
@@ -299,7 +303,12 @@ export default function ZenPractice({
             }}
           />
           <div className="practice-footer">
-            <p id="zen-hint">Tab restarts · Esc pauses</p>
+            <div className="practice-status">
+              {comboMeter}
+              <p id="zen-hint" className={comboMeter ? "sr-only" : undefined}>
+                Tab restarts · Esc pauses
+              </p>
+            </div>
             <div className="zen-actions">
               <button className="restart-button" onClick={() => stop(false)}>
                 Pause

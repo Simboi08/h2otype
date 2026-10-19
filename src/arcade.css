@@ -399,7 +399,7 @@ body {
     justify-self: center;
   }
   main {
-    padding: 20px 0 56px;
+    padding: 12px 0 24px;
   }
   .wordmark {
     font-size: 18px;
@@ -428,6 +428,9 @@ body {
   }
   .passage-window {
     margin: 16px 0;
+  }
+  .typing-space:has(.live-stats) .passage-window {
+    max-height: 18svh;
   }
   .level-up-banner {
     min-width: 144px;

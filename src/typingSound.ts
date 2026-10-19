@@ -5,11 +5,11 @@ export function createSoundSamples(
   style: Exclude<SoundStyle, "off">,
   sampleRate: number,
 ) {
-  const duration = style === "standard" ? 0.035 : 0.075;
+  const duration = style === "standard" ? 0.035 : 0.095;
   const samples = new Float32Array(Math.round(sampleRate * duration));
   let seed = 731;
   let held = 0;
-  const hold = Math.max(1, Math.round(sampleRate / 4500));
+  const hold = Math.max(1, Math.round(sampleRate / 3500));
   for (let index = 0; index < samples.length; index++) {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     const noise = (seed / 0xffffffff) * 2 - 1;
@@ -21,14 +21,18 @@ export function createSoundSamples(
         (noise * 0.28 + Math.sin(2 * Math.PI * 850 * time) * 0.16) * envelope;
     else {
       const punchEnvelope =
-        Math.min(1, time / 0.0005) * Math.pow(1 - index / samples.length, 2.3);
+        Math.min(1, time / 0.0003) *
+        Math.pow(1 - index / (samples.length - 1), 1.5);
       if (index % hold === 0)
         held =
           Math.round(
-            (Math.sign(Math.sin(2 * Math.PI * 245 * time)) * 0.48 +
-              Math.sin(2 * Math.PI * (170 * time - 500 * time * time)) * 0.14 +
-              noise * 0.12) *
-              8,
+            Math.tanh(
+              (Math.sign(Math.sin(2 * Math.PI * 185 * time)) * 0.55 +
+                Math.sin(2 * Math.PI * (135 * time - 360 * time * time)) *
+                  0.35 +
+                noise * 0.18 * Math.exp(-time * 95)) *
+                1.8,
+            ) * 6,
           ) / 8;
       samples[index] = held * punchEnvelope;
     }
@@ -70,7 +74,7 @@ export function stopTypingSounds() {
   voices.clear();
 }
 
-export function playTypingSound(style: SoundStyle, volume: number) {
+export function playTypingSound(style: SoundStyle, volume: number, pitch = 1) {
   if (style === "off" || volume <= 0 || document.hidden) return;
   try {
     if (!context || context.state === "closed") {
@@ -105,6 +109,9 @@ export function playTypingSound(style: SoundStyle, volume: number) {
       const source = activeContext.createBufferSource();
       const gain = activeContext.createGain();
       source.buffer = buffer;
+      source.playbackRate.value = Number.isFinite(pitch)
+        ? Math.min(1.5, Math.max(1, pitch))
+        : 1;
       gain.gain.value = (Math.min(100, volume) / 100) * 0.3;
       source.connect(gain);
       gain.connect(activeContext.destination);
