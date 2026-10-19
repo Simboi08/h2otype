@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 
 test("mode navigation switches practice without starting the timer", async ({
   page,
@@ -22,10 +22,6 @@ test("mode navigation switches practice without starting the timer", async ({
   ).toHaveValue("");
   await page.getByRole("button", { name: "Sprint", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Zen session", exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Go to Sprint", exact: true }).click();
-  await expect(
     page.getByRole("heading", { name: "h2otype typing practice" }),
   ).toBeAttached();
 });
@@ -47,7 +43,7 @@ test("theme follows the system, persists overrides, and supports keyboard dismis
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Open settings" }),
+    page.getByRole("textbox", { name: "Type the passage" }),
   ).toBeFocused();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");

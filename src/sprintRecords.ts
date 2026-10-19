@@ -1,3 +1,5 @@
+import type { WordSet } from "./wordBank";
+
 export const sprintDurations = [15, 30, 60] as const;
 export type SprintDuration = (typeof sprintDurations)[number];
 export type Best = { wpm: number; accuracy: number };
@@ -57,11 +59,14 @@ export function recordSprint(
   duration: SprintDuration,
   candidate: Best,
   eligible: boolean,
+  wordSet: WordSet = "sentences",
 ) {
+  const storageKey =
+    wordSet === "sentences" ? key : `h2otype.sprint-bests.${wordSet}.v1`;
   let bests: Bests = {};
   let available = true;
   try {
-    bests = parseBests(localStorage.getItem(key));
+    bests = parseBests(localStorage.getItem(storageKey));
   } catch {
     available = false;
   }
@@ -69,7 +74,7 @@ export function recordSprint(
   if (newBest) bests[duration] = candidate;
   if (available && newBest) {
     try {
-      localStorage.setItem(key, JSON.stringify({ version: 1, bests }));
+      localStorage.setItem(storageKey, JSON.stringify({ version: 1, bests }));
     } catch {
       available = false;
     }

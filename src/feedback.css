@@ -1,0 +1,287 @@
+.practice-status {
+  flex: 1;
+  min-width: 0;
+}
+.passage-card {
+  position: relative;
+  isolation: isolate;
+}
+.practice-surface {
+  position: relative;
+  z-index: 1;
+}
+.combo-vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 48%,
+    #d04c7014 72%,
+    #c5466180 100%
+  );
+  box-shadow: inset 0 0 calc(45px + var(--combo-power) * 18px)
+    calc(8px + var(--combo-power) * 5px) #c734584d;
+  opacity: calc(0.3 + var(--combo-power) * 0.13);
+  animation: vignette-arrive 220ms ease-out;
+  transition:
+    opacity 160ms ease-out,
+    box-shadow 160ms ease-out;
+}
+:root[data-theme="dark"] .combo-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 48%,
+    #e9604214 72%,
+    #dd493875 100%
+  );
+  box-shadow: inset 0 0 calc(45px + var(--combo-power) * 18px)
+    calc(8px + var(--combo-power) * 5px) #e7583459;
+}
+:root[data-effects="1"] .combo-vignette {
+  opacity: calc(0.12 + var(--combo-power) * 0.055);
+}
+@keyframes vignette-arrive {
+  from {
+    opacity: 0;
+  }
+}
+.combo-meter {
+  --combo-color: #ae4616;
+  position: relative;
+  width: min(100%, 340px);
+  padding: 6px 9px;
+  color: var(--combo-color);
+  background: var(--surface);
+  border: 1px solid var(--combo-color);
+  border-left-width: 3px;
+}
+:root[data-theme="dark"] .combo-meter {
+  --combo-color: #ffb45e;
+}
+.combo-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 10px;
+  margin-bottom: 5px;
+  font: 10px monospace;
+}
+.combo-heading strong {
+  font: 11px var(--hud);
+}
+.combo-heading > span {
+  color: var(--secondary);
+}
+.combo-track {
+  height: 4px;
+  background: var(--border);
+}
+.combo-track > span {
+  display: block;
+  height: 100%;
+  background: var(--combo-color);
+  transition: width 140ms ease-out;
+}
+:root[data-effects="2"] .combo-meter {
+  box-shadow: 0 0 26px #f1782840;
+  border-width: 2px;
+  border-left-width: 4px;
+}
+:root[data-effects="0"] .combo-meter {
+  box-shadow: none;
+  border-color: var(--border);
+}
+:root[data-effects="0"] .combo-track > span {
+  transition: none;
+}
+:root[data-effects="0"] .level-up-banner {
+  animation: none;
+  box-shadow: none;
+}
+:root[data-effects="0"] .has-level-up .level-indicator {
+  border-color: var(--border);
+}
+.progress-notice {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+}
+.level-up-banner {
+  position: absolute;
+  top: clamp(88px, 12svh, 120px);
+  left: 50%;
+  min-width: min(340px, calc(100vw - 32px));
+  padding: 16px 28px;
+  transform: translateX(-50%);
+  text-align: center;
+  border-width: 3px;
+  box-shadow:
+    6px 6px 0 var(--background),
+    0 0 48px color-mix(in srgb, var(--pink) 20%, transparent);
+  animation: grand-cycle 4000ms linear both;
+}
+.level-up-label {
+  font-size: 14px;
+  letter-spacing: 3px;
+  margin-bottom: 7px;
+}
+.level-up-banner strong {
+  font-size: 42px;
+  text-shadow: 3px 3px 0 var(--background);
+}
+.level-celebration {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  animation: celebration-fade 1800ms ease-out both;
+}
+.level-halo,
+.level-shards {
+  position: absolute;
+  left: 50%;
+  top: clamp(134px, 18svh, 180px);
+}
+.level-halo {
+  width: 60vmin;
+  height: 60vmin;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  box-shadow:
+    0 0 30px var(--accent-soft),
+    inset 0 0 20px var(--accent-soft);
+  animation: level-wave 1300ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.level-shards i {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  animation: level-spark 1250ms var(--burst-delay)
+    cubic-bezier(0.1, 0.6, 0.2, 1) both;
+}
+.level-shards i:nth-child(3n) {
+  background: var(--pink);
+}
+.level-shards i:nth-child(3n + 1) {
+  background: #efbb57;
+  width: 5px;
+  height: 12px;
+}
+@keyframes grand-cycle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.05);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  8% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    animation-timing-function: linear;
+  }
+  92% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+    animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.05);
+  }
+}
+@keyframes celebration-fade {
+  0%,
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes level-wave {
+  from {
+    opacity: 0.65;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.4);
+  }
+}
+@keyframes level-spark {
+  from {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.7);
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--burst-x), var(--burst-y)) rotate(120deg)
+      scale(0.3);
+  }
+}
+@media (max-width: 700px) {
+  .level-up-banner {
+    padding: 14px 18px;
+  }
+  .level-up-banner strong {
+    font-size: 30px;
+  }
+  .level-up-label {
+    font-size: 11px;
+  }
+  .combo-heading {
+    font-size: 9px;
+  }
+  .combo-heading strong {
+    font-size: 10px;
+  }
+}
+@media (max-height: 500px) {
+  .level-up-banner {
+    top: 6px;
+    min-width: 180px;
+    padding: 6px 14px;
+  }
+  .level-up-banner strong {
+    font-size: 24px;
+  }
+  .level-up-label {
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+  .level-halo,
+  .level-shards {
+    top: 40px;
+  }
+}
+
+:root[data-graphics="low"] .combo-vignette {
+  animation: none;
+  transition: none;
+  box-shadow: none;
+}
+:root[data-graphics="low"] .combo-meter,
+:root[data-graphics="low"] .level-up-banner {
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .combo-vignette,
+  .level-up-banner {
+    animation: none;
+  }
+  .combo-vignette,
+  .combo-track > span {
+    transition: none;
+  }
+}
+@media (forced-colors: active) {
+  .level-celebration,
+  .combo-vignette {
+    display: none;
+  }
+  .combo-track > span {
+    background: Highlight;
+  }
+}

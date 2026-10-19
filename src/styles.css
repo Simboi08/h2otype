@@ -55,6 +55,11 @@ a {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
+/* The passage caret communicates typing focus without framing the workspace. */
+main:focus,
+.typing-input:focus {
+  outline: none;
+}
 .app-shell {
   max-width: 1180px;
   min-height: 100svh;
@@ -136,7 +141,7 @@ main {
 }
 .typing-space {
   width: 100%;
-  max-width: 820px;
+  max-width: calc(820px * var(--typing-scale, 1));
   min-width: 0;
 }
 .passage-card {
@@ -150,17 +155,24 @@ main {
   font-size: 12px;
 }
 .passage-window {
-  max-height: min(210px, 30svh);
+  max-height: min(calc(210px * var(--typing-scale, 1)), 30svh);
   overflow-y: auto;
   margin: 28px 0;
   padding: 4px 2px;
   scrollbar-width: thin;
 }
 .passage {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: clamp(20px, 2.3vw, 25px);
+  font-family: var(
+    --typing-font,
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace
+  );
+  font-size: calc(clamp(20px, 2.3vw, 25px) * var(--typing-scale, 1));
+  font-weight: var(--typing-weight, 400);
   line-height: 1.85;
-  letter-spacing: -0.6px;
+  letter-spacing: var(--typing-spacing, 0px);
   color: var(--secondary);
   margin: 0;
 }
@@ -210,11 +222,16 @@ main {
   color: var(--text);
   padding: 12px 14px;
   font: inherit;
-  font-size: 16px;
+  font-size: max(16px, calc(16px * var(--typing-scale, 1)));
+  font-family: var(--typing-font, inherit);
+  font-weight: var(--typing-weight, 400);
 }
 .typing-input::placeholder {
   color: var(--muted);
   font-size: 13px;
+}
+.typing-input {
+  letter-spacing: var(--typing-spacing, 0px);
 }
 .practice-footer {
   display: flex;
@@ -610,6 +627,7 @@ main {
   position: sticky;
   top: 0;
   background: var(--surface);
+  box-shadow: 0 -32px 0 var(--surface);
   z-index: 1;
   padding-bottom: 12px;
 }
@@ -646,6 +664,18 @@ main {
   font-size: 13px;
   color: var(--text);
 }
+.preference-select {
+  min-height: 40px;
+  max-width: 45%;
+  flex-shrink: 0;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 12px;
+}
 .preference-description {
   display: block;
   font-size: 11px;
@@ -653,7 +683,7 @@ main {
   margin-top: 5px;
   line-height: 1.5;
 }
-.preference-row input {
+.preference-row input[type="checkbox"] {
   appearance: none;
   flex-shrink: 0;
   margin: 0;
@@ -665,7 +695,7 @@ main {
   cursor: pointer;
   position: relative;
 }
-.preference-row input::after {
+.preference-row input[type="checkbox"]::after {
   content: "";
   position: absolute;
   width: 16px;
@@ -675,11 +705,11 @@ main {
   border-radius: 50%;
   background: var(--secondary);
 }
-.preference-row input:checked {
+.preference-row input[type="checkbox"]:checked {
   background: var(--accent);
   border-color: var(--accent);
 }
-.preference-row input:checked::after {
+.preference-row input[type="checkbox"]:checked::after {
   left: 16px;
   background: var(--surface);
 }
@@ -689,11 +719,58 @@ main {
   line-height: 1.6;
   margin: 16px 0 0;
 }
+.preference-range {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.range-heading,
+.range-endpoints {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+.range-heading output,
+.range-endpoints {
+  font-size: 11px;
+  color: var(--secondary);
+  font-variant-numeric: tabular-nums;
+}
+.typing-particles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+.sound-preview {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+}
+.sound-preview:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.preference-range .preference-description {
+  margin-bottom: 0;
+}
+.preference-range input[type="range"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 32px;
+  margin: 8px 0 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
 .live-stats {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px;
-  font-size: 11px;
+  row-gap: 6px;
+  font-size: 14px;
   margin: 0;
   font-variant-numeric: tabular-nums;
 }

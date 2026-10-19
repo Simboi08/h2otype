@@ -1,5 +1,6 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 import { defaultPreferences, parsePreferences } from "../src/preferences";
+import { setWpmRefresh } from "./settings";
 
 async function openSettings(page: import("@playwright/test").Page) {
   await page
@@ -21,6 +22,7 @@ async function enableStats(page: import("@playwright/test").Page) {
   await page
     .getByRole("switch", { name: "Live accuracy", exact: true })
     .check();
+  await setWpmRefresh(page, 0);
   await closeSettings(page);
 }
 const stat = (page: import("@playwright/test").Page, name: string) =>
@@ -51,11 +53,36 @@ test("preferences validate partial boolean fields and fall back safely for inval
       }),
     ),
   ).toEqual({
+    ...defaultPreferences,
     liveWpm: true,
     liveAccuracy: false,
     xpProgress: false,
     levelNotifications: true,
+    wpmRefreshMs: 500,
   });
+});
+
+test("WPM refresh validation accepts supported intervals and migrates existing preferences", () => {
+  for (const value of [0, 500, 1000, 2000]) {
+    expect(
+      parsePreferences(
+        JSON.stringify({
+          version: 1,
+          preferences: { liveWpm: true, wpmRefreshMs: value },
+        }),
+      ),
+    ).toEqual({ ...defaultPreferences, liveWpm: true, wpmRefreshMs: value });
+  }
+  for (const value of [null, true, "1000", -1, 1, 250, 1e10]) {
+    expect(
+      parsePreferences(
+        JSON.stringify({
+          version: 1,
+          preferences: { liveWpm: true, wpmRefreshMs: value },
+        }),
+      ),
+    ).toEqual({ ...defaultPreferences, liveWpm: true });
+  }
 });
 
 test("defaults stay quiet and every display preference and theme survive reload", async ({
@@ -192,7 +219,7 @@ test("hiding progress and notifications changes display only and never replays a
   await closeSettings(page);
   await page.getByRole("textbox").press("s");
   await expect(page.getByRole("progressbar")).toHaveCount(0);
-  await expect(page.locator(".progress-notice")).toHaveText("");
+  await expect(page.locator(".level-up-banner")).toHaveCount(0);
   expect(
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).totalXp,
@@ -212,7 +239,7 @@ test("hiding progress and notifications changes display only and never replays a
   await page
     .getByRole("textbox")
     .fill((await page.locator(".passage").innerText()).slice(0, 201));
-  await expect(page.locator(".progress-notice")).toHaveText("Level 3");
+  await expect(page.locator(".progress-notice")).toContainText("Level 3");
   await openSettings(page);
   await page
     .getByRole("switch", { name: "Level-up notifications", exact: true })
@@ -251,17 +278,12 @@ test("settings trap keyboard focus, switches work with Space, and Escape returns
   await expect(close).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(opener).toBeFocused();
-  // A fresh page tests entry order; reload may legitimately restore previous focus.
-  const fresh = await page.context().newPage();
-  await fresh.goto("/");
-  await fresh.keyboard.press("Tab");
-  await expect(
-    fresh.getByRole("link", { name: "Skip to content" }),
-  ).toBeFocused();
-  await fresh.keyboard.press("Enter");
-  await expect(fresh.locator("#main")).toBeFocused();
-  await fresh.close();
+  await expect(page.getByRole("textbox")).toBeFocused();
+  // Settings remains directly reachable without Tab navigation on the game page.
+  await page.keyboard.press("F2");
+  await expect(close).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("textbox")).toBeFocused();
 });
 
 test("all displays fit small screens, settings scroll accessibly, and reduced motion keeps the caret still", async ({
