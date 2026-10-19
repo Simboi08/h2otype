@@ -62,15 +62,23 @@ The planned MVP milestones are complete. Later possibilities remain optional and
 - [x] Three-stop graphics slider preserving saved quality tiers
 - [x] Larger, sparser 8-bit particles and a stronger 95ms crunch
 - [x] Grand level-up banner, ring, and pixel burst respecting motion/notification/quality settings
-- [x] Correct-typing combo meter, escalating fire, and bounded rising sound pitch
+- [x] Correct-typing combo meter, escalating vignette, and bounded rising sound pitch
 - [x] Keep combos separate from scoring/XP and prevent credit replay through corrections
 
 ## Post-MVP — Game feedback and direct navigation
 - [x] Level announcements shrink out as quickly as they scale in
 - [x] Direct Zen-to-Sprint switching with preserved paused drafts and active-time accounting
-- [x] Larger edge fire, bounded embers, and short milestone screen shake on by default
+- [x] Larger edge fire and short milestone shake on by default (fire later replaced by vignette below)
 - [x] Independent Visual effects intensity slider and Screen shake switch
 - [x] Remove the full-screen scanline/filter overlay; retain reduced-motion/Low/Off fallbacks
+
+## Post-MVP — Word sets and combo vignette
+- [x] Local English 100/500/1,000 common-word pools and the original sentences
+- [x] Header word-set picker beside Settings, F3 shortcut, remembered choices
+- [x] Fresh randomized Sprint runs and resumable, continuously generated Zen
+- [x] Separate best scores per pool/duration and preserve old drafts/XP/records
+- [x] Replace all flame sprites with a combo-driven edge vignette
+- [x] Stronger Intense shake, with independent intensity/shake and Low/reduced-motion controls
 
 The current implementation requests are complete. Achievements and unlockable themes remain deferred; further notes and future tester feedback can be added in [NOTES.md](NOTES.md).
 

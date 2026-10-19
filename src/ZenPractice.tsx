@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { Ref } from "react";
+import { freshSeed } from "./wordBank";
+import type { WordSet } from "./wordBank";
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
 import { useTypingFeedback } from "./useTypingFeedback";
@@ -14,8 +17,15 @@ import {
 import type { ZenState } from "./zenEngine";
 import { loadZen, saveZen } from "./zenStorage";
 
-export default function ZenPractice() {
-  const [initial] = useState(loadZen);
+export type ZenHandle = { changeWordSet: (set: WordSet) => void };
+export default function ZenPractice({
+  wordSet,
+  ref,
+}: {
+  wordSet: WordSet;
+  ref?: Ref<ZenHandle>;
+}) {
+  const [initial] = useState(() => loadZen(wordSet));
   const [state, setState] = useState(initial.state);
   const latest = useRef(initial.state);
   const [now, setNow] = useState(0);
@@ -29,6 +39,7 @@ export default function ZenPractice() {
   const heading = useRef<HTMLHeadingElement>(null);
   const focusInput = useRef(false);
   const { prefix, word } = getWordInput(state.session.typed);
+  useImperativeHandle(ref, () => ({ changeWordSet: (set) => newSession(set) }));
   const metrics = zenMetrics(state, now);
   const stopped = state.paused || state.summary;
   const {
@@ -37,7 +48,7 @@ export default function ZenPractice() {
     reset: resetFeedback,
     layer: particleLayer,
     comboMeter,
-    fireLayer,
+    vignetteLayer,
   } = useTypingFeedback(!stopped);
   usePracticeKeyboard({
     restart: newSession,
@@ -108,20 +119,20 @@ export default function ZenPractice() {
     update(resumeZen(latest.current, timestamp), timestamp);
   }
 
-  function newSession() {
+  function newSession(set: WordSet = wordSet) {
     resetFeedback();
     const timestamp = performance.now();
     focusInput.current = true;
     setDraft(null);
     composing.current = false;
-    update(createZen(), timestamp);
+    update(createZen(set, freshSeed()), timestamp);
     input.current?.focus({ preventScroll: true });
   }
 
   return (
     <div className="passage-card" ref={feedbackRef}>
       {particleLayer}
-      {fireLayer}
+      {vignetteLayer}
       <div className="practice-surface">
         <div className="passage-meta">
           <span>Zen</span>
@@ -180,7 +191,7 @@ export default function ZenPractice() {
             <div className="results-footer">
               <p>Active time only. Enter resumes · Tab starts a new session.</p>
               <div className="zen-actions">
-                <button className="restart-button" onClick={newSession}>
+                <button className="restart-button" onClick={() => newSession()}>
                   New session
                 </button>
                 <button className="restart-button" onClick={resume}>

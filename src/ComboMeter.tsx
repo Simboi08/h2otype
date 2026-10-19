@@ -9,15 +9,10 @@ export default function ComboMeter({ streak }: { streak: number }) {
       data-tier={tier}
       title="Correct-typing streak. Feedback only; XP stays the same."
     >
-      <div className="combo-flames" aria-hidden="true">
-        {[0, 1, 2, 3, 4].map((flame) => (
-          <i key={flame} />
-        ))}
-      </div>
       <div className="combo-heading">
         <strong>Combo ×{tier}</strong>
         <span>
-          {streak} correct{tier >= 4 ? " · On fire" : ""}
+          {streak} correct{tier >= 4 ? " · Peak combo" : ""}
         </span>
       </div>
       <div

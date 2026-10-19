@@ -1,7 +1,7 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 import type { Page } from "@playwright/test";
 import { defaultPreferences, parsePreferences } from "../src/preferences";
-import { comboImpact } from "../src/combo";
+import { comboImpact, impactProfile } from "../src/combo";
 import { setGraphicsQuality } from "./settings";
 
 async function ready(page: Page) {
@@ -71,6 +71,17 @@ test("combo impacts reward tier changes and longer streak milestones instead of 
   expect(comboImpact(49, 50)).toBe(3);
   expect(comboImpact(59, 60)).toBe(3);
   expect(comboImpact(60, 61)).toBe(0);
+  expect(comboImpact(69, 70)).toBe(3);
+  expect(impactProfile(2, 5)).toEqual({
+    strength: 7.5,
+    duration: 220,
+    cooldown: 120,
+  });
+  expect(impactProfile(1, 5)).toEqual({
+    strength: 0.8,
+    duration: 160,
+    cooldown: 250,
+  });
   expect(comboImpact(199, 200)).toBe(5);
   expect(comboImpact(220, 0)).toBe(0);
   expect(comboImpact(220, 220)).toBe(0);
@@ -124,7 +135,7 @@ test("level-up scales in, holds, and scales out over equal short intervals befor
   await expect(banner).toHaveCount(0);
 });
 
-test("default fire adds larger edge jets and brief bounded shake while keeping the page filter-free", async ({
+test("default combos add an edge vignette and stronger bounded shake without flame sprites or filters", async ({
   page,
 }) => {
   await probeShake(page);
@@ -134,25 +145,28 @@ test("default fire adds larger edge jets and brief bounded shake while keeping t
   await input.fill(passage.slice(0, 25));
   await expect(page.locator("html")).toHaveAttribute("data-effects", "2");
   await expect(page.locator(".screen-lines")).toHaveCount(0);
-  await expect(page.locator(".combo-aura")).toHaveCSS("pointer-events", "none");
-  await expect(page.locator(".fire-jet")).toHaveCount(2);
+  const vignette = page.locator(".combo-vignette");
+  await expect(vignette).toHaveCSS("pointer-events", "none");
+  await expect(vignette).toHaveAttribute("data-tier", "2");
+  await expect(
+    page.locator(".fire-jet, .combo-flames, .combo-embers"),
+  ).toHaveCount(0);
   expect(
-    (await page.locator(".fire-jet").first().boundingBox())!.height,
-  ).toBeGreaterThanOrEqual(60);
-  await expect(page.locator(".fire-jet i").first()).toHaveCSS(
-    "animation-name",
-    "arcade-fire",
-  );
+    await vignette.evaluate((el) => getComputedStyle(el).backgroundImage),
+  ).toContain("radial-gradient");
+  const bounds = await vignette.boundingBox();
+  expect(bounds!.width).toBe(1280);
+  expect(bounds!.height).toBe(720);
   const first = await impacts(page);
   expect(first).toHaveLength(1);
-  expect(first[0].duration).toBe(160);
+  expect(first[0].duration).toBe(220);
   expect(
     first[0].frames.some((frame) => frame.transform !== "translate(0, 0)"),
   ).toBe(true);
   expect(
     first[0].frames.every((frame) =>
       [...String(frame.transform).matchAll(/(-?[\d.]+)px/g)].every(
-        (value) => Math.abs(Number(value[1])) <= 3,
+        (value) => Math.abs(Number(value[1])) <= 8,
       ),
     ),
   ).toBe(true);
@@ -162,7 +176,7 @@ test("default fire adds larger edge jets and brief bounded shake while keeping t
   await input.pressSequentially(passage.slice(26, 50));
   expect(await impacts(page)).toHaveLength(2);
   await input.press("Tab");
-  await expect(page.locator(".combo-aura")).toHaveCount(0);
+  await expect(page.locator(".combo-vignette")).toHaveCount(0);
   expect(
     await page
       .locator(".practice-surface")
@@ -179,8 +193,10 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
   await input.fill(passage.slice(0, 60));
-  const intenseHeight = (await page.locator(".fire-jet").first().boundingBox())!
-    .height;
+  await page.clock.runFor(300);
+  const intenseOpacity = await page
+    .locator(".combo-vignette")
+    .evaluate((el) => Number(getComputedStyle(el).opacity));
   await page.keyboard.press("F2");
   await page.getByRole("slider", { name: "Visual effects" }).press("Home");
   await page
@@ -194,16 +210,19 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
     .selectOption("pixel");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "60");
+  await page.clock.runFor(300);
   expect(
-    (await page.locator(".fire-jet").first().boundingBox())!.height,
-  ).toBeLessThan(intenseHeight);
+    await page
+      .locator(".combo-vignette")
+      .evaluate((el) => Number(getComputedStyle(el).opacity)),
+  ).toBeLessThan(intenseOpacity);
   const count = (await impacts(page)).length;
   await input.pressSequentially(passage.slice(60, 80));
   expect(await impacts(page)).toHaveLength(count);
   await page.keyboard.press("F2");
   await page.getByRole("slider", { name: "Visual effects" }).press("Home");
   await page.keyboard.press("Escape");
-  await expect(page.locator(".combo-aura")).toHaveCount(0);
+  await expect(page.locator(".combo-vignette")).toHaveCount(0);
   await expect(page.locator(".combo-flames")).not.toBeVisible();
   await expect(page.locator(".typing-particles")).toHaveCount(0);
   expect(
@@ -238,7 +257,7 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
   ).toHaveValue("pixel");
 });
 
-test("reduced motion and Low quality suppress screen shake and moving fire even when effects are Intense", async ({
+test("reduced motion and Low quality suppress screen shake and vignette motion even when effects are Intense", async ({
   page,
 }) => {
   await probeShake(page);
@@ -260,7 +279,7 @@ test("reduced motion and Low quality suppress screen shake and moving fire even 
       "100",
     );
     expect(await impacts(page)).toHaveLength(0);
-    await expect(page.locator(".fire-jet i").first()).toHaveCSS(
+    await expect(page.locator(".combo-vignette")).toHaveCSS(
       "animation-name",
       "none",
     );

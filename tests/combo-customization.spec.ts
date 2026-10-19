@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 import type { Page } from "@playwright/test";
 import { advanceCombo, getCombo } from "../src/combo";
 import { editSession, emptySession } from "../src/typingEngine";

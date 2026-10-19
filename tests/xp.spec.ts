@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 const key = "h2otype.progress.v1";
 async function total(page: import("@playwright/test").Page) {
   return page.evaluate(

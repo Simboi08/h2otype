@@ -1,6 +1,6 @@
 # h2otype — Ideas and feedback
 
-Captured: 2026-10-18. All currently requested controls and customization ideas are implemented.
+Captured: 2026-10-18. All currently requested controls, customization, and word-set changes are implemented.
 
 Feedback added: 2026-10-19.
 
@@ -63,5 +63,13 @@ Feedback added: 2026-10-19.
 - [x] Remove the screen-wide filter/scanlines and celebration tint.
 - Product direction: make h2otype fun and satisfying as a game while keeping typing readable. Strong earned feedback and clear effect preferences are part of that identity.
 - Planning can happen in this Codex chat or a separate brainstorming chat. Keep agreed decisions and future tester feedback here, then record implementation choices in DESIGN.md and completed/verified work in PROGRESS.md.
+
+## Word sets and effects — latest feedback
+- [x] Larger common-English word bank: English 100, 500, and 1,000, plus original sentences.
+- [x] Word-set button next to Settings, remembered across visits, with F3 access.
+- [x] Preserve earned XP, existing sentence drafts, and separate personal bests when selecting sets.
+- [x] Remove the fire sprites and meter flames; use an earned, tier-scaled edge vignette with a clear center.
+- [x] Stronger and more frequent Intense shake, while Balanced/Off, Low graphics, reduced motion, and the independent shake switch remain effective.
+- Other languages and additional text packs can follow later; achievements and unlockable themes remain deferred.
 
 See PROGRESS.md for implementation and validation details. Add new feedback here as it comes up.

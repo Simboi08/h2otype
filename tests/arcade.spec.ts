@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, sentenceStorage } from "./practice-fixture";
 import type { Page } from "@playwright/test";
 import { easeXp, graphicsProfiles, particleVelocity } from "../src/graphics";
 import { defaultPreferences, parsePreferences } from "../src/preferences";
@@ -74,6 +74,7 @@ test("particles start beyond the letter's right edge and graphics tiers change d
   browser,
 }) => {
   const context = await browser.newContext({
+    storageState: sentenceStorage,
     viewport: { width: 640, height: 600 },
     deviceScaleFactor: 2,
   });

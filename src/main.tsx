@@ -4,6 +4,7 @@ import App from "./App";
 import "./styles.css";
 import "./arcade.css";
 import "./feedback.css";
+import "./wordsets.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 import { isBetter, parseBests } from "../src/sprintRecords";
 
 for (const duration of [15, 30, 60]) {
@@ -108,7 +108,8 @@ test("blocked storage does not prevent results or restart", async ({
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
-  await page.getByRole("textbox").pressSequentially("slow");
+  const passage = await page.locator(".passage").innerText();
+  await page.getByRole("textbox").fill(passage.slice(0, 4));
   await page.clock.fastForward(30_000);
   await expect(page.locator(".record-summary")).toContainText(
     "Browser storage is unavailable",

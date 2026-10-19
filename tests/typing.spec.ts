@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 
 test("typing marks characters, supports correction, and expires with honest accuracy", async ({
   page,

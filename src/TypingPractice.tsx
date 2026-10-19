@@ -15,27 +15,27 @@ import TypingPassage from "./TypingPassage";
 import SprintResults from "./SprintResults";
 import { sprintDurations } from "./sprintRecords";
 import type { SprintDuration } from "./sprintRecords";
-
-const passages = {
-  sprint:
-    "slow down and notice the little things. the light across your desk, the quiet of the morning, the space between one thought and the next.",
-  zen: "there is no hurry to get anywhere. let each word lead to the next, like a path winding softly through the trees on a quiet afternoon.",
-};
+import { freshSeed, generateWords } from "./wordBank";
+import type { WordSet } from "./wordBank";
+import { sprintSentence } from "./passages";
 
 export default function TypingPractice({
   mode,
   duration,
   onDurationChange,
+  wordSet,
 }: {
   mode: "sprint" | "zen";
   duration: SprintDuration;
   onDurationChange: (duration: SprintDuration) => void;
+  wordSet: WordSet;
 }) {
-  // A fixed long passage supplies well over a normal minute of typing.
-  const passage =
-    mode === "sprint"
-      ? Array(24).fill(passages.sprint).join(" ")
-      : passages.zen;
+  // Each generated run gets fresh words, with enough text for a full minute.
+  const createPassage = () =>
+    wordSet === "sentences"
+      ? Array(24).fill(sprintSentence).join(" ")
+      : generateWords(wordSet, freshSeed(), 600).text;
+  const [passage, setPassage] = useState(createPassage);
   const durationMs = mode === "sprint" ? duration * 1000 : null;
   const [session, setSession] = useState(emptySession);
   const latest = useRef(session);
@@ -52,7 +52,7 @@ export default function TypingPractice({
     reset: resetFeedback,
     layer: particleLayer,
     comboMeter,
-    fireLayer,
+    vignetteLayer,
   } = useTypingFeedback(!finished);
   const { prefix, word } = getWordInput(session.typed);
   usePracticeKeyboard({ restart, composing, input, enabled: !finished });
@@ -85,6 +85,7 @@ export default function TypingPractice({
 
   function restart() {
     resetFeedback();
+    setPassage(createPassage());
     focusOnAttach.current = true;
     const next = emptySession();
     latest.current = next;
@@ -97,7 +98,7 @@ export default function TypingPractice({
   return (
     <div className="passage-card" ref={feedbackRef}>
       {particleLayer}
-      {fireLayer}
+      {vignetteLayer}
       <div className="practice-surface">
         <div className="passage-meta">
           {mode === "sprint" ? (
@@ -144,6 +145,7 @@ export default function TypingPractice({
             duration={duration}
             metrics={metrics}
             xpEarned={session.xpEarned}
+            wordSet={wordSet}
             onRestart={restart}
           />
         ) : (

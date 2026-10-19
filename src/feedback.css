@@ -10,165 +10,55 @@
   position: relative;
   z-index: 1;
 }
-.combo-aura {
-  --fire: #bd4618;
+.combo-vignette {
   position: fixed;
   inset: 0;
-  overflow: clip;
   pointer-events: none;
   z-index: 0;
-}
-:root[data-theme="dark"] .combo-aura {
-  --fire: #ffa447;
-}
-.combo-aura::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    var(--fire),
-    transparent 35% 65%,
-    var(--fire)
+  background: radial-gradient(
+    ellipse at center,
+    transparent 48%,
+    #d04c7014 72%,
+    #c5466180 100%
   );
-  box-shadow: 0 0 22px #f878284d;
+  box-shadow: inset 0 0 calc(45px + var(--combo-power) * 18px)
+    calc(8px + var(--combo-power) * 5px) #c734584d;
+  opacity: calc(0.3 + var(--combo-power) * 0.13);
+  animation: vignette-arrive 220ms ease-out;
+  transition:
+    opacity 160ms ease-out,
+    box-shadow 160ms ease-out;
 }
-.fire-jet {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 84px;
-  height: calc(50px + var(--combo-power) * 16px);
-}
-.fire-right {
-  left: auto;
-  right: 0;
-  transform: scaleX(-1);
-}
-.fire-jet i {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 28px;
-  height: 100%;
-  background: linear-gradient(#fff1a1 0%, #ffc044 30%, #ff702b 70%, #d93b2d);
-  transform-origin: bottom;
-  clip-path: polygon(
-    40% 0,
-    65% 0,
-    65% 18%,
-    80% 18%,
-    80% 38%,
-    100% 38%,
-    100% 85%,
-    80% 85%,
-    80% 100%,
-    15% 100%,
-    15% 80%,
-    0 80%,
-    0 43%,
-    20% 43%,
-    20% 20%,
-    40% 20%
+:root[data-theme="dark"] .combo-vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 48%,
+    #e9604214 72%,
+    #dd493875 100%
   );
-  animation: arcade-fire 420ms ease-in-out infinite alternate;
+  box-shadow: inset 0 0 calc(45px + var(--combo-power) * 18px)
+    calc(8px + var(--combo-power) * 5px) #e7583459;
 }
-.fire-jet i:nth-child(2) {
-  left: 25px;
-  width: 34px;
-  height: 78%;
-  animation-delay: -170ms;
+:root[data-effects="1"] .combo-vignette {
+  opacity: calc(0.12 + var(--combo-power) * 0.055);
 }
-.fire-jet i:nth-child(3) {
-  left: 50px;
-  width: 26px;
-  height: 55%;
-  animation-delay: -290ms;
-}
-.combo-embers i {
-  position: absolute;
-  bottom: 12px;
-  left: calc(12px + var(--ember) * 5px);
-  width: 4px;
-  height: 4px;
-  background: #ffb54d;
-  animation: ember-rise 1100ms calc(var(--ember) * -170ms) ease-out infinite;
-}
-.combo-embers i:nth-child(even) {
-  left: auto;
-  right: calc(12px + var(--ember) * 5px);
-}
-:root[data-effects="1"] .fire-jet {
-  height: calc(22px + var(--combo-power) * 6px);
-  opacity: 0.75;
-}
-:root[data-effects="1"] .combo-embers {
-  display: none;
-}
-:root[data-effects="2"] .combo-meter {
-  border-width: 2px;
-  border-left-width: 4px;
-  box-shadow: 0 0 24px #f178283b;
-}
-:root[data-effects="2"] .combo-flames i {
-  width: 14px;
-}
-:root[data-effects="2"] .combo-meter[data-tier="4"] .combo-flames i {
-  height: 30px;
-}
-:root[data-effects="2"] .combo-meter[data-tier="5"] .combo-flames i {
-  height: 36px;
-}
-:root[data-effects="0"] .combo-flames {
-  display: none;
-}
-:root[data-effects="0"] .combo-meter {
-  box-shadow: none;
-  border-color: var(--border);
-}
-:root[data-effects="0"] .combo-track > span {
-  transition: none;
-}
-:root[data-effects="0"] .level-up-banner {
-  animation: none;
-  box-shadow: none;
-}
-:root[data-effects="0"] .has-level-up .level-indicator {
-  border-color: var(--border);
-}
-@keyframes arcade-fire {
+@keyframes vignette-arrive {
   from {
-    transform: scaleY(0.68) skewX(-4deg);
-  }
-  to {
-    transform: scaleY(1.05) skewX(5deg);
-  }
-}
-@keyframes ember-rise {
-  from {
-    opacity: 0.9;
-    transform: translate(0, 0);
-  }
-  to {
     opacity: 0;
-    transform: translate(8px, -100px);
   }
 }
 .combo-meter {
-  --fire: #ae4616;
+  --combo-color: #ae4616;
   position: relative;
-  width: min(100%, 320px);
-  padding: 5px 8px;
-  color: var(--fire);
+  width: min(100%, 340px);
+  padding: 6px 9px;
+  color: var(--combo-color);
   background: var(--surface);
-  border: 1px solid var(--fire);
+  border: 1px solid var(--combo-color);
   border-left-width: 3px;
 }
 :root[data-theme="dark"] .combo-meter {
-  --fire: #ffb45e;
+  --combo-color: #ffb45e;
 }
 .combo-heading {
   display: flex;
@@ -192,83 +82,27 @@
 .combo-track > span {
   display: block;
   height: 100%;
-  background: var(--fire);
+  background: var(--combo-color);
   transition: width 140ms ease-out;
 }
-.combo-flames {
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  top: 0;
-  height: 0;
-  pointer-events: none;
+:root[data-effects="2"] .combo-meter {
+  box-shadow: 0 0 26px #f1782840;
+  border-width: 2px;
+  border-left-width: 4px;
 }
-.combo-flames i {
-  position: absolute;
-  left: 4%;
-  bottom: 0;
-  width: 10px;
-  height: 14px;
-  transform-origin: bottom;
-  background: linear-gradient(#ffed99 15%, #ffab47 60%, #eb553e);
-  clip-path: polygon(
-    50% 0,
-    60% 30%,
-    80% 15%,
-    100% 65%,
-    85% 100%,
-    15% 100%,
-    0 65%,
-    25% 25%,
-    30% 55%
-  );
-  animation: combo-flame 720ms ease-in-out infinite alternate;
+:root[data-effects="0"] .combo-meter {
+  box-shadow: none;
+  border-color: var(--border);
 }
-.combo-flames i:nth-child(2) {
-  left: 28%;
-  animation-delay: -250ms;
+:root[data-effects="0"] .combo-track > span {
+  transition: none;
 }
-.combo-flames i:nth-child(3) {
-  left: 48%;
-  animation-delay: -430ms;
+:root[data-effects="0"] .level-up-banner {
+  animation: none;
+  box-shadow: none;
 }
-.combo-flames i:nth-child(4) {
-  left: 70%;
-  animation-delay: -180ms;
-}
-.combo-flames i:nth-child(5) {
-  left: 90%;
-  animation-delay: -510ms;
-}
-.combo-meter[data-tier="1"] .combo-flames i:nth-child(n + 3) {
-  display: none;
-}
-.combo-meter[data-tier="2"] .combo-flames i:nth-child(n + 4) {
-  display: none;
-}
-.combo-meter[data-tier="3"] .combo-flames i {
-  height: 18px;
-}
-.combo-meter[data-tier="4"],
-.combo-meter[data-tier="5"] {
-  box-shadow:
-    0 0 20px #e65e2529,
-    inset 0 0 14px #e65e2514;
-}
-.combo-meter[data-tier="4"] .combo-flames i {
-  height: 22px;
-}
-.combo-meter[data-tier="5"] .combo-flames i {
-  height: 28px;
-  width: 14px;
-}
-@keyframes combo-flame {
-  from {
-    transform: scaleY(0.65) skewX(-7deg);
-  }
-  to {
-    transform: scaleY(1) skewX(6deg);
-  }
+:root[data-effects="0"] .has-level-up .level-indicator {
+  border-color: var(--border);
 }
 .progress-notice {
   position: fixed;
@@ -388,9 +222,6 @@
   }
 }
 @media (max-width: 700px) {
-  .fire-jet {
-    height: calc(30px + var(--combo-power) * 10px);
-  }
   .level-up-banner {
     padding: 14px 18px;
   }
@@ -425,40 +256,29 @@
     top: 40px;
   }
 }
-:root[data-graphics="low"] .combo-flames i {
+
+:root[data-graphics="low"] .combo-vignette {
   animation: none;
-  height: 12px;
+  transition: none;
+  box-shadow: none;
 }
 :root[data-graphics="low"] .combo-meter,
 :root[data-graphics="low"] .level-up-banner {
   box-shadow: none;
 }
-:root[data-graphics="low"] .fire-jet i {
-  animation: none;
-}
-:root[data-graphics="low"] .combo-embers {
-  display: none;
-}
-:root[data-graphics="low"] .combo-aura::before {
-  box-shadow: none;
-}
 @media (prefers-reduced-motion: reduce) {
-  .combo-flames i,
-  .fire-jet i,
+  .combo-vignette,
   .level-up-banner {
     animation: none;
   }
+  .combo-vignette,
   .combo-track > span {
     transition: none;
-  }
-  .combo-embers {
-    display: none;
   }
 }
 @media (forced-colors: active) {
   .level-celebration,
-  .combo-aura,
-  .combo-flames {
+  .combo-vignette {
     display: none;
   }
   .combo-track > span {

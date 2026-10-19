@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 import { defaultPreferences, parsePreferences } from "../src/preferences";
 
 test("customization preferences validate old, partial, and malformed saves independently", () => {

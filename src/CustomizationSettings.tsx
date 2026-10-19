@@ -94,14 +94,14 @@ export default function CustomizationSettings() {
         />
         <p className="settings-note">
           {preferences.graphicsTier === "low"
-            ? "Fewer particles, static fire, no shake or glow, and instant XP updates."
+            ? "Fewer particles, a static vignette, no shake or glow, and instant XP updates."
             : preferences.graphicsTier === "high"
               ? "More particles, richer glow, and expressive XP motion."
               : "Balanced particles, subtle atmosphere, and smooth XP motion."}
         </p>
         <PreferenceSlider
           label="Visual effects"
-          description="Set the fire, bursts, and level-up motion. Off keeps plain meters and notices."
+          description="Control vignette, shake strength, bursts, and level-up motion. Off keeps plain meters and notices."
           min={0}
           max={2}
           step={1}
@@ -160,7 +160,7 @@ export default function CustomizationSettings() {
           <span>
             <span className="preference-label">Combo feedback</span>
             <span className="preference-description">
-              Build a fire meter and raise sound pitch with correct streaks. No
+              Build a combo meter and raise sound pitch with correct streaks. No
               XP multiplier.
             </span>
           </span>

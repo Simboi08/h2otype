@@ -1,15 +1,12 @@
 import { editSession, emptySession, getMetrics } from "./typingEngine";
 import type { Session } from "./typingEngine";
+import { generateWords, isWordSet } from "./wordBank";
+import type { WordSet } from "./wordBank";
+import { zenSentences as batches } from "./passages";
 
-const batches = [
-  "there is no hurry to get anywhere. let each word lead to the next, like a path winding softly through the trees on a quiet afternoon.",
-  "the station opens at seven. a blue train waits beside the platform while people check their tickets and carry their bags through the doors.",
-  "a small wooden table stands near the window. on it are a notebook, a glass of water, and a map folded neatly beside a pencil.",
-  "the road follows the river past the old bridge. bicycles pass the market as the shops open and the first delivery arrives.",
-  "the library has three floors and a garden at the back. new books sit on a shelf beside the entrance, arranged by the month they arrived.",
-  "clouds move across the hills beyond the town. a narrow track crosses the field and joins the main road near a row of stone houses.",
-];
 export type ZenState = {
+  wordSet: WordSet;
+  randomState: number;
   session: Session;
   passage: string;
   batch: number;
@@ -20,10 +17,14 @@ export type ZenState = {
   summary: boolean;
 };
 
-export function createZen(): ZenState {
+export function createZen(wordSet: WordSet = "sentences", seed = 1): ZenState {
+  const generated =
+    wordSet === "sentences" ? null : generateWords(wordSet, seed, 80);
   return {
+    wordSet,
+    randomState: generated?.randomState ?? 1,
     session: emptySession(),
-    passage: batches[0] + " " + batches[1] + " ",
+    passage: generated?.text ?? batches[0] + " " + batches[1] + " ",
     batch: 2,
     bankedCorrect: 0,
     elapsedMs: 0,
@@ -68,17 +69,29 @@ export function editZen(state: ZenState, next: string, now: number): ZenState {
     !state.session.typed.startsWith(next)
   )
     return state;
-  let { passage, batch } = state;
+  let { passage, batch, randomState } = state;
   // Replenish before accepting a boundary character; the shared engine never runs out.
   while (passage.length - [...next].length < 200) {
-    passage += batches[batch % batches.length] + " ";
-    batch = (batch + 1) % batches.length;
+    if (state.wordSet === "sentences") {
+      passage += batches[batch % batches.length] + " ";
+      batch = (batch + 1) % batches.length;
+    } else {
+      const generated = generateWords(
+        state.wordSet,
+        randomState,
+        40,
+        passage.trimEnd().split(" ").at(-1),
+      );
+      passage += generated.text;
+      randomState = generated.randomState;
+    }
   }
   const session = editSession(state.session, next, passage, now, null);
   let result = {
     ...state,
     passage,
     batch,
+    randomState,
     session,
     runningSince: state.runningSince ?? (session.attempts > 0 ? now : null),
   };
@@ -140,6 +153,15 @@ export function parseZen(raw: string | null): ZenState | null {
     } | null;
     if (data?.version !== 1 || !data.state) return null;
     const state = data.state;
+    const wordSet = state.wordSet ?? "sentences";
+    const randomState = state.randomState ?? (wordSet === "sentences" ? 1 : 0);
+    if (
+      !isWordSet(wordSet) ||
+      !Number.isInteger(randomState) ||
+      randomState < 1 ||
+      randomState > 0xffffffff
+    )
+      return null;
     const finite = (value: unknown) =>
       typeof value === "number" && Number.isFinite(value) && value >= 0;
     if (
@@ -197,6 +219,8 @@ export function parseZen(raw: string | null): ZenState | null {
       return null;
     return {
       ...state,
+      wordSet,
+      randomState,
       session: {
         ...state.session,
         credited,

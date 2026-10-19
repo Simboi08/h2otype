@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 import type { Page } from "@playwright/test";
 
 async function ready(page: Page) {

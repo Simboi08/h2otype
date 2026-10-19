@@ -1,4 +1,16 @@
-# h2otype — Design specification v0.5
+# h2otype — Design specification v0.6
+
+## Word sets and combo vignette — 2026-10-19
+This user-requested update replaces the earlier pixel fire jets, embers, meter flames, and weaker shake. Use an earned screen-edge vignette with a transparent center; no fire sprites, scanlines, or always-on tint.
+
+- The header has a Word sets button beside Settings (F3 opens it). Offer English 100 (default), English 500, English 1,000, and the original English sentences. The nested common-word pools are bundled locally; they are not claimed as exact frequency rankings or copies of Monkeytype. Source/license details live in `src/data/WORDS.md`. Other languages remain future work.
+- Generated Sprint runs contain 600 words and reshuffle on restart. Zen starts with 80 words, appends 40 as needed, and preserves the existing bounded correction history. No immediately repeated word, including across replenishment boundaries. Keep generation pure and save its state in the Zen draft so reload/resume preserves the passage and future sequence.
+- Changing sets starts a fresh session and clears the old Zen draft in either mode. Keep all earned XP, selected Sprint duration, display preferences, and best scores. Canceling the picker or selecting the current set preserves the run. Modal keyboard navigation never restarts gameplay; dismissal restores typing or the stopped summary.
+- Save word choice separately in `h2otype.word-set.v1`. Old Zen drafts migrate to sentences and take priority over a conflicting word preference on initial load, preserving the session. Corrupt choices fall back to English 100; unavailable storage permits per-visit choices. Reset Zen through its live owner before changing sets, avoiding a stale unmount save or subtraction of the old session's XP ledger.
+- Best scores are separate per word pool and duration. Retain `h2otype.sprint-bests.v1` for original sentences; generated pools use `h2otype.sprint-bests.<wordSet>.v1`. WPM, accuracy, deadlines, and first-correct-position XP rules are unchanged.
+- The vignette appears only from combo 10, grows with tiers 10/25/50/100/200, and stays behind the readable practice surface. It never captures pointers or focus. Balanced lowers opacity; Effects Off removes it, particles, and shake while retaining combo counting and plain meters. Low/reduced motion keep the vignette static; Low also removes shadow/glow.
+- Intense shake now lasts 220ms, grows from 3.1px to 7.5px (hard cap 8px), and has a 120ms cooldown. Reward tier gains and crossed ten-character milestones from 50 onward. Balanced keeps 160ms/0.8px/250ms pulses. Maintain one owned animation, cancellation on restart/hide/stop/mode change/disable, and the independent Screen shake switch. Low and reduced motion suppress shake entirely.
+- Preserve rising combo sound pitch, the 95ms crunch, larger pixel particles, and the grand matched level-up entry/exit. Achievements and unlockable themes remain deferred.
 
 ## Game feedback and direct navigation — 2026-10-19
 The user wants the experience to feel fun and rewarding as a game. Make earned combo/level feedback visible and satisfying while retaining readable typing and explicit effect controls. This update supersedes the earlier Zen exit confirmation and scanline treatment.
@@ -6,10 +18,10 @@ The user wants the experience to feel fun and rewarding as a game. Make earned c
 - Clicking the top Sprint button switches immediately from active, paused, finished, or empty Zen. Unmount saves a paused draft and exact active elapsed time through the existing atomic progress store. Returning to an existing Zen draft offers Resume; no extra button gates the Sprint switch. Pause and Finish retain their explicit summaries.
 - Level announcements scale up over 320ms, hold, and shrink over a matching reversed 320ms curve before removal at four seconds. Low graphics, Effects Off, and reduced motion keep a static announcement. Disabling notifications dismisses it immediately as an explicit preference change.
 - Visual effects has a three-stop Off/Balanced/Intense slider, default Intense. Screen shake defaults on and has an independent switch. Saved preferences receive the new defaults without overwriting explicit sound/particle/quality choices, XP, records, or drafts. Effect intensity is separate from graphics quality/performance.
-- Intense combos add large pixel fire jets at the bottom screen corners, six bounded embers, a stronger meter, and taller high-tier flames. Keep the large jets outside the controls so opaque inputs/buttons do not mask them; meter flames remain local. Balanced reduces jet size and removes embers. Off keeps plain combo/progress meters and notices, disables decorative bursts/fire/shake and level-up motion, and settles XP immediately. Combo counting and sound pitch remain independent of visual intensity.
-- Screen shake is a 160ms pulse on the practice surface at tier gains and, from 50 correct characters, crossed 20-character milestones. Strength caps at 3px (Balanced: 0.8px), with at most one animation and a 250ms cooldown. Restart, hiding, pause/finish, unmount, changing intensity, or disabling shake cancel it. No constant per-keystroke shake. Fixed particle/notice layers stay outside the moving surface.
-- Low/reduced motion override shake and moving fire. Low removes embers/glow; reduced motion retains static flames without embers. Decorative effects never intercept pointer events or keyboard focus.
-- Remove the full-screen scanline overlay and celebration tint. The clean navy/sky canvas, pixel HUD, local edge fire, and deliberate motion provide the arcade identity. Do not reintroduce an always-on screen filter.
+- Intense combos now use the edge vignette specified above, replacing the earlier jets/embers/flames. Off keeps plain combo/progress meters and notices, disables decorative bursts/vignette/shake and level-up motion, and settles XP immediately. Combo counting and sound pitch remain independent of visual intensity.
+- Screen shake follows the stronger intensity-specific timing and limits above. Fixed particle/notice layers stay outside the moving practice surface; no constant per-keystroke shake.
+- Low/reduced motion override shake and vignette animation. Decorative effects never intercept pointer events or keyboard focus.
+- Remove the full-screen scanline overlay and celebration tint. The clean navy/sky canvas, pixel HUD, earned edge vignette, and deliberate motion provide the arcade identity. Do not reintroduce an always-on screen filter.
 
 ## Arcade feel and combos — 2026-10-19
 The latest feedback adds adjustable character spacing and independent live-stat sizes, larger/sparser pixel particles, stronger crunch audio, a grander level-up celebration, a graphics slider, and correct-typing combos. Achievements and unlockable themes remain deferred.
@@ -17,9 +29,9 @@ The latest feedback adds adjustable character spacing and independent live-stat 
 - Character spacing: 0–3px in 0.5px steps, default 0. Apply to passage and word input; remeasure the caret after a change. WPM/accuracy size sliders are independent, 80–200% in 10% steps, default 100%, with a 14px base label/value size. These affect live statistics only; their visibility switches stay independent.
 - Graphics quality uses a three-stop Low/Medium/High slider, preserving existing saved tier strings and rendering budgets. Pixel sprites are 6×6 CSS pixels (previously 3×3), with 2/4/6 per burst and caps of 12/24/36; Regular particles retain the table below.
 - Level-ups show a larger centered banner above the passage, a single expanding ring, and 14 (Medium) or 24 (High) pixel rays. Effects never intercept pointers or focus. Low/reduced motion use the large static banner only; notification Off suppresses everything. Compact landscape placement preserves passage visibility.
-- Combos start at 10 fresh correct character positions, including spaces, with tiers at 10/25/50/100/200. The meter replaces the visible footer hint instead of adding another row, grows warmer fire at higher tiers, and progressively raises the selected typing sound up to seven semitones (below 1.5× playback rate). The original hint remains available to screen readers.
+- Combos start at 10 fresh correct character positions, including spaces, with tiers at 10/25/50/100/200. The meter replaces the visible footer hint instead of adding another row, strengthens the edge vignette at higher tiers, and progressively raises the selected typing sound up to seven semitones (below 1.5× playback rate). The original hint remains available to screen readers.
 - A mistake, any accepted deletion, pause/finish, hidden page, restart, mode change, or reload breaks the streak. Already credited positions cannot rebuild it through Backspace/retyping. Accepted multi-character commits count their fresh correct positions in order; Zen retirement preserves an active streak. Inactivity and opening Settings alone do not break a streak.
-- Combos are feedback only: no XP or score multiplier, no change to WPM, accuracy, deadlines, persistence, or credit rules. Combo feedback defaults on and can be disabled in Settings; re-enabling starts fresh. Low uses static flames/no glow; reduced motion removes flame/meter animation as well as celebration motion.
+- Combos are feedback only: no XP or score multiplier, no change to WPM, accuracy, deadlines, persistence, or credit rules. Combo feedback defaults on and can be disabled in Settings; re-enabling starts fresh. Low uses a static vignette/no glow; reduced motion removes vignette/meter animation as well as celebration motion.
 - Crunch is now a 95ms saturated, quantized square/sub-kick with a sharper transient, lower body, and clean zero-amplitude ending. Standard is unchanged. Pitch changes reuse the cached sound buffer; volume, mute, delayed-note suppression, and four-voice headroom still apply.
 
 ## Current direction — arcade refresh, 2026-10-19
@@ -31,7 +43,7 @@ The user's Krillion references replace the original Cupertino presentation with 
 - The 8-bit click gains a stronger quantized attack/body while retaining volume, mute, short duration, and bounded voices.
 
 ## Vision
-A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HUD in dark mode, a sky/ink palette in light mode, sharp panels, and locally bundled pixel labels. The passage remains easy to read while fiery combos, brief impacts, a prominent XP rail, and level-up announcements make progression satisfying. The user's Krillion screenshots guide the palette and pixel typography; the later feedback removes CRT filtering.
+A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HUD in dark mode, a sky/ink palette in light mode, sharp panels, and locally bundled pixel labels. The passage remains easy to read while earned combo vignettes, brief impacts, a prominent XP rail, and level-up announcements make progression satisfying. The user's Krillion screenshots guide the palette and pixel typography; the later feedback removes CRT filtering.
 
 ## Design principles
 1. The passage is always the focal point.
@@ -42,7 +54,7 @@ A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HU
 6. No visible start button required: first valid typing input starts the session.
 
 ## Layout
-- Compact header: pixel h2otype wordmark, Sprint/Zen selector, settings/theme access. A wide optional XP rail sits immediately above the typing workspace.
+- Compact header: pixel h2otype wordmark, Sprint/Zen selector, word-set and settings/theme access. A wide optional XP rail sits immediately above the typing workspace.
 - Centerpiece: readable multiline typing passage, per-character correct/incorrect feedback, animated caret, smooth text advancement.
 - Low-emphasis supporting controls and context-sensitive hint text.
 - Results screen for Sprint: WPM, accuracy, errors, XP gained, restart.
@@ -122,9 +134,9 @@ A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HU
 | Medium (default) | 7 | 70 | 400ms | 1.5 | 60fps | 600ms ease-in/out |
 | High | 12 | 144 | 520ms | 2 | 60fps | 850ms ease-in/out |
 
-Low removes the backdrop, bloom, modal blur, and level-banner motion, and keeps fire static. Medium has subtle static atmosphere; High increases static glow and atmosphere. Scanlines are removed at every tier. Reduced motion makes XP instant and removes particle/banner/fire/shake motion regardless of tier. Graphics choices do not change scoring, XP, or sound volume.
+Low removes the backdrop, bloom, modal blur, and level-banner motion, and keeps the vignette static. Medium has subtle static atmosphere; High increases static glow and atmosphere. Scanlines are removed at every tier. Reduced motion makes XP instant and removes particle/banner/vignette/shake motion regardless of tier. Graphics choices do not change scoring, XP, or sound volume.
 
-Silkscreen Regular is bundled locally under SIL OFL 1.1, with its license in public/fonts. It is used only for the HUD; the passage retains its selectable built-in fonts. Background stars, horizon, panels, fire, and glow are CSS; no third-party images or runtime font services are required. Standard audio remains a 35ms click; 8-bit crush uses the stronger 95ms envelope described above, with the existing four-voice cap and volume controls.
+Silkscreen Regular is bundled locally under SIL OFL 1.1, with its license in public/fonts. It is used only for the HUD; the passage retains its selectable built-in fonts. Background stars, horizon, panels, vignette, and glow are CSS; no third-party images or runtime font services are required. Standard audio remains a 35ms click; 8-bit crush uses the stronger 95ms envelope described above, with the existing four-voice cap and volume controls.
 
 ## Accessibility
 - Contrast and visible caret in either theme.

@@ -4,6 +4,12 @@ import CustomizationSettings from "./CustomizationSettings";
 import PreferenceSlider from "./PreferenceSlider";
 import ProgressIndicator from "./ProgressIndicator";
 import ZenPractice from "./ZenPractice";
+import type { ZenHandle } from "./ZenPractice";
+import WordSetPicker from "./WordSetPicker";
+import { loadWordSet, saveWordSet } from "./wordBank";
+import type { WordSet } from "./wordBank";
+import { commitProgress, loadZenProgress } from "./progressStore";
+import { trapDialogFocus } from "./dialogFocus";
 import TypingPractice from "./TypingPractice";
 import type { SprintDuration } from "./sprintRecords";
 import {
@@ -37,6 +43,16 @@ function SettingsIcon() {
 export default function App() {
   const [mode, setMode] = useState<"sprint" | "zen">("sprint");
   const [duration, setDuration] = useState<SprintDuration>(30);
+  const [words, setWords] = useState(() =>
+    loadWordSet(loadZenProgress().state?.wordSet),
+  );
+  const zen = useRef<ZenHandle>(null);
+  function changeWords(set: WordSet) {
+    if (set === words.wordSet) return;
+    if (mode === "zen") zen.current?.changeWordSet(set);
+    else commitProgress(0, null);
+    setWords({ wordSet: set, storageAvailable: saveWordSet(set) });
+  }
   const { preferences, storageAvailable } = usePreferences();
   const {
     theme,
@@ -72,7 +88,8 @@ export default function App() {
       )
         return;
       event.preventDefault();
-      if (!event.repeat && !element.open) element.showModal();
+      if (!event.repeat && !document.querySelector("dialog[open]"))
+        element.showModal();
     };
     element.addEventListener("close", restoreFocus);
     window.addEventListener("keydown", openWithKeyboard);
@@ -113,18 +130,25 @@ export default function App() {
               Zen
             </button>
           </nav>
-          <button
-            className="appearance-button"
-            ref={appearanceButton}
-            onClick={() => dialog.current?.showModal()}
-            aria-label="Open settings"
-            aria-haspopup="dialog"
-            aria-keyshortcuts="F2"
-            title="Settings (F2)"
-          >
-            <SettingsIcon />
-            <span>Settings</span>
-          </button>
+          <div className="header-tools">
+            <WordSetPicker
+              value={words.wordSet}
+              onChange={changeWords}
+              storageAvailable={words.storageAvailable}
+            />
+            <button
+              className="appearance-button"
+              ref={appearanceButton}
+              onClick={() => dialog.current?.showModal()}
+              aria-label="Open settings"
+              aria-haspopup="dialog"
+              aria-keyshortcuts="F2"
+              title="Settings (F2)"
+            >
+              <SettingsIcon />
+              <span>Settings</span>
+            </button>
+          </div>
         </header>
 
         <main id="main" tabIndex={-1}>
@@ -145,13 +169,14 @@ export default function App() {
             <h1 className="sr-only">h2otype typing practice</h1>
             <ProgressIndicator />
             {mode === "zen" ? (
-              <ZenPractice />
+              <ZenPractice ref={zen} wordSet={words.wordSet} />
             ) : (
               <TypingPractice
-                key={`${mode}-${duration}`}
+                key={`${mode}-${duration}-${words.wordSet}`}
                 mode={mode}
                 duration={duration}
                 onDurationChange={setDuration}
+                wordSet={words.wordSet}
               />
             )}
           </section>
@@ -161,25 +186,7 @@ export default function App() {
           ref={dialog}
           className="settings-dialog"
           aria-labelledby="settings-title"
-          onKeyDown={(event) => {
-            if (event.key !== "Tab") return;
-            const controls = Array.from(
-              event.currentTarget.querySelectorAll<
-                HTMLButtonElement | HTMLInputElement | HTMLSelectElement
-              >(
-                "button:not([disabled]), input:not([disabled]), select:not([disabled])",
-              ),
-            ).filter((control) => control.getClientRects().length > 0);
-            const first = controls[0];
-            const last = controls[controls.length - 1];
-            if (event.shiftKey && document.activeElement === first) {
-              event.preventDefault();
-              last?.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
-              event.preventDefault();
-              first?.focus({ preventScroll: true });
-            }
-          }}
+          onKeyDown={trapDialogFocus}
           onClick={(event) => {
             const bounds = event.currentTarget.getBoundingClientRect();
             if (
@@ -301,8 +308,8 @@ export default function App() {
           <p className="settings-note">
             Tab restarts anywhere on the game page. In Zen it clears the draft;
             earned XP stays. Shift+Tab stays in typing. F2 opens Settings, where
-            Tab and Shift+Tab navigate normally. Escape closes Settings and
-            returns to typing or your summary.
+            Tab and Shift+Tab navigate normally. F3 opens Word sets. Escape
+            closes Settings and returns to typing or your summary.
           </p>
           {(!storageAvailable || !themeStorageAvailable) && (
             <p className="settings-storage-note" role="status">

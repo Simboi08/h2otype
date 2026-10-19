@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 
 test("mode navigation switches practice without starting the timer", async ({
   page,

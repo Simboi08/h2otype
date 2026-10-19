@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { recordSprint } from "./sprintRecords";
 import type { SprintDuration } from "./sprintRecords";
 import type { getMetrics } from "./typingEngine";
+import type { WordSet } from "./wordBank";
 
 type Props = {
   duration: SprintDuration;
   metrics: ReturnType<typeof getMetrics>;
   onRestart: () => void;
   xpEarned: number;
+  wordSet: WordSet;
 };
 
 export default function SprintResults({
@@ -15,6 +17,7 @@ export default function SprintResults({
   metrics,
   onRestart,
   xpEarned,
+  wordSet,
 }: Props) {
   const heading = useRef<HTMLHeadingElement>(null);
   const recorded = useRef(false);
@@ -27,9 +30,9 @@ export default function SprintResults({
   useEffect(() => {
     if (recorded.current) return;
     recorded.current = true;
-    setRecord(recordSprint(duration, { wpm, accuracy }, eligible));
+    setRecord(recordSprint(duration, { wpm, accuracy }, eligible, wordSet));
     heading.current?.focus({ preventScroll: true });
-  }, [duration, wpm, accuracy, eligible]);
+  }, [duration, wpm, accuracy, eligible, wordSet]);
 
   return (
     <section

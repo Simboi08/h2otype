@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 
 test("wrapped passage lines start at the same left edge", async ({ page }) => {
   for (const width of [320, 375, 768, 1280]) {

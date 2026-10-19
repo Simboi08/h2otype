@@ -45,7 +45,13 @@ export function comboImpact(before: number, after: number) {
   if (after <= before || after < 10) return 0;
   const tier = getCombo(after).tier;
   return tier > getCombo(before).tier ||
-    (after >= 50 && Math.floor(after / 20) > Math.floor(before / 20))
+    (after >= 50 && Math.floor(after / 10) > Math.floor(before / 10))
     ? tier
     : 0;
+}
+
+export function impactProfile(intensity: number, tier: number) {
+  return intensity === 2
+    ? { strength: Math.min(8, 2 + tier * 1.1), duration: 220, cooldown: 120 }
+    : { strength: 0.8, duration: 160, cooldown: 250 };
 }

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 
 async function setupClock(page: import("@playwright/test").Page) {
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });

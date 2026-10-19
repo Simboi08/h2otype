@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./practice-fixture";
 
 test("typing is ready on arrival and the first character is preserved after focus leaves the field", async ({
   page,

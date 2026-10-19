@@ -13,9 +13,9 @@ import { playTypingSound, stopTypingSounds } from "./typingSound";
 import TypingParticles from "./TypingParticles";
 import type { ParticleHandle } from "./TypingParticles";
 import { useReducedMotion } from "./useReducedMotion";
-import { advanceCombo, getCombo, comboImpact } from "./combo";
+import { advanceCombo, getCombo, comboImpact, impactProfile } from "./combo";
 import ComboMeter from "./ComboMeter";
-import ComboFire from "./ComboFire";
+import ComboVignette from "./ComboVignette";
 
 export function useTypingFeedback(enabled: boolean) {
   const { preferences } = usePreferences();
@@ -62,6 +62,7 @@ export function useTypingFeedback(enabled: boolean) {
     if (!feedback.accepted) return;
     const tier = comboImpact(combo.streak, streak);
     const timestamp = performance.now();
+    const profile = impactProfile(preferences.effectIntensity, tier);
     const surface =
       container.current?.querySelector<HTMLElement>(".practice-surface");
     if (
@@ -69,13 +70,10 @@ export function useTypingFeedback(enabled: boolean) {
       tier &&
       surface &&
       !document.hidden &&
-      timestamp - lastImpactAt.current >= 250
+      timestamp - lastImpactAt.current >= profile.cooldown
     ) {
       impact.current?.cancel();
-      const strength =
-        preferences.effectIntensity === 2
-          ? Math.min(3, 0.75 + tier * 0.45)
-          : 0.8;
+      const strength = profile.strength;
       const animation = surface.animate(
         [
           { transform: "translate(0, 0)" },
@@ -84,7 +82,7 @@ export function useTypingFeedback(enabled: boolean) {
           { transform: `translate(${-strength / 2}px, 0)` },
           { transform: "translate(0, 0)" },
         ],
-        { duration: 160, easing: "ease-out" },
+        { duration: profile.duration, easing: "ease-out" },
       );
       impact.current = animation;
       lastImpactAt.current = timestamp;
@@ -150,9 +148,9 @@ export function useTypingFeedback(enabled: boolean) {
     container,
     onEdit,
     reset,
-    fireLayer:
+    vignetteLayer:
       active && combo.streak >= 10 && preferences.effectIntensity > 0 ? (
-        <ComboFire tier={getCombo(combo.streak).tier} />
+        <ComboVignette tier={getCombo(combo.streak).tier} />
       ) : null,
     comboMeter:
       active && combo.streak >= 10 ? (
