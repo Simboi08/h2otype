@@ -49,6 +49,14 @@ The planned MVP milestones are complete. Later possibilities remain optional and
 - [x] Optional Regular/8-bit pixel particles on correct characters, with reduced-motion support
 - [x] Persist new preferences without changing existing progress or sessions
 
+## Post-MVP — Arcade feedback refresh
+- [x] Right-edge particle origin with a right-facing 180° fan
+- [x] Persistent Low/Medium/High graphics tiers with actual rendering budgets
+- [x] Larger XP rail with accelerating/decelerating motion and a prominent level-up banner
+- [x] Stronger 8-bit crunch within the existing volume/voice limits
+- [x] Pixel-arcade dark/light presentation inspired by the supplied references
+- [x] Preserve typing focus, reduced motion, optional effects, existing scores, and saved progress
+
 The current feedback list is implemented. Further notes can be added in [NOTES.md](NOTES.md).
 
 ## Later possibilities

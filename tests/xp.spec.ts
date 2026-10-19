@@ -53,7 +53,7 @@ test("a level-up never takes typing focus and session XP appears in results", as
   await page.goto("/");
   const input = page.getByRole("textbox");
   await input.press("s");
-  await expect(page.locator(".progress-notice")).toHaveText("Level 2");
+  await expect(page.locator(".progress-notice")).toContainText("Level 2");
   await expect(input).toBeFocused();
   await expect(page.getByRole("progressbar")).toHaveAttribute(
     "aria-valuemax",

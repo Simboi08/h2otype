@@ -3,11 +3,13 @@
 Updated: 2026-10-19
 
 ## Current state
-Milestones 0–5 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen replenishes continuously, pauses/resumes with active-time statistics, and saves a resumable local session. Correct typing earns persistent XP and levels in both modes, with subtle header progress and session XP in results. Settings now controls live WPM/accuracy, the XP indicator, notifications, and appearance. The planned MVP roadmap is complete.
+Milestones 0–5 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered layout and word-clearing input are preserved. Zen replenishes continuously, pauses/resumes with active-time statistics, and saves a resumable local session. Correct typing earns persistent XP and levels in both modes, now shown in a prominent eased XP rail above the passage. Settings controls live statistics, progression display, fonts/sizing, sound/particles, graphics quality, and appearance. The planned MVP roadmap is complete.
 
 The first feedback update adds Tab restart in both modes and a persistent WPM refresh-rate selector. Ready sessions now accept typing without a preliminary click and without a large workspace/input focus outline. Tab restarts from anywhere on the game page; Shift+Tab stays in typing instead of navigating controls. F2 opens Settings, which retains normal navigation. Requested preferences and their completion status are in NOTES.md.
 
 All currently requested customization notes are now implemented: built-in fonts, weight, interface size, a WPM slider, optional Standard/8-bit crush audio with volume/preview, and optional Regular/8-bit pixel particles. Sounds and particles default off; existing typing controls and local progress are preserved.
+
+The latest user-requested refresh replaces Cupertino styling with a pixel-arcade navy/cyan/pink visual system and matching light theme, adds real Low/Medium/High graphics budgets, launches particles rightward from the letter edge, strengthens 8-bit audio, and makes level-ups prominent without stealing focus or changing XP rules.
 
 ## Completed
 ### Milestone 0
@@ -99,10 +101,21 @@ All currently requested customization notes are now implemented: built-in fonts,
 - Added a bounded canvas particle layer: six circles/pixels per correct burst, at most 48 particles, 360ms lifetime, and animation frames only while active. Anchors follow the rendered/scrolled letter, including Zen retirement. Restart, pause/finish, hiding, resize, and unmount clear effects; reduced-motion changes remove the layer without replaying bursts.
 - Completed NOTES.md and recorded these optional effects as the requested post-MVP design extension. Fonts/sliders were checked before adding audio/particles; final combined validation is recorded below.
 
+## Arcade feedback refresh — 2026-10-19
+- Recorded the new design direction in DESIGN.md and updated AGENTS.md's product intent so future work follows the user's arcade references. Added original CSS atmosphere, crisp controls, and locally bundled Silkscreen Regular with its SIL OFL license; selectable passage fonts remain separate.
+- Added independently validated/persisted graphicsTier, default Medium. Low/Medium/High vary burst/total particles (3/24, 7/70, 12/144), lifetimes (240/400/520ms), DPR caps (1/1.5/2), and frame caps (30/60/60fps). Low removes atmosphere/glow/blur and XP animation; reduced motion suppresses particle/banner motion and makes XP instant on all tiers.
+- Changed particle origin to right edge + 2px and initial angles to −90°…+90° around positive x, with tier-specific speeds. Quality changes recreate/clear the layer and do not alter scoring or saved progress.
+- Added a wide XP HUD above the passage with exact current/required/total/next-level labels, a cubic ease-in/out visual fill, natural level-boundary rollover, and a prominent four-second cyan/pink level-up banner. Motion changes only DOM presentation; ARIA/labels retain the true XP immediately. Hidden/low/reduced-motion states settle immediately, and hiding/re-showing XP cannot leave a stale fill.
+- Kept independent XP-display/notification choices, first-key typing, Tab restart, Shift+Tab staying in play, F2 Settings, and all scoring/credit-ledger behavior. Adjusted short-screen passage/HUD spacing to retain first-viewport play.
+- Strengthened 8-bit crush to a 75ms quantized square/kick sound with a faster attack and fuller envelope. Standard remains 35ms; volume, Off, delayed-note suppression, and the four-voice cap remain intact.
+- Condensed results spacing on short landscape screens, including the extra messages shown when browser storage cannot save progress. Hidden XP/notifications remove the empty HUD without affecting XP accrual.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test -- --workers=3`: 89 tests passed (29 pure logic tests and 60 browser tests).
+- Arcade validation: saved/invalid graphics-tier handling, real canvas density/resolution changes, right-edge particle origins and right-facing angles, accelerating/decelerating XP fill and level rollover, immediate exact labels, no focus stealing, reduced-motion/Low fallbacks, hidden-XP restoration, stronger bounded audio, and light/dark phone/landscape layouts.
+- Arcade production smoke: HTTP 200, no JavaScript errors, and the bundled pixel font loaded. Reviewed dark/light desktop, 320px phone/Settings, level-up, and 844×390 storage-failure results screenshots. The landscape results fit within the viewport (bottom 356.4px); the level-up kept typing focus. No runtime font service or new package dependency was added.
+- `CHROMIUM_PATH=/usr/bin/chromium npm test -- --workers=3`: 96 tests passed (32 pure logic tests and 64 browser tests).
 - Customization validation: independent new-field parsing/old-save defaults, font/weight/size persistence in both modes without clearing input, all three font stacks at 80%/130% and bold weight across phone/landscape/desktop, caret visibility, and the existing refresh tests now using native slider keys.
 - Feedback validation: accepted edits/corrections versus deletion/late input, Unicode anchors and Zen retirement, finite/distinct sound envelopes, real browser sound-source playback and style previews, immediate mute, saved audio settings, a 100-edit Zen burst capped at four voices, audio-unavailable fallback, visible canvas pixels only for correct characters, lifetime/restart cleanup, reduced-motion suppression without replay, and Zen pause/reload behavior.
 - Customization production smoke: HTTP 200 with no JavaScript errors; saved font/size/particle choices survived reload, typing was retained while changing Settings, and 130% bold System text with live WPM fit the 320px viewport without overflow. Desktop/phone Settings and live screenshots were reviewed, including the corrected sticky header after scrolling. No new dependencies or remote assets were added.
@@ -132,4 +145,4 @@ All currently requested customization notes are now implemented: built-in fonts,
 - Dependencies/lockfile remain from Milestone 0. This cloud machine uses the writable npm cache documented in README and preinstalled `/usr/bin/chromium`; Playwright's browser-download host was blocked during setup.
 
 ## Next task for Codex
-The planned MVP and all current notes are implemented. Gather hands-on feedback on font/size comfort, sound balance, and particle feel, or choose a release/deployment task. Broader Safari/Firefox/mobile keyboard and audio testing remains useful. Future history, achievements, and unlocks are still optional and unimplemented. Preserve the minimal centered interface, word-clearing input, scoring/XP rules, and existing local data unless the user requests a change.
+The planned MVP and all current notes are implemented. Gather hands-on feedback on the arcade presentation, graphics tiers, XP motion/level-up visibility, and stronger sound, or choose a release/deployment task. Broader Safari/Firefox/mobile keyboard and audio testing remains useful. Future history, achievements, and unlocks are still optional and unimplemented. Preserve the centered typing workspace, word-clearing input, scoring/XP rules, and existing local data unless the user requests a change.

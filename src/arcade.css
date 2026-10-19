@@ -1,0 +1,521 @@
+@font-face {
+  font-family: "Silkscreen";
+  src: url("/fonts/Silkscreen-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --background: #dcebf2;
+  --surface: #edf5f8;
+  --text: #102c42;
+  --secondary: #3e5c73;
+  --muted: #49667d;
+  --border: #a7c3d3;
+  --segmented: #cadde8;
+  --accent: #08768e;
+  --accent-soft: #c0e5ed;
+  --pink: #ad2d62;
+  --hud: "Silkscreen", "Courier New", monospace;
+}
+:root[data-theme="dark"] {
+  --background: #040f1d;
+  --surface: #0c1c30;
+  --text: #e0edf8;
+  --secondary: #a1b5ce;
+  --muted: #89a5c3;
+  --border: #203a55;
+  --segmented: #122943;
+  --accent: #41d7f2;
+  --accent-soft: #102f46;
+  --pink: #ff648e;
+}
+body {
+  background: var(--background);
+}
+.app-shell {
+  position: relative;
+  z-index: 1;
+}
+.arcade-backdrop {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% -20%, #60cbe91c, transparent 65%);
+}
+.arcade-stars {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  background-image:
+    radial-gradient(circle, #70a6c7 1px, transparent 1px),
+    radial-gradient(circle, #4ca1bb 1px, transparent 1px);
+  background-size:
+    173px 137px,
+    263px 211px;
+  background-position:
+    37px 23px,
+    99px 63px;
+  mask-image: linear-gradient(#000, transparent 85%);
+}
+.arcade-horizon {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 22%;
+  opacity: 0.12;
+  background: linear-gradient(transparent, #12739766);
+  clip-path: polygon(
+    0 20%,
+    12% 20%,
+    12% 12%,
+    26% 12%,
+    26% 22%,
+    42% 22%,
+    42% 7%,
+    58% 7%,
+    58% 18%,
+    78% 18%,
+    78% 12%,
+    90% 12%,
+    90% 24%,
+    100% 24%,
+    100% 100%,
+    0 100%
+  );
+}
+.screen-lines {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(transparent 0 3px, #000 3px 4px);
+  opacity: 0.025;
+}
+.header {
+  border-bottom: 1px solid var(--border);
+}
+.wordmark {
+  font-family: var(--hud);
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+  text-shadow: 2px 1px 0 color-mix(in srgb, var(--pink) 50%, transparent);
+}
+.wordmark-two {
+  font-size: inherit;
+  transform: none;
+  color: var(--accent);
+}
+.brand-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 0;
+  background: var(--pink);
+  margin-left: 7px;
+}
+.mode-switch {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 4px;
+  background: var(--surface);
+}
+.mode-switch button {
+  font-family: var(--hud);
+  font-size: 14px;
+  font-weight: 400;
+  border-radius: 0;
+  padding: 8px 16px;
+}
+.mode-switch button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: inset 0 -2px var(--accent);
+}
+.appearance-button {
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 8px 12px;
+  font-family: var(--hud);
+  font-size: 12px;
+  color: var(--secondary);
+  background: var(--surface);
+}
+.progress-hud {
+  position: relative;
+  margin-bottom: 24px;
+}
+.progress-hud:empty {
+  display: none;
+}
+.level-indicator {
+  display: block;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  background: var(--surface);
+  font-size: 11px;
+}
+.xp-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.level-badge {
+  font-family: var(--hud);
+  font-size: 15px;
+  color: var(--accent);
+}
+.level-badge strong {
+  font-size: 21px;
+  font-weight: 400;
+  color: var(--text);
+}
+.xp-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  font-size: 12px;
+}
+.xp-value span {
+  color: var(--muted);
+}
+.xp-track {
+  width: 100%;
+  height: 14px;
+  border: 1px solid var(--accent);
+  padding: 2px;
+  border-radius: 0;
+  background: var(--background);
+  overflow: hidden;
+}
+.xp-track > .xp-fill {
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    color-mix(in srgb, var(--accent) 60%, var(--pink))
+  );
+  border-radius: 0;
+}
+.xp-caption {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--muted);
+  font-family: monospace;
+  font-size: 10px;
+}
+.progress-notice {
+  position: absolute;
+  top: -8px;
+  left: auto;
+  right: 12px;
+  z-index: 4;
+  pointer-events: none;
+}
+.level-up-banner {
+  min-width: 168px;
+  padding: 10px 18px;
+  border: 2px solid var(--pink);
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 4px 4px 0 var(--background);
+  animation: level-arrive 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.level-up-banner strong {
+  display: block;
+  font: 24px var(--hud);
+  color: var(--pink);
+}
+.level-up-label {
+  display: block;
+  font: 10px var(--hud);
+  color: var(--accent);
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+.has-level-up .level-indicator {
+  border-color: var(--pink);
+}
+.progress-unsaved {
+  position: static;
+  display: block;
+  margin-top: 6px;
+  color: var(--pink);
+}
+@keyframes level-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.passage-meta {
+  font-family: var(--hud);
+  font-size: 12px;
+}
+.duration-switch button {
+  border-radius: 0;
+  font-family: var(--hud);
+  font-size: 12px;
+}
+.duration-switch button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: inset 0 -2px var(--accent);
+}
+.passage-window {
+  max-height: min(calc(190px * var(--typing-scale, 1)), 22svh);
+  margin: 20px 0;
+}
+.character.correct {
+  color: var(--text);
+}
+.character.incorrect,
+:root[data-theme="dark"] .character.incorrect {
+  color: var(--pink);
+  background: color-mix(in srgb, var(--pink) 12%, transparent);
+}
+.typing-input {
+  border-radius: 2px;
+  background: var(--surface);
+  border-color: var(--border);
+  border-bottom: 2px solid var(--accent);
+}
+.restart-button {
+  border-radius: 1px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--hud);
+  font-size: 12px;
+  color: var(--secondary);
+}
+.restart-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.practice-footer p {
+  font-family: monospace;
+}
+.settings-dialog {
+  border-radius: 4px;
+  border-top: 3px solid var(--accent);
+  box-shadow:
+    6px 6px 0 #0004,
+    0 20px 90px #0006;
+}
+.dialog-heading h2 {
+  font: 23px var(--hud);
+  letter-spacing: -1px;
+}
+.settings-section-title,
+.preference-options legend {
+  font-family: var(--hud);
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--accent);
+}
+.preference-select {
+  border-radius: 1px;
+}
+.theme-option {
+  font-family: monospace;
+}
+.theme-swatch,
+.theme-swatch span {
+  border-radius: 1px;
+}
+.swatch-light {
+  background: #dcebf2;
+}
+.swatch-dark {
+  background: #071629;
+}
+.swatch-system {
+  background: linear-gradient(90deg, #dcebf2 50%, #071629 50%);
+}
+.sprint-results h2 {
+  font-family: var(--hud);
+  font-weight: 400;
+  color: var(--accent);
+}
+.result-grid dt {
+  font: 10px var(--hud);
+}
+.result-grid dd {
+  font-family: var(--hud);
+  font-weight: 400;
+  color: var(--text);
+  font-size: clamp(20px, 3vw, 32px);
+  letter-spacing: -1px;
+}
+.record-summary strong,
+.session-xp {
+  color: var(--accent);
+}
+:root[data-graphics="high"] .level-indicator {
+  box-shadow: 0 0 24px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+:root[data-graphics="high"] .xp-fill {
+  box-shadow: 0 0 14px var(--accent);
+}
+:root[data-graphics="high"] .level-up-banner {
+  box-shadow:
+    4px 4px 0 var(--background),
+    0 0 32px color-mix(in srgb, var(--pink) 30%, transparent);
+}
+:root[data-graphics="high"] .screen-lines {
+  opacity: 0.055;
+}
+:root[data-graphics="high"] .arcade-stars {
+  opacity: 0.65;
+}
+:root[data-graphics="low"] .arcade-backdrop,
+:root[data-graphics="low"] .screen-lines {
+  display: none;
+}
+:root[data-graphics="low"] .settings-dialog::backdrop {
+  backdrop-filter: none;
+}
+:root[data-graphics="low"] .level-up-banner {
+  animation: none;
+}
+@media (max-width: 700px) {
+  .header {
+    grid-template-columns: auto 1fr auto;
+  }
+  .mode-switch {
+    justify-self: center;
+  }
+  main {
+    padding: 20px 0 56px;
+  }
+  .wordmark {
+    font-size: 18px;
+  }
+  .mode-switch button {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+  .appearance-button {
+    padding: 8px;
+  }
+  .progress-hud {
+    margin-bottom: 18px;
+  }
+  .level-indicator {
+    padding: 9px 11px;
+  }
+  .level-badge {
+    font-size: 12px;
+  }
+  .level-badge strong {
+    font-size: 17px;
+  }
+  .xp-caption {
+    font-size: 9px;
+  }
+  .passage-window {
+    margin: 16px 0;
+  }
+  .level-up-banner {
+    min-width: 144px;
+    padding: 8px 12px;
+  }
+  .level-up-banner strong {
+    font-size: 20px;
+  }
+}
+@media (max-height: 500px) {
+  main {
+    padding: 12px 0 24px;
+  }
+  .progress-hud {
+    margin-bottom: 12px;
+  }
+  .level-indicator {
+    padding: 6px 10px;
+  }
+  .xp-heading {
+    margin-bottom: 5px;
+  }
+  .level-badge,
+  .level-badge strong {
+    font-size: 12px;
+  }
+  .xp-caption {
+    display: none;
+  }
+  .xp-track {
+    height: 10px;
+  }
+  .passage-window {
+    max-height: 16svh;
+    margin: 12px 0;
+  }
+  .typing-input {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .practice-footer {
+    margin-top: 10px;
+  }
+  .sprint-results {
+    padding-top: 6px;
+  }
+  .typing-space:has(.sprint-results) .progress-hud {
+    margin-bottom: 6px;
+  }
+  .sprint-results h2 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .result-grid {
+    margin-bottom: 8px;
+  }
+  .result-grid dt {
+    margin-bottom: 4px;
+  }
+  .result-grid dd {
+    font-size: 24px;
+  }
+  .session-xp {
+    margin-bottom: 6px;
+    font-size: 11px;
+  }
+  .record-summary {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .record-summary p {
+    margin: 2px 0;
+  }
+  .results-footer {
+    margin-top: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .level-up-banner {
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  .arcade-backdrop,
+  .screen-lines {
+    display: none;
+  }
+  .xp-track > .xp-fill {
+    background: Highlight;
+  }
+}

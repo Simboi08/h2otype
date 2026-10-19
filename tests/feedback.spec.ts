@@ -56,12 +56,12 @@ test("standard and bitcrushed sounds have distinct, finite, quiet envelopes", ()
   const standard = createSoundSamples("standard", 48000);
   const bitcrush = createSoundSamples("bitcrush", 48000);
   expect(standard.length).toBe(1680);
-  expect(bitcrush.length).toBe(2640);
+  expect(bitcrush.length).toBe(3600);
   for (const samples of [standard, bitcrush]) {
     expect(Math.abs(samples[0])).toBe(0);
     expect(Math.abs(samples[samples.length - 1])).toBeLessThan(0.000001);
     expect(
-      samples.every((value) => Number.isFinite(value) && Math.abs(value) < 0.6),
+      samples.every((value) => Number.isFinite(value) && Math.abs(value) < 0.9),
     ).toBe(true);
     expect(samples.some((value) => Math.abs(value) > 0.1)).toBe(true);
   }

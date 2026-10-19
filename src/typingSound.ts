@@ -5,11 +5,11 @@ export function createSoundSamples(
   style: Exclude<SoundStyle, "off">,
   sampleRate: number,
 ) {
-  const duration = style === "standard" ? 0.035 : 0.055;
+  const duration = style === "standard" ? 0.035 : 0.075;
   const samples = new Float32Array(Math.round(sampleRate * duration));
   let seed = 731;
   let held = 0;
-  const hold = Math.max(1, Math.round(sampleRate / 6000));
+  const hold = Math.max(1, Math.round(sampleRate / 4500));
   for (let index = 0; index < samples.length; index++) {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
     const noise = (seed / 0xffffffff) * 2 - 1;
@@ -20,12 +20,17 @@ export function createSoundSamples(
       samples[index] =
         (noise * 0.28 + Math.sin(2 * Math.PI * 850 * time) * 0.16) * envelope;
     else {
+      const punchEnvelope =
+        Math.min(1, time / 0.0005) * Math.pow(1 - index / samples.length, 2.3);
       if (index % hold === 0)
         held =
           Math.round(
-            (Math.sin(2 * Math.PI * 330 * time) * 0.32 + noise * 0.1) * 16,
-          ) / 16;
-      samples[index] = held * envelope;
+            (Math.sign(Math.sin(2 * Math.PI * 245 * time)) * 0.48 +
+              Math.sin(2 * Math.PI * (170 * time - 500 * time * time)) * 0.14 +
+              noise * 0.12) *
+              8,
+          ) / 8;
+      samples[index] = held * punchEnvelope;
     }
   }
   return samples;

@@ -28,6 +28,7 @@ export const typingFonts = [
 export type TypingFont = (typeof typingFonts)[number]["value"];
 export type SoundStyle = "off" | "standard" | "bitcrush";
 export type ParticleStyle = "off" | "regular" | "pixel";
+export type GraphicsTier = "low" | "medium" | "high";
 export type Preferences = {
   liveWpm: boolean;
   liveAccuracy: boolean;
@@ -40,6 +41,7 @@ export type Preferences = {
   soundStyle: SoundStyle;
   soundVolume: number;
   particleStyle: ParticleStyle;
+  graphicsTier: GraphicsTier;
 };
 export const defaultPreferences: Preferences = {
   liveWpm: false,
@@ -53,6 +55,7 @@ export const defaultPreferences: Preferences = {
   soundStyle: "off",
   soundVolume: 35,
   particleStyle: "off",
+  graphicsTier: "medium",
 };
 export type BooleanPreferenceKey =
   | "liveWpm"
@@ -72,6 +75,9 @@ export function isParticleStyle(value: unknown): value is ParticleStyle {
 
 export function isWpmRefreshMs(value: unknown): value is WpmRefreshMs {
   return wpmRefreshOptions.some((option) => option.value === value);
+}
+export function isGraphicsTier(value: unknown): value is GraphicsTier {
+  return value === "low" || value === "medium" || value === "high";
 }
 type Snapshot = { preferences: Preferences; storageAvailable: boolean };
 let snapshot: Snapshot | null = null;
@@ -107,6 +113,8 @@ export function parsePreferences(raw: string | null): Preferences {
       preferences.soundStyle = data.preferences.soundStyle;
     if (isParticleStyle(data.preferences.particleStyle))
       preferences.particleStyle = data.preferences.particleStyle;
+    if (isGraphicsTier(data.preferences.graphicsTier))
+      preferences.graphicsTier = data.preferences.graphicsTier;
     for (const [key, min, max, step] of [
       ["typingWeight", 400, 700, 100],
       ["typingScale", 80, 130, 10],

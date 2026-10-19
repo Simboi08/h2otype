@@ -1,18 +1,26 @@
-# h2otype — Design specification v0.2
+# h2otype — Design specification v0.3
+
+## Current direction — arcade refresh, 2026-10-19
+The user's Krillion references replace the original Cupertino presentation with an original pixel-arcade visual system: navy/cyan/pink in dark mode, sky/ink in light mode, pixel HUD typography, crisp panels, subtle scanlines, and a prominent XP rail. Keep the passage central, existing typing controls, theme/preference choices, and all scoring/progression rules. This direction supersedes the earlier small-header-XP and Cupertino styling decisions below.
+
+- Particles originate two pixels beyond the letter's right edge, with initial angles −90° to +90° around the positive x-axis.
+- Graphics Low/Medium/High control particle budgets, canvas resolution/frame caps, atmosphere/glow, and XP animation cost. Reduced motion overrides animation on every tier.
+- XP uses a wide rail near the passage, easing in/out toward earned XP and rolling across level boundaries. Accessible XP updates immediately; animation cannot award XP or delay typing. Level-ups get a large, nonblocking banner following the notification preference.
+- The 8-bit click gains a stronger quantized attack/body while retaining volume, mute, short duration, and bounded voices.
 
 ## Vision
-A typing game that looks and feels like a polished macOS application. Think Apple's Cupertino design language: typography, whitespace, neutral surfaces, and restrained motion. Underneath the calm interface is compelling long-term progression.
+A focused typing game with the atmosphere of a pixel arcade: a navy/cyan/pink HUD in dark mode, a sky/ink palette in light mode, sharp panels, and locally bundled pixel labels. The passage remains easy to read while a prominent XP rail and level-up banner make progression satisfying. The user's Krillion screenshots guide the palette, pixel typography, and CRT treatment.
 
 ## Design principles
 1. The passage is always the focal point.
 2. Comfortable spacing, refined typography, subtle boundaries; avoid clutter, visual noise, and heavy skeuomorphism.
-3. Native-feeling segmented controls, buttons, preference toggles, and keyboard shortcuts.
+3. Crisp arcade controls with native form behavior, preference controls, and keyboard shortcuts.
 4. Support light/dark/system theme (system by default), both themes deliberately designed.
 5. Motion communicates state; never blocks typing; support reduced motion.
 6. No visible start button required: first valid typing input starts the session.
 
 ## Layout
-- Compact header: h2otype wordmark, Sprint/Zen selector, settings/theme access, optional level indicator.
+- Compact header: pixel h2otype wordmark, Sprint/Zen selector, settings/theme access. A wide optional XP rail sits immediately above the typing workspace.
 - Centerpiece: readable multiline typing passage, per-character correct/incorrect feedback, animated caret, smooth text advancement.
 - Low-emphasis supporting controls and context-sensitive hint text.
 - Results screen for Sprint: WPM, accuracy, errors, XP gained, restart.
@@ -47,12 +55,12 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Correctly completed characters earn base XP, exactly once per character.
 - Accuracy/flow bonuses may be added after core mechanics work; cap bonuses and ensure no exploitable key-repeat loop.
 - Continuous Zen XP, level advancement, and persistent cumulative progress.
-- Level-ups: small nonblocking toast/glow, never an overlay that disrupts typing.
+- Level-ups: a prominent cyan/pink nonblocking banner on the XP rail, never an overlay that intercepts typing or steals focus.
 - Cosmetic rewards / unlockable themes are later-stage ideas, not MVP commitments.
 - Milestone 4 rule: award 1 XP per character position the first time it is typed correctly in that session, including spaces and punctuation. A correction from wrong to correct can earn its first XP; deleting/retyping a credited position cannot. Composition earns only after commit; paste/drop and held character repeats remain blocked. No speed, accuracy, or flow bonuses yet.
 - XP is retained when text is deleted or a session is abandoned. Restart/new session alone awards nothing; actual correct typing in a new session is fresh practice and can earn XP.
 - Level 1 begins at 0 XP. Advancing from level L costs 100 × L XP; lifetime threshold for level L is 50 × L × (L−1). Thus levels 2/3/4 begin at 100/300/600 XP. Level is derived from lifetime XP rather than stored independently.
-- Keep a small level/bar by the wordmark and a brief polite level-up notice that never steals focus. Results/summaries include session XP. Respect reduced motion; Milestone 5 provides independent display and notification toggles.
+- Show the level, current/required XP, lifetime XP, and next level on a wide rail above the passage. Animate the visual fill with cubic acceleration/deceleration; integer levels roll over as animated lifetime XP crosses a threshold. Accessible values and labels update immediately from the real saved XP. Results/summaries include session XP; display and notification toggles remain independent.
 - Save lifetime XP and the credited Zen draft together in one versioned localStorage envelope on each accepted edit. This keeps a reload from restoring older credit history against a newer XP balance. Older pre-XP Zen drafts migrate without granting retroactive XP; their already-correct retained positions are marked credited.
 
 ## Preferences
@@ -82,8 +90,19 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Sound: Off (default), Standard, or 8-bit crush, with a 0–100% volume slider (default 35%) and Preview sound. Generate short local click/pluck buffers; never download assets or require sound to play. Accepted character edits, including mistakes/corrections and composition commits, play one click per edit; Backspace, rejected input, paste/drop, held repeats, and expired/paused input stay silent.
 - Keep at most four short sound voices, discard delayed notes, and stop voices on mute, hidden pages, restarts, pause/finish, and mode changes. Unavailable audio reports a Settings status without affecting typing.
 - Particles: Off (default), Regular circles, or 8-bit pixels. Emit a small burst from the newly rendered correct character, including a valid correction even when that position already earned XP. Wrong characters and deletion never emit. A multi-character commit emits at most one burst at its newest correct retained character.
-- Limit particles to 48 total, with six per burst and a 360ms lifetime; animate a pointer-transparent canvas only while particles are alive. Clear on restart/pause/finish, page hiding, resize, and unmount. Suppress entirely under reduced motion, without replaying old bursts when re-enabled.
+- Apply the tier budgets below to a pointer-transparent canvas that animates only while particles are alive. Clear on restart/pause/finish, page hiding, resize, tier changes, and unmount. Suppress entirely under reduced motion, without replaying old bursts when re-enabled.
 - These optional restrained particles are the user-requested post-MVP exception to the original effects scope. Scoring, progression, deadlines, live-stat math, and the minimal default screen remain unchanged.
+
+## Graphics tiers and assets
+| Tier | Particles / burst | Maximum | Lifetime | Canvas DPR cap | Frame cap | XP fill |
+| --- | --- | --- | --- | --- | --- | --- |
+| Low | 3 | 24 | 240ms | 1 | 30fps | Instant |
+| Medium (default) | 7 | 70 | 400ms | 1.5 | 60fps | 600ms ease-in/out |
+| High | 12 | 144 | 520ms | 2 | 60fps | 850ms ease-in/out |
+
+Low removes the backdrop/scanlines, bloom, modal blur, and level-banner entry motion. Medium has subtle static atmosphere; High increases static glow and atmosphere. Reduced motion makes XP instant and removes particle/banner motion regardless of tier. Graphics choices do not change scoring, XP, or sound volume.
+
+Silkscreen Regular is bundled locally under SIL OFL 1.1, with its license in public/fonts. It is used only for the HUD; the passage retains its selectable built-in fonts. Background stars, horizon, scanlines, panels, and glow are CSS; no third-party images or runtime font services are required. Standard audio remains a 35ms click; 8-bit crush uses a punchier quantized square/kick body and a 75ms envelope, with the existing four-voice cap and volume controls.
 
 ## Accessibility
 - Contrast and visible caret in either theme.

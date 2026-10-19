@@ -1,9 +1,4 @@
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useSyncExternalStore,
-} from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { usePreferences } from "./preferences";
 import type { ParticleStyle } from "./preferences";
 import type { Session } from "./typingEngine";
@@ -11,19 +6,11 @@ import { getTypingFeedback } from "./typingFeedback";
 import { playTypingSound, stopTypingSounds } from "./typingSound";
 import TypingParticles from "./TypingParticles";
 import type { ParticleHandle } from "./TypingParticles";
+import { useReducedMotion } from "./useReducedMotion";
 
-const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
-function subscribeMotion(listener: () => void) {
-  const media = matchMedia(reducedMotionQuery);
-  media.addEventListener("change", listener);
-  return () => media.removeEventListener("change", listener);
-}
 export function useTypingFeedback(enabled: boolean) {
   const { preferences } = usePreferences();
-  const reducedMotion = useSyncExternalStore(
-    subscribeMotion,
-    () => matchMedia(reducedMotionQuery).matches,
-  );
+  const reducedMotion = useReducedMotion();
   const container = useRef<HTMLDivElement>(null);
   const particles = useRef<ParticleHandle>(null);
   const pending = useRef<{ index: number; style: ParticleStyle } | null>(null);
@@ -61,10 +48,7 @@ export function useTypingFeedback(enabled: boolean) {
     const bounds = letter.getBoundingClientRect();
     const viewport = window.getBoundingClientRect();
     if (bounds.top < viewport.top || bounds.bottom > viewport.bottom) return;
-    particles.current?.emit(
-      bounds.x + bounds.width / 2,
-      bounds.y + bounds.height * 0.35,
-    );
+    particles.current?.emit(bounds.right + 2, bounds.y + bounds.height / 2);
   });
   useEffect(() => {
     if (
@@ -94,9 +78,10 @@ export function useTypingFeedback(enabled: boolean) {
     layer:
       enabled && preferences.particleStyle !== "off" && !reducedMotion ? (
         <TypingParticles
-          key={preferences.particleStyle}
+          key={`${preferences.particleStyle}-${preferences.graphicsTier}`}
           ref={particles}
           style={preferences.particleStyle}
+          tier={preferences.graphicsTier}
         />
       ) : null,
   };

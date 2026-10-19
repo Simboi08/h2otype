@@ -92,7 +92,7 @@ test("sound is silent by default, previews each style, plays once per accepted e
     .selectOption("bitcrush");
   await page.getByRole("button", { name: "Preview sound" }).click();
   await expect.poll(async () => (await stats()).durations.length).toBe(4);
-  expect((await stats()).durations[3]).toBeCloseTo(0.055, 3);
+  expect((await stats()).durations[3]).toBeCloseTo(0.075, 3);
   await page.getByRole("slider", { name: "Sound volume" }).press("Home");
   await expect(
     page.getByRole("button", { name: "Preview sound" }),

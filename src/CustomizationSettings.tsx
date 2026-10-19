@@ -3,6 +3,7 @@ import {
   isParticleStyle,
   isSoundStyle,
   isTypingFont,
+  isGraphicsTier,
   setPreference,
   typingFonts,
   usePreferences,
@@ -62,6 +63,31 @@ export default function CustomizationSettings() {
           valueText={`${preferences.typingScale}%`}
           onChange={(value) => setPreference("typingScale", value)}
         />
+      </fieldset>
+      <fieldset className="preference-options">
+        <legend>Graphics</legend>
+        <label className="preference-row">
+          <span className="preference-label">Graphics quality</span>
+          <select
+            className="preference-select"
+            value={preferences.graphicsTier}
+            onChange={(event) => {
+              if (isGraphicsTier(event.currentTarget.value))
+                setPreference("graphicsTier", event.currentTarget.value);
+            }}
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <p className="settings-note">
+          {preferences.graphicsTier === "low"
+            ? "Fewer particles, no scanlines or glow, and instant XP updates."
+            : preferences.graphicsTier === "high"
+              ? "More particles, richer glow, and expressive XP motion."
+              : "Balanced particles, subtle atmosphere, and smooth XP motion."}
+        </p>
       </fieldset>
       <fieldset className="preference-options">
         <legend>Typing feedback</legend>

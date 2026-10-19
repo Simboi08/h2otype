@@ -2,13 +2,13 @@
 
 > clicking is apparently the 17th best seated exercise
 
-A minimalist, Apple-inspired typing game with a calm interface and satisfying progression. Built for short timed challenges and endless Zen typing sessions.
+A focused pixel-arcade typing game with satisfying progression. Built for short timed challenges and endless Zen typing sessions.
 
 ## Concept
 - **Sprint:** timed 15, 30, or 60 second typing tests, with WPM/accuracy results and local personal bests.
 - **Zen:** endless uninterrupted typing, cumulative XP and persistent levels.
 - **Progression:** accurate typing earns XP and eventually unlocks levels; restrained, nonblocking feedback.
-- **Presentation:** Cupertino-inspired light/dark themes, system theme by default, clean typography and keyboard-first controls.
+- **Presentation:** pixel HUD typography, crisp cyan/pink panels, atmospheric dark/light themes, system theme by default, and keyboard-first play.
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
@@ -43,7 +43,7 @@ In this cloud environment the home npm cache is unwritable. Before npm commands,
 
 ## Foundation decisions
 - React handles the small interactive controls; TypeScript catches mismatched values before shipping. Vite supplies fast local development and production builds.
-- CSS variables define shared colors, surfaces, borders, and shadows. Changing a theme updates those values together. System fonts avoid external font downloads.
+- CSS variables define shared colors, surfaces, borders, and shadows. Changing a theme updates those values together. Typing uses built-in font choices; the HUD uses locally bundled Silkscreen Regular ([SIL Open Font License](public/fonts/OFL-Silkscreen.txt)), without a third-party font service.
 - Appearance defaults to the device setting, follows changes while open, and saves explicit preferences in localStorage. An early script sets colors before React loads to avoid a bright flash; blocked storage falls back safely to a per-visit choice.
 - A native Settings dialog provides keyboard focus handling and Escape dismissal. Closing it returns focus to active typing or the current summary. F2 opens Settings directly; its controls retain visible focus styles. The layout adapts to narrow screens, and reduced-motion preferences disable transitions.
 - A real browser text field shows only the active word; Space clears it for the next word while the passage retains correct/error feedback and the current caret. Backspace from an empty field reopens the previous word; pasting, dropping text, mid-passage edits, and held character keys are blocked. Composition drafts are scored only when committed.
@@ -80,9 +80,9 @@ To keep long sessions responsive, Zen appends short local text batches and retir
 - Held character-key repeats, incorrect attempts, paste/drop, uncommitted composition, paused input, and post-deadline input do not award XP. There are no speed/accuracy bonuses yet.
 - Earned XP stays earned after Backspace, restart, mode changes, or abandoning a run. Restarting or opening results does not grant XP. Fresh correct typing in a new session is legitimate practice and can earn XP again.
 - Level 1 starts at 0 XP. Reaching level 2 costs 100 XP; the next level costs 200 more, then 300 more. Lifetime thresholds for levels 2/3/4/5 are 100/300/600/1000 XP. Levels are calculated from total XP.
-- The small indicator below the wordmark shows level and progress toward the next level. Hover for exact XP; its accessible progressbar exposes the same information. A four-second level-up notice never moves keyboard focus. Sprint results and Zen summaries show XP earned in that session.
+- The wide XP rail above the passage shows level, current/required XP, lifetime XP, and the next level. Its fill accelerates then slows toward earned XP, rolling over naturally between levels. The labels and accessible progressbar stay exact during that animation. A prominent four-second level-up banner never moves keyboard focus. Sprint results and Zen summaries show XP earned in that session.
 - Lifetime XP and the current Zen credit history share one versioned `h2otype.progress.v1` storage value, so a reload cannot pay again from an older saved draft. Milestone 3 drafts from `h2otype.zen-session.v1` migrate automatically without retroactive XP; existing correct positions are marked credited. Sprint personal bests and appearance settings remain intact.
-- If storage fails, play and XP continue in memory and the header says **XP not saved**. Closing/reloading can lose unsaved progress. Malformed saved data is ignored. Progress is local to this browser/origin, with no cloud sync; use one active tab to avoid concurrent writes overwriting each other.
+- If storage fails, play and XP continue in memory and the XP area says **XP not saved**. Closing/reloading can lose unsaved progress. Malformed saved data is ignored. Progress is local to this browser/origin, with no cloud sync; use one active tab to avoid concurrent writes overwriting each other.
 
 ## Settings
 Open **Settings** in the header or press **F2**. Changes take effect immediately in both Sprint and Zen without clearing the session:
@@ -97,14 +97,17 @@ Open **Settings** in the header or press **F2**. Changes take effect immediately
 | Typing sound | Off | Standard click or 8-bit crush, with Preview sound and a separate volume slider. Accepted character edits play once; controls and Backspace stay silent. |
 | Sound volume | 35% | Adjust from 0% (mute) to 100%. Sounds are generated locally, with at most four simultaneous short voices and no queued backlog. |
 | Typing particles | Off | Regular circles or 8-bit pixels burst from correct characters. Wrong characters and Backspace stay quiet visually; reduced motion suppresses particles. |
+| Graphics quality | Medium | Low uses fewer particles and removes scanlines/glow and XP motion. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
 | Live accuracy | Off | Shows correct attempts divided by all attempts, including corrected mistakes. |
-| XP progress | On | Shows the header level/progress indicator; hiding it keeps XP accruing and leaves session XP in results. |
+| XP progress | On | Shows the wide level/XP rail above typing; hiding it keeps XP accruing and leaves session XP in results. |
 | Level-up notifications | On | Shows brief, nonblocking notices; turning it off dismisses an active notice and suppresses new ones. |
 | Appearance | System | System/light/dark themes; System follows device changes. |
 
 Display preferences are stored in `h2otype.preferences.v1`; existing appearance remains in `h2otype.theme`. These keys are separate from XP, Zen sessions, and personal bests. Invalid fields fall back to defaults. Storage failures keep the choices working for the visit and show an explanation in Settings. Display preferences also follow changes made in another tab.
 
 Appearance, size, weight, volume, and WPM refresh use labeled native controls. The WPM slider retains the same four intervals as the original dropdown. Changes apply without restarting a run. Correct-letter particles follow the passage after scrolling and font/size changes; they are short-lived and clear on restart or pause. Sound and particles do not change XP or scoring. Some browsers require a user gesture before audio can play; use Preview sound if needed. Audio failures show a status in Settings while typing continues normally.
+
+Particles start just beyond the letter's right edge and fan out through a right-facing 180° semicircle. Graphics tiers change particle count, lifetime, frame/resolution caps, and decoration without changing gameplay. The stronger 8-bit crunch has a sharper attack and fuller body; use volume or Off to suit your preference. The optional scanlines and pixel HUD follow the supplied arcade references; passage fonts and all existing local data remain configurable.
 
 Keyboard users can Tab/Shift+Tab through the modal, use Space on switches, arrow keys on theme radios, and Escape to close. The panel scrolls on small screens while Close stays accessible. Live stats are not an announcing live region, so they do not read out every keystroke. Reduced-motion preferences disable caret blinking and transitions. Controls have larger hit areas, and the workspace stays centered with optional stats enabled.
 

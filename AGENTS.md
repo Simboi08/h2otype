@@ -3,7 +3,7 @@
 Read README.md, DESIGN.md, ROADMAP.md and PROGRESS.md before making changes.
 
 ## Product intent
-Build a minimalist Apple-inspired typing game: calm on the surface, with rewarding XP and level progression. Two modes: Sprint (15/30/60-second tests) and Zen (endless typing). The default interface is distraction-free, with live statistics configurable in Settings.
+Build a focused pixel-arcade typing game with rewarding XP and level progression. The user-requested arcade refresh in DESIGN.md supersedes the original Apple-inspired styling. Two modes: Sprint (15/30/60-second tests) and Zen (endless typing). Keep the passage central, graphics configurable, and live statistics optional in Settings.
 
 ## Development guidelines
 - Use React, TypeScript, and Vite unless existing code establishes another stack.

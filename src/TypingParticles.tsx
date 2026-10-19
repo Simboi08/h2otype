@@ -1,6 +1,7 @@
 import { useEffect, useImperativeHandle, useRef } from "react";
 import type { Ref } from "react";
-import type { ParticleStyle } from "./preferences";
+import type { GraphicsTier, ParticleStyle } from "./preferences";
+import { graphicsProfiles, particleVelocity } from "./graphics";
 
 type Particle = {
   x: number;
@@ -19,10 +20,13 @@ export type ParticleHandle = {
 export default function TypingParticles({
   ref,
   style,
+  tier,
 }: {
   ref: Ref<ParticleHandle>;
   style: Exclude<ParticleStyle, "off">;
+  tier: GraphicsTier;
 }) {
+  const profile = graphicsProfiles[tier];
   const canvas = useRef<HTMLCanvasElement>(null);
   const particles = useRef<Particle[]>([]);
   const frame = useRef<number | null>(null);
@@ -38,17 +42,21 @@ export default function TypingParticles({
   function draw(now: number) {
     const ctx = drawing.current;
     if (!ctx) return;
+    if (now - previous.current < 1000 / profile.fps - 0.1) {
+      frame.current = requestAnimationFrame(draw);
+      return;
+    }
     ctx.clearRect(0, 0, innerWidth, innerHeight);
     const dt = Math.min(0.04, Math.max(0, now - previous.current) / 1000);
     previous.current = now;
     particles.current = particles.current.filter(
-      (particle) => now - particle.born < 360,
+      (particle) => now - particle.born < profile.lifetime,
     );
     for (const particle of particles.current) {
       particle.x += particle.vx * dt;
       particle.y += particle.vy * dt;
       particle.vy += 70 * dt;
-      ctx.globalAlpha = (1 - (now - particle.born) / 360) * 0.65;
+      ctx.globalAlpha = (1 - (now - particle.born) / profile.lifetime) * 0.8;
       ctx.fillStyle = particle.color;
       if (particle.pixel)
         ctx.fillRect(
@@ -76,20 +84,18 @@ export default function TypingParticles({
       const color = getComputedStyle(document.documentElement)
         .getPropertyValue("--accent")
         .trim();
-      for (let index = 0; index < 6; index++) {
-        const angle = Math.PI + Math.random() * Math.PI;
-        const speed = 25 + Math.random() * 40;
+      for (let index = 0; index < profile.burst; index++) {
+        const velocity = particleVelocity(Math.random(), Math.random(), tier);
         particles.current.push({
           x,
           y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
+          ...velocity,
           born: now,
           pixel: style === "pixel",
           color,
         });
       }
-      particles.current = particles.current.slice(-48);
+      particles.current = particles.current.slice(-profile.maximum);
       if (frame.current === null) {
         previous.current = now;
         frame.current = requestAnimationFrame(draw);
@@ -106,7 +112,7 @@ export default function TypingParticles({
     }
     const resize = () => {
       clear();
-      const ratio = Math.min(devicePixelRatio || 1, 2);
+      const ratio = Math.min(devicePixelRatio || 1, profile.resolution);
       element.width = Math.round(innerWidth * ratio);
       element.height = Math.round(innerHeight * ratio);
       drawing.current?.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -123,7 +129,7 @@ export default function TypingParticles({
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, []);
+  }, [profile.resolution]);
   return (
     <canvas ref={canvas} className="typing-particles" aria-hidden="true" />
   );

@@ -34,4 +34,11 @@ Feedback added: 2026-10-19.
 3. Sound styles and volume — implemented and checked next.
 4. Optional particles — implemented and checked with sound feedback.
 
+## Arcade feedback refresh
+- [x] Emit particles from the front/right edge of the letter in a right-facing 180° fan, spanning up and down around the positive x-axis.
+- [x] Add Low/Medium/High graphics tiers controlling particle density, frame/resolution budgets, glow, scanlines, and XP motion.
+- [x] Make progression more prominent with a wide XP bar, accelerating/decelerating fill, and a larger nonblocking level-up banner.
+- [x] Give the 8-bit crunch more attack/body while retaining volume, mute, and bounded playback.
+- [x] Adopt the supplied Krillion-style pixel-arcade direction: navy/cyan/pink, pixel HUD labels, crisp panels, and a subtle CRT atmosphere, with a matching light mode.
+
 See PROGRESS.md for implementation and validation details. Add new feedback here as it comes up.

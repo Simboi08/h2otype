@@ -219,7 +219,7 @@ test("hiding progress and notifications changes display only and never replays a
   await closeSettings(page);
   await page.getByRole("textbox").press("s");
   await expect(page.getByRole("progressbar")).toHaveCount(0);
-  await expect(page.locator(".progress-notice")).toHaveText("");
+  await expect(page.locator(".level-up-banner")).toHaveCount(0);
   expect(
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).totalXp,
@@ -239,7 +239,7 @@ test("hiding progress and notifications changes display only and never replays a
   await page
     .getByRole("textbox")
     .fill((await page.locator(".passage").innerText()).slice(0, 201));
-  await expect(page.locator(".progress-notice")).toHaveText("Level 3");
+  await expect(page.locator(".progress-notice")).toContainText("Level 3");
   await openSettings(page);
   await page
     .getByRole("switch", { name: "Level-up notifications", exact: true })
