@@ -74,7 +74,16 @@ A typing game that looks and feels like a polished macOS application. Think Appl
 - Omit focus outlines on the page container and typing input: the passage caret communicates typing focus. Keep visible focus cues on Settings controls. This intentionally replaces the earlier Shift+Tab page navigation following user feedback on 2026-10-19.
 - WPM refresh choices: Instant (every existing metric update), 0.5 seconds (default), 1 second, or 2 seconds. Persist this choice with existing preferences and apply it to both modes without clearing the session.
 - Slower choices hold the displayed WPM until the next active-time interval. Accuracy, session clocks, scoring, XP, and final results remain independent of that display cadence. Restart resets the live display immediately; pausing hides it and resuming shows a fresh sample.
-- Optional fonts/interface sizing, sound styles, and particle effects are tracked in NOTES.md for separate work. Particle effects are a future opt-in exception to the MVP's restrained-effects policy, not part of this update.
+- WPM refresh uses a labeled four-stop slider, preserving the existing saved millisecond values and scoring behavior.
+
+## Typing customization and feedback
+- Typing appearance: built-in Monospace (default), System, and Serif stacks; weight Regular/Medium/Semibold/Bold (400/500/600/700); interface size 80–130% in 10% steps, default 100%. Apply to the passage and word input, with workspace width scaling within the viewport. Keep input text at least 16px for mobile keyboards. Changing any choice preserves the current run and keeps the caret visible.
+- Persist new choices alongside existing version-1 preferences, validating fields independently so old saves receive defaults without changing XP, themes, Zen drafts, or bests. Settings remains internally scrollable and fully keyboard operable.
+- Sound: Off (default), Standard, or 8-bit crush, with a 0–100% volume slider (default 35%) and Preview sound. Generate short local click/pluck buffers; never download assets or require sound to play. Accepted character edits, including mistakes/corrections and composition commits, play one click per edit; Backspace, rejected input, paste/drop, held repeats, and expired/paused input stay silent.
+- Keep at most four short sound voices, discard delayed notes, and stop voices on mute, hidden pages, restarts, pause/finish, and mode changes. Unavailable audio reports a Settings status without affecting typing.
+- Particles: Off (default), Regular circles, or 8-bit pixels. Emit a small burst from the newly rendered correct character, including a valid correction even when that position already earned XP. Wrong characters and deletion never emit. A multi-character commit emits at most one burst at its newest correct retained character.
+- Limit particles to 48 total, with six per burst and a 360ms lifetime; animate a pointer-transparent canvas only while particles are alive. Clear on restart/pause/finish, page hiding, resize, and unmount. Suppress entirely under reduced motion, without replaying old bursts when re-enabled.
+- These optional restrained particles are the user-requested post-MVP exception to the original effects scope. Scoring, progression, deadlines, live-stat math, and the minimal default screen remain unchanged.
 
 ## Accessibility
 - Contrast and visible caret in either theme.

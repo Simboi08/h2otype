@@ -91,12 +91,20 @@ Open **Settings** in the header or press **F2**. Changes take effect immediately
 | --- | --- | --- |
 | Live WPM | Off | Shows current speed using the existing correct-character/active-time calculation. |
 | WPM refresh rate | 0.5 seconds | Choose Instant, 0.5 seconds, 1 second, or 2 seconds between live WPM updates. Slower choices hold the number steady between active-time intervals; final results and scoring remain exact. |
+| Typing font | Monospace | Choose Monospace, System, or Serif using built-in fonts. Applies to the passage and word input. |
+| Font weight | Regular | Choose Regular, Medium, Semibold, or Bold with the slider. |
+| Typing size | 100% | Scale the passage, input, and workspace from 80% to 130%; layout stays within the viewport. |
+| Typing sound | Off | Standard click or 8-bit crush, with Preview sound and a separate volume slider. Accepted character edits play once; controls and Backspace stay silent. |
+| Sound volume | 35% | Adjust from 0% (mute) to 100%. Sounds are generated locally, with at most four simultaneous short voices and no queued backlog. |
+| Typing particles | Off | Regular circles or 8-bit pixels burst from correct characters. Wrong characters and Backspace stay quiet visually; reduced motion suppresses particles. |
 | Live accuracy | Off | Shows correct attempts divided by all attempts, including corrected mistakes. |
 | XP progress | On | Shows the header level/progress indicator; hiding it keeps XP accruing and leaves session XP in results. |
 | Level-up notifications | On | Shows brief, nonblocking notices; turning it off dismisses an active notice and suppresses new ones. |
 | Appearance | System | System/light/dark themes; System follows device changes. |
 
 Display preferences are stored in `h2otype.preferences.v1`; existing appearance remains in `h2otype.theme`. These keys are separate from XP, Zen sessions, and personal bests. Invalid fields fall back to defaults. Storage failures keep the choices working for the visit and show an explanation in Settings. Display preferences also follow changes made in another tab.
+
+Appearance, size, weight, volume, and WPM refresh use labeled native controls. The WPM slider retains the same four intervals as the original dropdown. Changes apply without restarting a run. Correct-letter particles follow the passage after scrolling and font/size changes; they are short-lived and clear on restart or pause. Sound and particles do not change XP or scoring. Some browsers require a user gesture before audio can play; use Preview sound if needed. Audio failures show a status in Settings while typing continues normally.
 
 Keyboard users can Tab/Shift+Tab through the modal, use Space on switches, arrow keys on theme radios, and Escape to close. The panel scrolls on small screens while Close stays accessible. Live stats are not an announcing live region, so they do not read out every keystroke. Reduced-motion preferences disable caret blinking and transitions. Controls have larger hit areas, and the workspace stays centered with optional stats enabled.
 

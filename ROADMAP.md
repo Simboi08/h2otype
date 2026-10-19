@@ -42,7 +42,14 @@ The planned MVP milestones are complete. Later possibilities remain optional and
 - [x] Persistent WPM refresh choices: Instant, 0.5 seconds, 1 second, or 2 seconds
 - [x] Keep scoring, final results, XP, and existing saved data independent of display refresh rate
 
-Further user feedback (fonts, boldness, interface size, sounds, particles, and a possible WPM slider) is tracked in [NOTES.md](NOTES.md).
+## Post-MVP — Typing customization
+- [x] Built-in typing fonts, font weight, and responsive interface-size controls
+- [x] Labeled WPM refresh slider using the existing four intervals
+- [x] Optional Standard/8-bit crush sounds, preview, volume, and mute
+- [x] Optional Regular/8-bit pixel particles on correct characters, with reduced-motion support
+- [x] Persist new preferences without changing existing progress or sessions
+
+The current feedback list is implemented. Further notes can be added in [NOTES.md](NOTES.md).
 
 ## Later possibilities
 - [ ] Performance history/charts

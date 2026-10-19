@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
+import { useTypingFeedback } from "./useTypingFeedback";
 import TypingPassage from "./TypingPassage";
 import { getWordInput } from "./typingEngine";
 import {
@@ -40,6 +41,12 @@ export default function ZenPractice({
   const { prefix, word } = getWordInput(state.session.typed);
   const metrics = zenMetrics(state, now);
   const stopped = state.paused || state.summary;
+  const {
+    container: feedbackRef,
+    onEdit: emitFeedback,
+    reset: resetFeedback,
+    layer: particleLayer,
+  } = useTypingFeedback(!stopped);
   usePracticeKeyboard({
     restart: newSession,
     composing,
@@ -103,7 +110,10 @@ export default function ZenPractice({
   }, [stopped, state.summary, exitRequested]);
 
   function edit(value: string, timestamp: number) {
-    update(editZen(latest.current, prefix + value, timestamp), timestamp);
+    const before = latest.current;
+    const next = editZen(before, prefix + value, timestamp);
+    emitFeedback(before.session, next.session, next.passage);
+    update(next, timestamp);
   }
 
   function stop(summary: boolean) {
@@ -121,6 +131,7 @@ export default function ZenPractice({
   }
 
   function newSession() {
+    resetFeedback();
     const timestamp = performance.now();
     focusInput.current = true;
     setDraft(null);
@@ -131,7 +142,8 @@ export default function ZenPractice({
   }
 
   return (
-    <div className="passage-card">
+    <div className="passage-card" ref={feedbackRef}>
+      {particleLayer}
       <div className="passage-meta">
         <span>Zen</span>
         {!stopped && (

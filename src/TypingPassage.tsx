@@ -1,4 +1,5 @@
-import { memo, useEffect, useRef } from "react";
+import { memo, useLayoutEffect, useRef } from "react";
+import { usePreferences } from "./preferences";
 
 type Props = {
   passage: string;
@@ -17,7 +18,10 @@ const TypingPassage = memo(function TypingPassage({
   const caret = useRef<HTMLSpanElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
   const typedCharacters = [...typed];
-  useEffect(() => {
+  const {
+    preferences: { typingFont, typingWeight, typingScale },
+  } = usePreferences();
+  useLayoutEffect(() => {
     const active = caret.current;
     const container = windowRef.current;
     if (!container) return;
@@ -32,7 +36,7 @@ const TypingPassage = memo(function TypingPassage({
       container.scrollTop += target.bottom - bounds.bottom + 12;
     if (target.top < bounds.top)
       container.scrollTop -= bounds.top - target.top + 12;
-  }, [typed]);
+  }, [typed, typingFont, typingWeight, typingScale]);
   // Trailing spaces travel with their word instead of indenting the next line.
   let position = 0;
   return (

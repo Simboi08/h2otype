@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { defaultPreferences, parsePreferences } from "../src/preferences";
+import { setWpmRefresh } from "./settings";
 
 async function openSettings(page: import("@playwright/test").Page) {
   await page
@@ -21,9 +22,7 @@ async function enableStats(page: import("@playwright/test").Page) {
   await page
     .getByRole("switch", { name: "Live accuracy", exact: true })
     .check();
-  await page
-    .getByRole("combobox", { name: "WPM refresh rate" })
-    .selectOption("0");
+  await setWpmRefresh(page, 0);
   await closeSettings(page);
 }
 const stat = (page: import("@playwright/test").Page, name: string) =>
@@ -54,6 +53,7 @@ test("preferences validate partial boolean fields and fall back safely for inval
       }),
     ),
   ).toEqual({
+    ...defaultPreferences,
     liveWpm: true,
     liveAccuracy: false,
     xpProgress: false,

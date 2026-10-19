@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { setWpmRefresh } from "./settings";
 
 async function clock(page: Page) {
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
@@ -162,7 +163,7 @@ test("Shift+Tab stays in typing, Settings retains Tab navigation, and held/compo
   await expect(close).not.toBeFocused();
   await expect(page.getByRole("dialog")).toBeVisible();
   await expect(input).toHaveValue("slow");
-  await page.getByRole("combobox", { name: "WPM refresh rate" }).focus();
+  await page.getByRole("slider", { name: "WPM refresh rate" }).focus();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Tab");
   await expect(
@@ -195,9 +196,9 @@ for (const mode of ["Sprint", "Zen"]) {
     await clock(page);
     await page.goto("/");
     await settings(page);
-    const rate = page.getByRole("combobox", { name: "WPM refresh rate" });
-    await expect(rate).toHaveValue("500");
-    await rate.selectOption("2000");
+    const rate = page.getByRole("slider", { name: "WPM refresh rate" });
+    await expect(rate).toHaveValue("1");
+    await setWpmRefresh(page, 2000);
     await page.getByRole("switch", { name: "Live WPM", exact: true }).check();
     await page
       .getByRole("switch", { name: "Live accuracy", exact: true })
@@ -221,7 +222,7 @@ for (const mode of ["Sprint", "Zen"]) {
     await page.clock.runFor(250);
     await expect(liveWpm(page)).toHaveText(mode === "Zen" ? "18" : "15");
     await settings(page);
-    await rate.selectOption("0");
+    await setWpmRefresh(page, 0);
     await closeSettings(page);
     await input.press(mode === "Zen" ? "i" : "d");
     await expect(liveWpm(page)).toHaveText(mode === "Zen" ? "21" : "18");
@@ -229,7 +230,7 @@ for (const mode of ["Sprint", "Zen"]) {
     await expect(liveWpm(page)).toHaveText("0");
     await expect(page.locator(".live-stats")).toContainText("100%");
     await settings(page);
-    await rate.selectOption("2000");
+    await setWpmRefresh(page, 2000);
     await closeSettings(page);
     await input.press(mode === "Zen" ? "t" : "s");
     await page.clock.runFor(2000);
@@ -238,7 +239,7 @@ for (const mode of ["Sprint", "Zen"]) {
     await expect(liveWpm(page)).toHaveText("0");
     await page.reload();
     await settings(page);
-    await expect(rate).toHaveValue("2000");
+    await expect(rate).toHaveValue("3");
   });
 }
 
@@ -248,9 +249,7 @@ test("slow WPM refresh cannot delay Sprint's exact results or final XP", async (
   await clock(page);
   await page.goto("/");
   await settings(page);
-  await page
-    .getByRole("combobox", { name: "WPM refresh rate" })
-    .selectOption("2000");
+  await setWpmRefresh(page, 2000);
   await page.getByRole("switch", { name: "Live WPM", exact: true }).check();
   await closeSettings(page);
   await page.getByRole("button", { name: "15s", exact: true }).click();

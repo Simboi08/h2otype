@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import CustomizationSettings from "./CustomizationSettings";
+import PreferenceSlider from "./PreferenceSlider";
 import ProgressIndicator from "./ProgressIndicator";
 import ZenPractice from "./ZenPractice";
 import TypingPractice from "./TypingPractice";
 import type { SprintDuration } from "./sprintRecords";
 import {
-  isWpmRefreshMs,
   setPreference,
   usePreferences,
   wpmRefreshOptions,
+  typingFonts,
 } from "./preferences";
 import type { BooleanPreferenceKey } from "./preferences";
 import { useTheme } from "./useTheme";
@@ -118,6 +121,15 @@ export default function App() {
       <main id="main" tabIndex={-1}>
         <section
           className="typing-space"
+          style={
+            {
+              "--typing-font": typingFonts.find(
+                (font) => font.value === preferences.typingFont,
+              )!.family,
+              "--typing-weight": preferences.typingWeight,
+              "--typing-scale": preferences.typingScale / 100,
+            } as CSSProperties
+          }
           aria-label={`${mode === "sprint" ? "Sprint" : "Zen"} typing practice`}
         >
           <h1 className="sr-only">h2otype typing practice</h1>
@@ -215,37 +227,28 @@ export default function App() {
         <p className="settings-note">
           System follows your device’s appearance.
         </p>
+        <CustomizationSettings />
         <fieldset className="preference-options">
           <legend>While typing</legend>
-          <label className="preference-row">
-            <span>
-              <span className="preference-label" id="wpm-refresh-label">
-                WPM refresh rate
-              </span>
-              <span
-                className="preference-description"
-                id="wpm-refresh-description"
-              >
-                How often live WPM changes. Results stay exact.
-              </span>
-            </span>
-            <select
-              className="preference-select"
-              value={preferences.wpmRefreshMs}
-              aria-labelledby="wpm-refresh-label"
-              aria-describedby="wpm-refresh-description"
-              onChange={(event) => {
-                const value = Number(event.currentTarget.value);
-                if (isWpmRefreshMs(value)) setPreference("wpmRefreshMs", value);
-              }}
-            >
-              {wpmRefreshOptions.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <PreferenceSlider
+            label="WPM refresh rate"
+            description="How often live WPM changes. Results stay exact."
+            min={0}
+            max={3}
+            step={1}
+            value={wpmRefreshOptions.findIndex(
+              (option) => option.value === preferences.wpmRefreshMs,
+            )}
+            valueText={
+              wpmRefreshOptions.find(
+                (option) => option.value === preferences.wpmRefreshMs,
+              )!.label
+            }
+            endpoints={["Instant", "2 seconds"]}
+            onChange={(index) =>
+              setPreference("wpmRefreshMs", wpmRefreshOptions[index].value)
+            }
+          />
           {(
             [
               ["liveWpm", "Live WPM", "Show your current typing speed."],

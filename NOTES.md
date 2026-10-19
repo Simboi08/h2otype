@@ -1,6 +1,6 @@
 # h2otype — Ideas and feedback
 
-Captured: 2026-10-18. Tab restart and WPM refresh controls are implemented; the remaining ideas are for later updates.
+Captured: 2026-10-18. All currently requested controls and customization ideas are implemented.
 
 Feedback added: 2026-10-19.
 
@@ -11,27 +11,27 @@ Feedback added: 2026-10-19.
 - [x] Apply restart consistently to Sprint and Zen, return focus to typing, and retain lifetime XP and personal bests. Settings explains that restarting Zen clears its resumable draft.
 
 ## Typing appearance
-- Add a menu for choosing the typing font and adjusting the size of the typing interface.
-- Add font weight (boldness) adjustment alongside font and size choices.
-- Keep the passage aligned and centered, including on phones and short screens. Font and size changes should preserve the current session.
+- [x] Add a menu for choosing the typing font and adjusting the size of the typing interface: Monospace/System/Serif and 80–130% size.
+- [x] Add font weight (boldness): Regular, Medium, Semibold, and Bold.
+- [x] Keep the passage aligned and centered, including on phones and short screens. Font and size changes preserve the current session and keep the caret visible.
 
 ## Live statistics
 - [x] Let the user choose how often the WPM counter refreshes: Instant, 0.5 seconds (default), 1 second, or 2 seconds. Persist the choice in Settings.
 - [x] Change only how often the number is displayed. Keep timing, scoring, XP, and final results accurate and independent of this setting.
-- Idea: use a sliding bar for WPM refresh rate instead of the current dropdown. Consider labeled stops for Instant, 0.5 seconds, 1 second, and 2 seconds; this is not implemented yet.
+- [x] Use a sliding bar for WPM refresh rate instead of the dropdown, with labeled values for Instant, 0.5 seconds, 1 second, and 2 seconds.
 
 ## Sound
-- Add typing sound effects, with standard and bitcrushed/8-bit styles.
-- Provide an Off option and volume control in Settings. Avoid overlapping sounds building up during fast typing.
+- [x] Add typing sound effects, with Standard and 8-bit crush styles and a Preview sound button.
+- [x] Provide an Off option (default) and volume control in Settings. Bound overlapping voices and discard delayed sounds during fast typing.
 
-## Particle effects — later
-- Small spurts of particles from the correctly typed letter, with pixel/8-bit and regular styles.
-- Add Settings controls later. Keep effects optional and restrained, respect reduced motion, and preserve typing responsiveness.
+## Particle effects
+- [x] Small spurts of particles from the correctly typed letter, with 8-bit pixel and Regular styles.
+- [x] Settings controls with Off by default. Effects are optional, bounded, and suppressed under reduced motion.
 
 ## Suggested order
 1. Tab restart and configurable WPM refresh rate — implemented.
-2. Font, font-weight, and interface-size controls.
-3. Sound styles and volume.
-4. Optional particles.
+2. Font, font-weight, interface-size controls, and the WPM slider — implemented and checked first.
+3. Sound styles and volume — implemented and checked next.
+4. Optional particles — implemented and checked with sound feedback.
 
-Build and check each remaining step separately. See PROGRESS.md for implementation and validation details.
+See PROGRESS.md for implementation and validation details. Add new feedback here as it comes up.

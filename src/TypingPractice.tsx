@@ -9,6 +9,7 @@ import {
 
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
+import { useTypingFeedback } from "./useTypingFeedback";
 import { commitProgress } from "./progressStore";
 import TypingPassage from "./TypingPassage";
 import SprintResults from "./SprintResults";
@@ -45,6 +46,12 @@ export default function TypingPractice({
   const focusOnAttach = useRef(false);
   const metrics = getMetrics(session, passage);
   const finished = session.endedAt !== null;
+  const {
+    container: feedbackRef,
+    onEdit: emitFeedback,
+    reset: resetFeedback,
+    layer: particleLayer,
+  } = useTypingFeedback(!finished);
   const { prefix, word } = getWordInput(session.typed);
   usePracticeKeyboard({ restart, composing, input, enabled: !finished });
 
@@ -67,6 +74,7 @@ export default function TypingPractice({
   function edit(value: string, now: number) {
     const current = latest.current;
     const next = editSession(current, prefix + value, passage, now, durationMs);
+    emitFeedback(current, next, passage);
     latest.current = next;
     setSession(next);
     if (next.xpEarned > current.xpEarned)
@@ -74,6 +82,7 @@ export default function TypingPractice({
   }
 
   function restart() {
+    resetFeedback();
     focusOnAttach.current = true;
     const next = emptySession();
     latest.current = next;
@@ -84,7 +93,8 @@ export default function TypingPractice({
   }
 
   return (
-    <div className="passage-card">
+    <div className="passage-card" ref={feedbackRef}>
+      {particleLayer}
       <div className="passage-meta">
         {mode === "sprint" ? (
           <div
