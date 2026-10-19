@@ -37,11 +37,11 @@
 The planned MVP milestones are complete. Later possibilities remain optional and require a separate task.
 
 ## Post-MVP — Controls and live WPM
-- [x] Tab restarts from typing and focused summary headings; Shift+Tab retains keyboard navigation
+- [x] Tab restarts anywhere on the game page; Settings keeps normal Tab and Shift+Tab retains page navigation
 - [x] Persistent WPM refresh choices: Instant, 0.5 seconds, 1 second, or 2 seconds
 - [x] Keep scoring, final results, XP, and existing saved data independent of display refresh rate
 
-Further user feedback (fonts, interface size, sounds, and particles) is tracked in [NOTES.md](NOTES.md).
+Further user feedback (fonts, boldness, interface size, sounds, particles, and a possible WPM slider) is tracked in [NOTES.md](NOTES.md).
 
 ## Later possibilities
 - [ ] Performance history/charts

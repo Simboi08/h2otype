@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { recordSprint } from "./sprintRecords";
-import { restartOnTab } from "./restartShortcut";
 import type { SprintDuration } from "./sprintRecords";
 import type { getMetrics } from "./typingEngine";
 
@@ -48,7 +47,6 @@ export default function SprintResults({
         tabIndex={-1}
         ref={heading}
         aria-keyshortcuts="Tab Enter"
-        onKeyDown={(event) => restartOnTab(event, onRestart)}
       >
         Sprint results
       </h2>

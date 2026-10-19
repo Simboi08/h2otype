@@ -1,11 +1,11 @@
 # h2otype — Progress and handoff
 
-Updated: 2026-10-18
+Updated: 2026-10-19
 
 ## Current state
 Milestones 0–5 are complete. Sprint supports 15/30/60-second tests, a dedicated results screen, duration-specific local personal bests, and keyboard/button restart. The centered minimal layout and word-clearing input are preserved. Zen replenishes continuously, pauses/resumes with active-time statistics, and saves a resumable local session. Correct typing earns persistent XP and levels in both modes, with subtle header progress and session XP in results. Settings now controls live WPM/accuracy, the XP indicator, notifications, and appearance. The planned MVP roadmap is complete.
 
-The first feedback update adds Tab restart in both modes and a persistent WPM refresh-rate selector. The remaining wishlist is in NOTES.md.
+The first feedback update adds Tab restart in both modes and a persistent WPM refresh-rate selector. The Tab follow-up expands restart to anywhere on the game page, so clicking outside the typing field does not reintroduce Tab cycling. Settings retains normal navigation. The remaining wishlist, including font boldness and a possible WPM slider, is in NOTES.md.
 
 ## Completed
 ### Milestone 0
@@ -75,10 +75,17 @@ The first feedback update adds Tab restart in both modes and a persistent WPM re
 - New runs reset the displayed WPM immediately. Existing saved preferences safely receive the new default, and invalid interval values are ignored. Appearance, XP, bests, and Zen storage are preserved.
 - Recorded all remaining feedback in NOTES.md: font/interface-size choices, standard/bitcrushed typing sounds, and optional regular/pixel particles. Those features are deferred as requested.
 
+## Tab restart follow-up — 2026-10-19
+- Reproduced the reported navigation gap: the old shortcut only listened on typing fields and summary headings, so Tab from initial page focus or another control navigated normally instead of restarting.
+- Moved the shortcut to one page-level listener owned by the currently mounted mode, with cleanup on mode change. Tab now restarts from header buttons, passage clicks, blurred fields, and all results/summary controls.
+- Kept normal Tab inside Settings, Shift+Tab navigation across the game page, and held/modified/composing-key protection. The skip link remains reachable with Shift+Tab. Restart preserves earned XP, bests, and selected Sprint duration; Zen still starts a fresh draft.
+- Added font-weight adjustment and the WPM-slider suggestion to NOTES.md. Fonts, sizing, audio, particles, and replacing the dropdown remain future work.
+
 ## Tested
 - `npm run build`: TypeScript checks and production bundle passed.
 - `npm run lint`: passed.
-- `CHROMIUM_PATH=/usr/bin/chromium npm test -- --workers=4`: 73 tests passed (25 pure logic tests and 48 browser tests).
+- `CHROMIUM_PATH=/usr/bin/chromium npm test -- --workers=4`: 74 tests passed (25 pure logic tests and 49 browser tests).
+- Tab follow-up validation: the new regression failed against the previous shortcut scope, then passed for initial page focus, mode/header buttons, passage clicks, blurred fields, and action buttons in both modes. The full suite also confirms normal Settings Tab navigation, Shift+Tab access to the skip link, composition/repeat protections, deadline reset, retained XP/bests, and correct mode switching.
 - Post-MVP checks: Tab restart during Sprint/Zen and from results/pause, deadline reset, focus return, retained duration/XP/bests, cleared Zen draft across reload, Shift+Tab escape, normal Settings navigation, held/modified/composing Tab suppression, preference validation/migration, sampled WPM in both modes, Instant changes, immediate display reset, saved refresh choice, and exact results/XP despite slower display updates.
 - Post-MVP production smoke: HTTP 200 with no JavaScript errors; 320px dark Settings screenshot reviewed with no horizontal overflow; Tab reset/refocus and refresh-preference reload persistence verified.
 - Milestone 5 production smoke: HTTP 200 with no JavaScript errors; 50 correct characters over 10 active seconds displayed 60 WPM and 100% accuracy; dark theme persisted after reload; a live-WPM preference change from another tab propagated. Desktop and 320px Settings/live-stat screenshots were reviewed.
@@ -102,4 +109,4 @@ The first feedback update adds Tab restart in both modes and a persistent WPM re
 - Dependencies/lockfile remain from Milestone 0. This cloud machine uses the writable npm cache documented in README and preinstalled `/usr/bin/chromium`; Playwright's browser-download host was blocked during setup.
 
 ## Next task for Codex
-The planned MVP milestones are complete. User feedback is captured in [NOTES.md](NOTES.md). The requested first update implements Tab restart and WPM refresh controls. Remaining wishlist: font/interface-size controls, typing sounds, and optional particle effects later, as separate tested changes. Preserve the minimal centered interface, word-clearing input, scoring/XP rules, and existing local data unless the user requests a change.
+The planned MVP milestones are complete. User feedback is captured in [NOTES.md](NOTES.md). Tab restart and WPM refresh controls are implemented, including the page-level Tab follow-up. Remaining wishlist: font/font-weight/interface-size controls, typing sounds, optional particle effects, and a possible WPM-refresh slider, as separate tested changes. Preserve the minimal centered interface, word-clearing input, scoring/XP rules, and existing local data unless the user requests a change.

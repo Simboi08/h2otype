@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import LiveStats from "./LiveStats";
-import { restartOnTab } from "./restartShortcut";
+import { useRestartShortcut } from "./restartShortcut";
 import TypingPassage from "./TypingPassage";
 import { getWordInput } from "./typingEngine";
 import {
@@ -40,6 +40,7 @@ export default function ZenPractice({
   const { prefix, word } = getWordInput(state.session.typed);
   const metrics = zenMetrics(state, now);
   const stopped = state.paused || state.summary;
+  useRestartShortcut(newSession, composing);
 
   function update(next: ZenState, timestamp: number) {
     latest.current = next;
@@ -156,7 +157,6 @@ export default function ZenPractice({
             tabIndex={-1}
             ref={heading}
             aria-keyshortcuts="Tab Enter"
-            onKeyDown={(event) => restartOnTab(event, newSession)}
           >
             {state.summary ? "Zen session" : "Zen paused"}
           </h2>
@@ -236,7 +236,6 @@ export default function ZenPractice({
             onPaste={(event) => event.preventDefault()}
             onDrop={(event) => event.preventDefault()}
             onKeyDown={(event) => {
-              restartOnTab(event, newSession, composing.current);
               if (event.repeat && event.key.length === 1)
                 event.preventDefault();
               if (event.key === "Escape") {

@@ -8,7 +8,7 @@ import {
 } from "./typingEngine";
 
 import LiveStats from "./LiveStats";
-import { restartOnTab } from "./restartShortcut";
+import { useRestartShortcut } from "./restartShortcut";
 import { commitProgress } from "./progressStore";
 import TypingPassage from "./TypingPassage";
 import SprintResults from "./SprintResults";
@@ -48,6 +48,7 @@ export default function TypingPractice({
   const metrics = getMetrics(session, passage);
   const finished = session.endedAt !== null;
   const { prefix, word } = getWordInput(session.typed);
+  useRestartShortcut(restart, composing);
 
   useEffect(() => {
     if (session.startedAt === null || finished) return;
@@ -176,7 +177,6 @@ export default function TypingPractice({
             onPaste={(event) => event.preventDefault()}
             onDrop={(event) => event.preventDefault()}
             onKeyDown={(event) => {
-              restartOnTab(event, restart, composing.current);
               if (event.repeat && event.key.length === 1)
                 event.preventDefault();
               if (

@@ -292,9 +292,9 @@ export default function App() {
           indicator is hidden.
         </p>
         <p className="settings-note">
-          Tab restarts from the typing field or summary heading. In Zen it
-          clears the draft; earned XP stays. Shift+Tab navigates out of the
-          field. Tab works normally elsewhere, including here in Settings.
+          Tab restarts anywhere on the game page. In Zen it clears the draft;
+          earned XP stays. Use Shift+Tab to navigate page controls. Tab works
+          normally here in Settings.
         </p>
         {(!storageAvailable || !themeStorageAvailable) && (
           <p className="settings-storage-note" role="status">

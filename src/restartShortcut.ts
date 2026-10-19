@@ -1,9 +1,8 @@
-import type { KeyboardEvent } from "react";
+import { useEffect } from "react";
+import type { RefObject } from "react";
 
-// Scope this shortcut to the typing input and focused summary headings.
-// Shift+Tab remains available to leave the field and reach other controls.
-export function restartOnTab(
-  event: KeyboardEvent<HTMLElement>,
+function restartOnTab(
+  event: KeyboardEvent,
   restart: () => void,
   composing = false,
 ) {
@@ -14,9 +13,26 @@ export function restartOnTab(
     event.altKey ||
     event.metaKey ||
     composing ||
-    event.nativeEvent.isComposing
+    event.isComposing
   )
     return;
   event.preventDefault();
   if (!event.repeat) restart();
+}
+
+// Each mounted mode owns one page-level shortcut, including while its results
+// are visible. Settings retains normal Tab behavior; Shift+Tab navigates the page.
+export function useRestartShortcut(
+  restart: () => void,
+  composing: RefObject<boolean>,
+) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || document.querySelector("dialog[open]"))
+        return;
+      restartOnTab(event, restart, composing.current);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [restart, composing]);
 }

@@ -279,13 +279,16 @@ test("settings trap keyboard focus, switches work with Space, and Escape returns
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(opener).toBeFocused();
-  // A fresh page tests entry order; reload may legitimately restore previous focus.
+  // Shift+Tab keeps every page control reachable, including the skip link.
   const fresh = await page.context().newPage();
   await fresh.goto("/");
-  await fresh.keyboard.press("Tab");
-  await expect(
-    fresh.getByRole("link", { name: "Skip to content" }),
-  ).toBeFocused();
+  const skip = fresh.getByRole("link", { name: "Skip to content" });
+  for (let index = 0; index < 12; index++) {
+    await fresh.keyboard.press("Shift+Tab");
+    if (await skip.evaluate((element) => element === document.activeElement))
+      break;
+  }
+  await expect(skip).toBeFocused();
   await fresh.keyboard.press("Enter");
   await expect(fresh.locator("#main")).toBeFocused();
   await fresh.close();
