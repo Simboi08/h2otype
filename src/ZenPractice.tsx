@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import LiveStats from "./LiveStats";
-import { useRestartShortcut } from "./restartShortcut";
+import { usePracticeKeyboard } from "./usePracticeKeyboard";
 import TypingPassage from "./TypingPassage";
 import { getWordInput } from "./typingEngine";
 import {
@@ -40,7 +40,12 @@ export default function ZenPractice({
   const { prefix, word } = getWordInput(state.session.typed);
   const metrics = zenMetrics(state, now);
   const stopped = state.paused || state.summary;
-  useRestartShortcut(newSession, composing);
+  usePracticeKeyboard({
+    restart: newSession,
+    composing,
+    input,
+    enabled: !stopped,
+  });
 
   function update(next: ZenState, timestamp: number) {
     latest.current = next;

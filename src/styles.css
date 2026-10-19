@@ -55,6 +55,11 @@ a {
   outline: 2px solid var(--accent);
   outline-offset: 4px;
 }
+/* The passage caret communicates typing focus without framing the workspace. */
+main:focus,
+.typing-input:focus {
+  outline: none;
+}
 .app-shell {
   max-width: 1180px;
   min-height: 100svh;

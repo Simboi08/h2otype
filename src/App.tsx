@@ -35,9 +35,7 @@ export default function App() {
   const [mode, setMode] = useState<"sprint" | "zen">("sprint");
   const [duration, setDuration] = useState<SprintDuration>(30);
   const [zenExitRequested, setZenExitRequested] = useState(false);
-  const [focusPractice, setFocusPractice] = useState(false);
   const { preferences, storageAvailable } = usePreferences();
-  const returnFocus = useRef<HTMLElement | null>(null);
   const {
     theme,
     setTheme,
@@ -50,16 +48,30 @@ export default function App() {
     const element = dialog.current;
     if (!element) return;
     const restoreFocus = () => {
-      const target = returnFocus.current;
+      const target =
+        document.querySelector<HTMLElement>(
+          ".typing-input:not([readonly]), .sprint-results h2",
+        ) ?? appearanceButton.current;
+      target?.focus({ preventScroll: true });
+    };
+    const openWithKeyboard = (event: KeyboardEvent) => {
       if (
-        target?.isConnected &&
-        !(target instanceof HTMLInputElement && target.readOnly)
+        event.key !== "F2" ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.metaKey ||
+        event.shiftKey
       )
-        target.focus({ preventScroll: true });
-      else appearanceButton.current?.focus({ preventScroll: true });
+        return;
+      event.preventDefault();
+      if (!event.repeat && !element.open) element.showModal();
     };
     element.addEventListener("close", restoreFocus);
-    return () => element.removeEventListener("close", restoreFocus);
+    window.addEventListener("keydown", openWithKeyboard);
+    return () => {
+      element.removeEventListener("close", restoreFocus);
+      window.removeEventListener("keydown", openWithKeyboard);
+    };
   }, []);
 
   return (
@@ -92,19 +104,11 @@ export default function App() {
         <button
           className="appearance-button"
           ref={appearanceButton}
-          onPointerDown={() => {
-            returnFocus.current =
-              document.activeElement instanceof HTMLInputElement &&
-              document.activeElement.classList.contains("typing-input")
-                ? document.activeElement
-                : null;
-          }}
-          onKeyDown={() => {
-            returnFocus.current = null;
-          }}
           onClick={() => dialog.current?.showModal()}
           aria-label="Open settings"
           aria-haspopup="dialog"
+          aria-keyshortcuts="F2"
+          title="Settings (F2)"
         >
           <SettingsIcon />
           <span>Settings</span>
@@ -131,11 +135,7 @@ export default function App() {
               key={`${mode}-${duration}`}
               mode={mode}
               duration={duration}
-              focusOnMount={focusPractice}
-              onDurationChange={(value) => {
-                setFocusPractice(true);
-                setDuration(value);
-              }}
+              onDurationChange={setDuration}
             />
           )}
         </section>
@@ -293,8 +293,9 @@ export default function App() {
         </p>
         <p className="settings-note">
           Tab restarts anywhere on the game page. In Zen it clears the draft;
-          earned XP stays. Use Shift+Tab to navigate page controls. Tab works
-          normally here in Settings.
+          earned XP stays. Shift+Tab stays in typing. F2 opens Settings, where
+          Tab and Shift+Tab navigate normally. Escape closes Settings and
+          returns to typing or your summary.
         </p>
         {(!storageAvailable || !themeStorageAvailable) && (
           <p className="settings-storage-note" role="status">

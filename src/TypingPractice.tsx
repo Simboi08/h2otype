@@ -8,7 +8,7 @@ import {
 } from "./typingEngine";
 
 import LiveStats from "./LiveStats";
-import { useRestartShortcut } from "./restartShortcut";
+import { usePracticeKeyboard } from "./usePracticeKeyboard";
 import { commitProgress } from "./progressStore";
 import TypingPassage from "./TypingPassage";
 import SprintResults from "./SprintResults";
@@ -25,12 +25,10 @@ export default function TypingPractice({
   mode,
   duration,
   onDurationChange,
-  focusOnMount,
 }: {
   mode: "sprint" | "zen";
   duration: SprintDuration;
   onDurationChange: (duration: SprintDuration) => void;
-  focusOnMount: boolean;
 }) {
   // A fixed long passage supplies well over a normal minute of typing.
   const passage =
@@ -48,7 +46,7 @@ export default function TypingPractice({
   const metrics = getMetrics(session, passage);
   const finished = session.endedAt !== null;
   const { prefix, word } = getWordInput(session.typed);
-  useRestartShortcut(restart, composing);
+  usePracticeKeyboard({ restart, composing, input, enabled: !finished });
 
   useEffect(() => {
     if (session.startedAt === null || finished) return;
@@ -65,10 +63,6 @@ export default function TypingPractice({
       document.removeEventListener("visibilitychange", tick);
     };
   }, [session.startedAt, finished, durationMs]);
-
-  useEffect(() => {
-    if (focusOnMount) input.current?.focus({ preventScroll: true });
-  }, [focusOnMount]);
 
   function edit(value: string, now: number) {
     const current = latest.current;
@@ -229,7 +223,7 @@ export default function TypingPractice({
                   ? "Space advances · Tab restarts"
                   : focused
                     ? "Space advances · Tab restarts"
-                    : "Click the field to continue · Timer running"}
+                    : "Type to continue · Timer running"}
             </p>
             <button className="restart-button" onClick={restart}>
               Restart

@@ -142,7 +142,7 @@ test("Tab clears a Zen draft during play and pause, refocuses input, and keeps l
   expect(await totalXp(page)).toBe(10);
 });
 
-test("Shift+Tab leaves typing, Settings retains Tab navigation, and held/composing Tab cannot restart", async ({
+test("Shift+Tab stays in typing, Settings retains Tab navigation, and held/composing Tab cannot restart", async ({
   page,
 }) => {
   await clock(page);
@@ -150,7 +150,7 @@ test("Shift+Tab leaves typing, Settings retains Tab navigation, and held/composi
   const input = page.getByRole("textbox");
   await input.pressSequentially("slow");
   await input.press("Shift+Tab");
-  await expect(input).not.toBeFocused();
+  await expect(input).toBeFocused();
   await expect(input).toHaveValue("slow");
   await settings(page);
   const close = page.getByRole("button", {

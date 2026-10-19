@@ -278,20 +278,12 @@ test("settings trap keyboard focus, switches work with Space, and Escape returns
   await expect(close).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
-  await expect(opener).toBeFocused();
-  // Shift+Tab keeps every page control reachable, including the skip link.
-  const fresh = await page.context().newPage();
-  await fresh.goto("/");
-  const skip = fresh.getByRole("link", { name: "Skip to content" });
-  for (let index = 0; index < 12; index++) {
-    await fresh.keyboard.press("Shift+Tab");
-    if (await skip.evaluate((element) => element === document.activeElement))
-      break;
-  }
-  await expect(skip).toBeFocused();
-  await fresh.keyboard.press("Enter");
-  await expect(fresh.locator("#main")).toBeFocused();
-  await fresh.close();
+  await expect(page.getByRole("textbox")).toBeFocused();
+  // Settings remains directly reachable without Tab navigation on the game page.
+  await page.keyboard.press("F2");
+  await expect(close).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("textbox")).toBeFocused();
 });
 
 test("all displays fit small screens, settings scroll accessibly, and reduced motion keeps the caret still", async ({

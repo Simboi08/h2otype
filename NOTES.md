@@ -6,7 +6,8 @@ Feedback added: 2026-10-19.
 
 ## Controls
 - [x] Quick restart with **Tab**.
-- [x] Tab follow-up: fixed the gap where restart navigated through controls when focus left the typing field. The shortcut now covers the whole game page, preserving normal Tab in Settings and Shift+Tab navigation.
+- [x] Tab follow-up: fixed the gap where restart navigated through controls when focus left the typing field. The shortcut now covers the whole game page; neither Tab nor Shift+Tab navigates game-page controls. Settings retains normal keyboard navigation and opens with F2.
+- [x] Typing is ready without clicking the input first. Ready sessions autofocus; typing after focus leaves the field preserves the first character. Remove the large workspace/input focus outline while retaining the passage caret and Settings focus cues.
 - [x] Apply restart consistently to Sprint and Zen, return focus to typing, and retain lifetime XP and personal bests. Settings explains that restarting Zen clears its resumable draft.
 
 ## Typing appearance

@@ -47,7 +47,7 @@ test("theme follows the system, persists overrides, and supports keyboard dismis
   await page.keyboard.press("Escape");
   await expect(page.getByRole("dialog")).not.toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Open settings" }),
+    page.getByRole("textbox", { name: "Type the passage" }),
   ).toBeFocused();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
