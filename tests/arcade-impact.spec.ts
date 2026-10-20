@@ -8,6 +8,7 @@ async function ready(page: Page) {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.getByRole("textbox")).toBeFocused();
 }
 async function probeShake(page: Page) {
@@ -231,7 +232,7 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
       .evaluate((element) => element.getAnimations().length),
   ).toBe(0);
   await input.pressSequentially(passage.slice(80, 100));
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "100");
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "99");
   await expect(page.locator(".level-up-banner")).toContainText("Level 2");
   await expect(page.locator(".level-up-banner")).toHaveCSS(
     "animation-name",

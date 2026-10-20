@@ -124,7 +124,7 @@ export default function DailyRankings({
           </button>
         </div>
         <p className="settings-note">
-          {entry.day} · 60 seconds · English 100 · resets at midnight UTC
+          {entry.day} · 15 seconds · English 100 · resets at midnight UTC
         </p>
         {sharedRankings && (
           <>

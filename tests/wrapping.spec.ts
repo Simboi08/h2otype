@@ -4,6 +4,7 @@ test("wrapped passage lines start at the same left edge", async ({ page }) => {
   for (const width of [320, 375, 768, 1280]) {
     await page.setViewportSize({ width, height: 720 });
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     const lines = await page.locator(".passage").evaluate((passage) => {
       const leftByLine = new Map<number, number>();
       for (const character of passage.querySelectorAll(".character")) {

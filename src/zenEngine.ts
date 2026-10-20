@@ -1,5 +1,10 @@
 import { comboBonusTenths } from "./combo";
-import { editSession, emptySession, getMetrics } from "./typingEngine";
+import {
+  advanceClock,
+  editSession,
+  emptySession,
+  getMetrics,
+} from "./typingEngine";
 import type { Session } from "./typingEngine";
 import { generateWords, isWordSet } from "./wordBank";
 import type { WordSet } from "./wordBank";
@@ -122,6 +127,12 @@ export function editZen(state: ZenState, next: string, now: number): ZenState {
   return result;
 }
 
+export function advanceZen(state: ZenState, now: number): ZenState {
+  if (state.paused || state.summary || state.session.startedAt === null)
+    return state;
+  return { ...state, session: advanceClock(state.session, now, null) };
+}
+
 export function pauseZen(
   state: ZenState,
   now: number,
@@ -131,7 +142,7 @@ export function pauseZen(
     ...state,
     elapsedMs: zenElapsed(state, now),
     runningSince: null,
-    session: { ...state.session, streak: 0 },
+    session: { ...state.session, streak: 0, comboDecayFraction: 0 },
     paused: true,
     summary: state.summary || summary,
   };
@@ -143,6 +154,7 @@ export function resumeZen(state: ZenState, now: number): ZenState {
     paused: false,
     summary: false,
     runningSince: state.session.attempts > 0 ? now : null,
+    session: { ...state.session, now },
   };
 }
 
@@ -208,7 +220,10 @@ export function parseZen(raw: string | null): ZenState | null {
     const bonusTenths = legacy ? 0 : (state.session.bonusTenths ?? 0);
     const bestCombo = legacy ? 0 : (state.session.bestCombo ?? 0);
     const streak = legacy ? 0 : (state.session.streak ?? 0);
+    const decayFraction = state.session.comboDecayFraction ?? 0;
     if (
+      !finite(decayFraction) ||
+      decayFraction >= 1 ||
       !Array.isArray(credited) ||
       credited.length > state.passage.length ||
       credited.some(
@@ -240,6 +255,7 @@ export function parseZen(raw: string | null): ZenState | null {
         bonusTenths,
         bestCombo,
         streak: 0,
+        comboDecayFraction: 0,
         startedAt: 0,
         endedAt: null,
         now: 0,

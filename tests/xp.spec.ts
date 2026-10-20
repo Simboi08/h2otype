@@ -13,6 +13,7 @@ test("Sprint credits once per position, persists immediately, and restart alone 
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.pressSequentially("slx");
   expect(await total(page)).toBe(2);
@@ -51,6 +52,7 @@ test("a level-up never takes typing focus and session XP appears in results", as
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.press("s");
   await expect(page.locator(".progress-notice")).toContainText("Level 2");
@@ -75,6 +77,7 @@ test("Zen reload before autosave cannot replay credited positions or reset lifet
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.pressSequentially("there ");
@@ -97,6 +100,7 @@ test("retiring Zen history and repeated pause/resume keep XP totals exact", asyn
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   const input = page.getByRole("textbox");
   for (let i = 0; i < 4; i++) {
@@ -150,6 +154,7 @@ test("pre-XP drafts migrate without retroactive XP or deletion of old personal b
     );
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   const input = page.getByRole("textbox");
@@ -176,6 +181,7 @@ test("storage failures leave XP visible in memory and disclose that it is unsave
     };
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("textbox").pressSequentially("slow");
   await expect(page.getByRole("progressbar")).toHaveAttribute(
     "aria-valuenow",

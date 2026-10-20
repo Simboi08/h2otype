@@ -25,9 +25,7 @@ export default function RewardSummary({
         </div>
         <div>
           <dt>Best combo</dt>
-          <dd data-testid="best-combo">
-            {session.bestCombo} <small>chars</small>
-          </dd>
+          <dd data-testid="best-combo">{session.bestCombo}</dd>
         </div>
       </dl>
     </div>

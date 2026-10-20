@@ -89,6 +89,7 @@ test("defaults stay quiet and every display preference and theme survive reload"
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.locator(".live-stats")).toHaveCount(0);
   await expect(
     page.getByRole("progressbar", { name: "Level XP" }),
@@ -143,6 +144,7 @@ test("Sprint live stats track corrections and settings preserve input, clock, an
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await enableStats(page);
   const input = page.getByRole("textbox");
   await input.pressSequentially("slx");
@@ -177,6 +179,7 @@ test("Zen live stats use active time and resume preserves preferences", async ({
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await enableStats(page);
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   const input = page.getByRole("textbox");
@@ -209,6 +212,7 @@ test("hiding progress and notifications changes display only and never replays a
   );
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await openSettings(page);
   await page
     .getByRole("switch", { name: "XP progress", exact: true })
@@ -255,6 +259,7 @@ test("settings trap keyboard focus, switches work with Space, and Escape returns
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const opener = page.getByRole("button", {
     name: "Open settings",
     exact: true,
@@ -292,6 +297,7 @@ test("all displays fit small screens, settings scroll accessibly, and reduced mo
   await page.setViewportSize({ width: 320, height: 568 });
   await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "dark" });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await openSettings(page);
   const dialog = page.getByRole("dialog", { name: "Settings", exact: true });
   const bounds = await dialog.boundingBox();
@@ -349,6 +355,7 @@ test("malformed preferences recover without replacing existing theme or XP", asy
     );
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.locator(".live-stats")).toHaveCount(0);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.getByRole("progressbar")).toHaveAttribute(
@@ -375,6 +382,7 @@ test("failed preference writes keep controls functional for the visit and report
     };
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await openSettings(page);
   await page.getByRole("switch", { name: "Live WPM", exact: true }).check();
   await expect(page.locator(".settings-storage-note")).toContainText(

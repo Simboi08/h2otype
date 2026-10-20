@@ -133,14 +133,14 @@ test("Daily is shared by UTC date, uses a stable passage, and scores fresh credi
     daily.passage.slice(0, 100),
     daily.passage,
     0,
-    60000,
+    15000,
   );
   expect(dailyScore(first)).toBe(1275);
   const event = dailyEdit(emptySession(), first)!;
   expect(replayDaily(daily.day, [event])).toMatchObject({
     score: 1275,
     session: { xpEarned: 127 },
-    metrics: { wpm: 20, accuracy: 100 },
+    metrics: { wpm: 80, accuracy: 100 },
   });
   expect(
     replayDaily(daily.day, [
@@ -151,7 +151,7 @@ test("Daily is shared by UTC date, uses a stable passage, and scores fresh credi
   ).toBe(1275);
   for (const events of [
     [],
-    [{ at: 60000, add: "a" }],
+    [{ at: 15000, add: "a" }],
     [{ at: -1, add: "a" }],
     [{ at: 0, add: "a", remove: 1 }],
     [event, { at: 1, remove: 1000 }],
@@ -215,7 +215,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
     day,
     started_at: new Date(now - 60000).toISOString(),
     used: false,
-    rules_version: 2,
+    rules_version: 4,
     player_id: player,
   };
   const db: DailyDatabase = {
@@ -232,7 +232,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
       new Request("https://h2otype.test/api/daily", {
         method: "POST",
         body: JSON.stringify({
-          rulesVersion: 2,
+          rulesVersion: 4,
           ...(body as Record<string, unknown>),
         }),
       }),
@@ -256,7 +256,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
   };
   run.rules_version = 1;
   expect((await call(submission)).status).toBe(409);
-  run.rules_version = 2;
+  run.rules_version = 4;
   run.started_at = new Date(now - 1000).toISOString();
   expect((await call(submission)).status).toBe(409);
   run.started_at = new Date(now - 60000).toISOString();
@@ -267,7 +267,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
   expect((await call(submission)).status).toBe(200);
   expect(records[0]).toMatchObject({
     p_score: 1275,
-    p_wpm: 20,
+    p_wpm: 80,
     p_accuracy: 100,
     p_combo: 100,
   });

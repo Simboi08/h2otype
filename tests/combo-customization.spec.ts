@@ -99,6 +99,7 @@ test("native spacing/stat-size/graphics sliders preserve typing and persist in b
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.pressSequentially("slow");
   await page.keyboard.press("F2");
@@ -162,6 +163,7 @@ test("correct-typing combo raises live sound pitch, breaks on errors/backspace, 
   });
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.getByRole("textbox")).toBeFocused();
   await page.keyboard.press("F2");
   await page
@@ -211,6 +213,7 @@ test("Zen pause/reload clear streaks while the feedback toggle keeps reward acco
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
@@ -259,14 +262,25 @@ test("larger pixel particles use fewer sprites and remain bounded during rapid t
     const rectangles: number[][] = [];
     (window as typeof window & { particleRects: number[][] }).particleRects =
       rectangles;
+    const frameCounts: number[] = [];
+    (
+      window as typeof window & { particleFrameCounts: number[] }
+    ).particleFrameCounts = frameCounts;
+    const clear = CanvasRenderingContext2D.prototype.clearRect;
+    CanvasRenderingContext2D.prototype.clearRect = function (...args) {
+      frameCounts.push(0);
+      return Reflect.apply(clear, this, args);
+    };
     const fill = CanvasRenderingContext2D.prototype.fillRect;
     CanvasRenderingContext2D.prototype.fillRect = function (...args) {
       rectangles.push([...args]);
+      if (frameCounts.length) frameCounts[frameCounts.length - 1]++;
       return Reflect.apply(fill, this, args);
     };
   });
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
   await input.press("s");
@@ -276,7 +290,8 @@ test("larger pixel particles use fewer sprites and remain bounded during rapid t
       () =>
         (window as typeof window & { particleRects: number[][] }).particleRects,
     );
-  expect((await rects()).length).toBe(4);
+  // High defaults emit six sprites on each of the two available frames.
+  expect((await rects()).length).toBe(12);
   expect((await rects()).every((rect) => rect[2] === 6 && rect[3] === 6)).toBe(
     true,
   );
@@ -288,7 +303,12 @@ test("larger pixel particles use fewer sprites and remain bounded during rapid t
   });
   await page.clock.runFor(34);
   expect((await rects()).length).toBeGreaterThan(0);
-  expect((await rects()).length).toBeLessThanOrEqual(24);
+  const counts = await page.evaluate(
+    () =>
+      (window as typeof window & { particleFrameCounts: number[] })
+        .particleFrameCounts,
+  );
+  expect(Math.max(...counts)).toBe(36); // High caps live pixels per frame, independently of refresh rate.
 });
 
 test("grand level-up celebration respects notification/motion/quality settings and never intercepts typing", async ({
@@ -302,6 +322,7 @@ test("grand level-up celebration respects notification/motion/quality settings a
   );
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.press("s");
   await page.clock.runFor(600);
@@ -370,12 +391,14 @@ test("maximum spacing and statistics sizes fit phone/landscape viewports with an
   ]) {
     await page.setViewportSize(viewport);
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     const text = await page.locator(".passage").innerText();
     await page.getByRole("textbox").pressSequentially(text.slice(0, 60));
     await expect(page.getByRole("meter")).toHaveAttribute(
       "aria-valuenow",
       "60",
     );
+    await page.clock.runFor(160); // let the configured line-scroll finish
     const bounds = await page.locator(".typing-space").boundingBox();
     expect(bounds!.y).toBeGreaterThanOrEqual(0);
     expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(viewport.height);

@@ -10,7 +10,7 @@ import {
 import { useFinishCelebration } from "./useFinishCelebration";
 import { useCompletionSound } from "./useCompletionSound";
 import { beginDaily } from "./dailyLeaderboard";
-import { createDaily, dailyEdit } from "./dailyChallenge";
+import { createDaily, dailyEdit, dailyDuration } from "./dailyChallenge";
 import type { DailyEvent } from "./dailyChallenge";
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
@@ -39,9 +39,6 @@ export default function TypingPractice({
   const [challenge, setChallenge] = useState(createDaily);
   const events = useRef<DailyEvent[]>([]);
   const dailyRun = useRef<Promise<string | null> | null>(null);
-  useEffect(() => {
-    if (mode === "daily") dailyRun.current = beginDaily(challenge.day);
-  }, [mode, challenge.day]);
   const createPassage = () =>
     mode === "daily"
       ? challenge.passage
@@ -49,7 +46,7 @@ export default function TypingPractice({
         ? Array(24).fill(sprintSentence).join(" ")
         : generateWords(wordSet, freshSeed(), 600).text;
   const [passage, setPassage] = useState(createPassage);
-  const durationMs = (mode === "daily" ? 60 : duration) * 1000;
+  const durationMs = (mode === "daily" ? dailyDuration : duration) * 1000;
   const [session, setSession] = useState(emptySession);
   const latest = useRef(session);
   const [focused, setFocused] = useState(false);
@@ -62,6 +59,7 @@ export default function TypingPractice({
   const {
     container: feedbackRef,
     onEdit: emitFeedback,
+    onClock: clockFeedback,
     reset: resetFeedback,
     layer: particleLayer,
     comboMeter,
@@ -80,10 +78,11 @@ export default function TypingPractice({
       if (document.hidden && next.streak) {
         if (mode === "daily" && next.endedAt === null)
           events.current.push({ at: now - next.startedAt!, reset: true });
-        next = { ...next, streak: 0 };
+        next = { ...next, streak: 0, comboDecayFraction: 0 };
       }
       latest.current = next;
       setSession(next);
+      clockFeedback(next);
     };
     const interval = window.setInterval(tick, 100);
     document.addEventListener("visibilitychange", tick);
@@ -91,13 +90,15 @@ export default function TypingPractice({
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", tick);
     };
-  }, [session.startedAt, finished, durationMs, mode]);
+  }, [session.startedAt, finished, durationMs, mode, clockFeedback]);
 
   function edit(value: string, now: number) {
     const current = latest.current;
     const next = editSession(current, prefix + value, passage, now, durationMs);
     emitFeedback(current, next, passage);
     if (mode === "daily") {
+      if (current.startedAt === null && next.startedAt !== null)
+        dailyRun.current = beginDaily(challenge.day);
       const event = dailyEdit(current, next);
       if (event) events.current.push(event);
     }
@@ -112,7 +113,7 @@ export default function TypingPractice({
     const daily = createDaily();
     setChallenge(daily);
     events.current = [];
-    if (mode === "daily") dailyRun.current = beginDaily(daily.day);
+    dailyRun.current = null;
     setPassage(mode === "daily" ? daily.passage : createPassage());
     focusOnAttach.current = true;
     const next = emptySession();
@@ -173,7 +174,7 @@ export default function TypingPractice({
         </div>
         {finished ? (
           <SprintResults
-            duration={mode === "daily" ? 60 : duration}
+            duration={mode === "daily" ? dailyDuration : duration}
             metrics={metrics}
             session={session}
             challenge={mode === "daily" ? challenge : undefined}
@@ -187,6 +188,7 @@ export default function TypingPractice({
             <TypingPassage
               passage={passage}
               typed={session.typed}
+              started={session.startedAt !== null}
               focused={focused}
               finished={finished}
             />

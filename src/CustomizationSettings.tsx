@@ -73,6 +73,36 @@ export default function CustomizationSettings() {
           valueText={`${preferences.typingScale}%`}
           onChange={(value) => setPreference("typingScale", value)}
         />
+        <PreferenceSlider
+          label="Scroll speed"
+          description="How quickly a completed line moves out of view. Instant keeps it still between lines."
+          min={0}
+          max={240}
+          step={30}
+          value={240 - preferences.scrollDuration}
+          valueText={
+            preferences.scrollDuration === 0
+              ? "Instant"
+              : `${preferences.scrollDuration}ms`
+          }
+          endpoints={["Smooth", "Instant"]}
+          onChange={(value) => setPreference("scrollDuration", 240 - value)}
+        />
+        <PreferenceSlider
+          label="Caret speed"
+          description="How quickly the caret catches up to the current character."
+          min={0}
+          max={140}
+          step={10}
+          value={140 - preferences.caretDuration}
+          valueText={
+            preferences.caretDuration === 0
+              ? "Instant"
+              : `${preferences.caretDuration}ms`
+          }
+          endpoints={["Smooth", "Instant"]}
+          onChange={(value) => setPreference("caretDuration", 140 - value)}
+        />
       </fieldset>
       <fieldset className="preference-options">
         <legend>Graphics</legend>
@@ -111,6 +141,21 @@ export default function CustomizationSettings() {
           }
           onChange={(value) => setPreference("effectIntensity", value)}
           endpoints={["Off", "Intense"]}
+        />
+        <PreferenceSlider
+          label="Finish confetti"
+          description="Amount of celebration confetti. Visual effects Off, Low quality and reduced motion suppress it."
+          min={0}
+          max={200}
+          step={25}
+          value={preferences.confettiAmount}
+          valueText={
+            preferences.confettiAmount === 0
+              ? "Off"
+              : `${preferences.confettiAmount}%`
+          }
+          endpoints={["Off", "More"]}
+          onChange={(value) => setPreference("confettiAmount", value)}
         />
         <label className="preference-row">
           <span>

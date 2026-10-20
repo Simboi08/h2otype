@@ -4,6 +4,7 @@ async function setupClock(page: import("@playwright/test").Page) {
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
 }
 

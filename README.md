@@ -7,13 +7,13 @@ A focused pixel-arcade typing game with satisfying progression. Built for short 
 ## Concept
 - **Sprint:** timed 15, 30, or 60 second typing tests, with WPM/accuracy results, base/bonus XP and local personal bests.
 - **Zen:** endless uninterrupted typing, cumulative XP and persistent levels.
-- **Daily:** the same English-100 passage for everyone each UTC day, with 60-second score challenges and optional shared rankings.
+- **Daily:** the same English-100 passage for everyone each UTC day, with 15-second score challenges and optional shared rankings.
 - **Progression:** accurate typing earns XP and levels, with combo vignettes, brief impacts, and prominent nonblocking level announcements.
 - **Presentation:** pixel HUD typography, crisp cyan/pink panels, atmospheric dark/light themes, system theme by default, and keyboard-first play.
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
-Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Streaks build a combo meter and edge vignette and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Daily adds fixed-date score challenges and local rankings, with optional shared guest rankings. Completion sounds, combo XP bonuses and clearer results are included. Achievements and unlockable themes are saved for later.
+Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Fresh correct typing builds a time-decaying combo meter and edge vignette and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Daily adds fixed-date score challenges and local rankings, with optional shared guest rankings. Completion sounds, combo XP bonuses and clearer results are included. Achievements and unlockable themes are saved for later.
 
 ## Development
 Use Node.js 20.19+ (20.x) or 22.12+ and npm. Node 24 was used for validation.
@@ -54,7 +54,7 @@ In this cloud environment the home npm cache is unwritable. Before npm commands,
 ## Trying the typing engine
 Choose Sprint or Zen and start typing the passage. A ready session focuses the input automatically; the first committed character starts time, so simply focusing never starts the clock. Typing after clicking elsewhere on the game page also returns to the real input without losing the first character. Correct characters darken; mistakes are colored and underlined. Press Space after each word to clear the field and continue. Backspace to fix mistakes, including returning to the previous word from an empty input. The workspace is centered on screen without promotional copy or feature cards. The passage scrolls to keep the caret visible on small screens. The passage caret shows typing focus without a large outline around the workspace or input.
 
-Choose 15s, 30s (default), or 60s for Sprint. Changing duration discards the current run and focuses a fresh input. The selected duration stays active across restarts, word-set changes, and mode switches for this visit. Generated runs contain 600 words, with a fresh sequence on restart; reaching the end early also finishes the run. Zen has no time limit or passage boundary: new batches are appended ahead of the caret as you type.
+Choose 15s (default), 30s, or 60s for Sprint. Changing duration discards the current run and focuses a fresh input. The selected duration stays active across restarts, word-set changes, and mode switches for this visit. Generated runs contain 600 words, with a fresh sequence on restart; reaching the end early also finishes the run. Zen has no time limit or passage boundary: new batches are appended ahead of the caret as you type.
 
 At the end of Sprint, the passage is replaced by results showing WPM, accuracy, incorrect attempts, elapsed time, and the personal best for that duration. Press Enter while the results heading is focused, or click Restart, to reset and focus the input. Restart during practice also clears the run, clock, and counts. Live WPM and accuracy are off by default and can be enabled independently in Settings.
 
@@ -86,6 +86,7 @@ To keep long sessions responsive, Zen appends short local text batches and retir
 ## XP and levels
 - Each character position earns **1 base XP the first time it is typed correctly in a session**, including spaces and punctuation. Correcting a mistake can earn that position's first XP. Deleting and retyping a credited character does not earn more.
 - Combo tiers at 25/60/120/200/350 add **20/50/100/150/200%** to newly earned XP. Fractional bonuses carry forward: 100 perfect characters earn 100 base + 27 bonus XP. Highest combo and base/bonus XP appear in results. Existing drafts/balances migrate without retroactive bonuses.
+- Combo charge drains steadily while active, faster at higher tiers (0.75/1.5/2.5/4/6/8 units per second). Fresh correct positions replenish it; the current tier sets future bonuses and sound pitch. Decay preserves earned XP and historical best.
 - Held character-key repeats, incorrect attempts, paste/drop, uncommitted composition, paused input, and post-deadline input do not award XP. There are no separate speed/accuracy bonuses.
 - Earned XP stays earned after Backspace, restart, mode changes, or abandoning a run. Restarting or opening results does not grant XP. Fresh correct typing in a new session is legitimate practice and can earn XP again.
 - Level 1 starts at 0 XP. Reaching level 2 costs 100 XP; the next level costs 200 more, then 300 more. Lifetime thresholds for levels 2/3/4/5 are 100/300/600/1000 XP. Levels are calculated from total XP.
@@ -95,12 +96,12 @@ To keep long sessions responsive, Zen appends short local text batches and retir
 
 ## Daily challenges
 Choose **Daily** at the top. Everyone gets the same English-100 passage and a
-60-second timer for that UTC date. First typing starts the clock. Restart repeats
+15-second timer for that UTC date. First typing starts the clock. Restart repeats
 the same passage; after midnight UTC, restarting loads the new day. Daily keeps
 your Sprint word-set/duration preferences and saved Zen session intact.
 
 Every first-correct character earns 10 points, plus 2/5/10/15/20 bonus points at the five combo tiers. Mistakes
-break the combo; deleting/retyping cannot pay again. Results show points, WPM,
+break the combo; idle time drains it faster at higher tiers, and deleting/retyping cannot pay again. Results show points, WPM,
 accuracy, highest combo, and XP. **Daily rankings** sorts by score, then accuracy,
 then WPM. Local attempts are labelled **Scores on this browser**, with ten best
 attempts per day for thirty days. Only full-duration tests with correct text
@@ -109,7 +110,7 @@ qualify. Daily scores stay separate from Sprint speed records.
 The optional shared guest leaderboard needs a database connection. Its server
 replays the run and calculates points itself; visitors explicitly submit a display
 name, and only their best score that day is kept. See [DEPLOYMENT.md](DEPLOYMENT.md)
-for Vercel/Cloudflare publishing and Supabase configuration. Without that setup,
+for step-by-step Vercel/Cloudflare publishing and Supabase configuration (no player accounts required). Daily rules version 4 keeps decay-based rankings separate from older scores. Without that setup,
 the static game and local Daily rankings still work normally.
 
 ## Settings
@@ -119,16 +120,19 @@ Open **Settings** in the header or press **F2**. Changes take effect immediately
 | --- | --- | --- |
 | Live WPM | Off | Shows current speed using the existing correct-character/active-time calculation. |
 | WPM refresh rate | 0.5 seconds | Choose Instant, 0.5 seconds, 1 second, or 2 seconds between live WPM updates. Slower choices hold the number steady between active-time intervals; final results and scoring remain exact. |
-| Typing font | Monospace | Choose Monospace, System, or Serif using built-in fonts. Applies to the passage and word input. |
+| Typing font | 8-bit | Choose bundled 8-bit, Monospace, System, or Serif. Applies to the passage and word input. |
 | Font weight | Regular | Choose Regular, Medium, Semibold, or Bold with the slider. |
 | Typing size | 100% | Scale the passage, input, and workspace from 80% to 130%; layout stays within the viewport. |
+| Scroll speed | 120ms | Smooth-to-Instant slider controlling how quickly a completed line scrolls away. The current line moves to the top, with four lines visible in normal windows. Short windows use fewer lines so controls still fit. |
+| Caret speed | 70ms | Smooth-to-Instant slider controlling horizontal caret movement; line wraps jump directly to the next line. Reduced motion makes scrolling and caret movement instant. |
+| Finish confetti | 150% | Off–200% amount slider, subject to graphics quality, effects intensity and reduced motion. |
 | Character spacing | 0px | Add 0–3px between characters in 0.5px steps, applying to the passage and word input. |
 | WPM size | 100% | Scale the live WPM label and number from 80% to 200%, independently of the typing text. |
 | Accuracy size | 100% | Scale live accuracy from 80% to 200%, independently of WPM. |
-| Typing sound | Off | Standard click or 8-bit crush, with Preview sound and a separate volume slider. Accepted character edits play once; controls and Backspace stay silent. |
+| Typing sound | 8-bit crush | Standard click or 8-bit crush, with Preview sound and a separate volume slider. Accepted character edits play once; controls and Backspace stay silent. |
 | Sound volume | 35% | Adjust from 0% (mute) to 100%. Sounds are generated locally, with at most four simultaneous short voices and no queued backlog. |
-| Typing particles | Off | Regular circles or 8-bit pixels burst from correct characters. Wrong characters and Backspace stay quiet visually; reduced motion suppresses particles. |
-| Graphics quality | Medium | Three-stop slider: Low uses fewer particles, a static vignette, no shake/glow, and instant XP. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
+| Typing particles | 8-bit pixels | Regular circles or 8-bit pixels burst from correct characters. Wrong characters and Backspace stay quiet visually; reduced motion suppresses particles. |
+| Graphics quality | High | Three-stop slider: Low uses fewer particles, a static vignette, no shake/glow, and instant XP. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
 | Visual effects | Intense | Off/Balanced/Intense slider, separate from quality. Intense strengthens the edge vignette and combo shake. Off keeps plain meters/notices and disables decorative effects and XP motion. |
 | Screen shake | On | Brief, bounded impacts at combo milestones. Can be turned off independently; Low quality, Effects Off, and reduced motion suppress it. |
 | Combo feedback | On | Consecutive fresh correct characters build a combo meter and edge vignette and progressively higher sound pitch. Turn off for quieter visuals and fixed pitch. Bonus XP remains active when visual feedback is hidden. |
@@ -172,6 +176,22 @@ React + TypeScript + Vite. For the initial version, use localStorage rather than
 Keep changes small and review them before merging.
 
 ## Finish celebrations and harder combos
-Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst from the upper screen edges. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 1.4 seconds; combo bursts last 750ms. Medium budgets 20/12 particles (finish/combo), High 32/20, and Balanced halves those counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
+Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst around the full screen perimeter, mainly along the sides with smaller top/bottom sprays. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 2.2 seconds; combo bursts last 750ms. At 100% confetti, Medium budgets 100 finish/12 combo pieces and High 160/20. Finish confetti defaults to 150% (240 pieces on High), adjusts from Off to 200%, and Balanced halves the counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
 
-The larger combo rewards apply only to newly credited positions. Existing lifetime XP and saved Zen rewards keep their value. Daily uses scoring rules version 2 and `h2otype.daily-scores.v2`; older local rankings remain stored separately, while new shared rankings filter by rules version. WPM personal bests and accuracy calculations are unchanged.
+The larger combo rewards apply only to newly credited positions. Existing lifetime XP and saved Zen rewards keep their value. Daily uses scoring rules version 4 and `h2otype.daily-scores.v4`; older local rankings remain stored separately, while new shared rankings filter by rules version. WPM personal bests and accuracy calculations are unchanged.
+
+## Reading flow and new-player defaults
+New visits start in Sprint 15s, with High graphics, Screen shake on, and 8-bit sound and particles enabled. Every saved returning-player setting is preserved. Pixel typography is consistent across menus, descriptions, statistics and results; the typing font remains selectable and saved.
+
+The passage keeps its active line at the top as soon as the preceding line is complete. In normal windows this gives four upcoming/current lines instead of waiting for the caret to fall below the bottom. Scroll/caret speed sliders control visual motion only; neither delays accepted input or scoring. Restart resets the passage immediately. Font changes, resizing, Zen retirement and reduced motion keep the caret aligned.
+
+Medium and High particles now draw on each available display animation frame instead of skipping frames around a fixed cap. Larger pixel sprites move continuously rather than snapping to a two-pixel grid. Low retains a 30fps limit. Actual performance still depends on the device and browser.
+
+Daily is a shared-date 15s Sprint for now. Its score storage and optional server tokens use rules version 4, keeping earlier 60s and nondecaying 15s scores separate. Per-duration Daily passages, multiplayer racing, unlockable carets, currency and randomized pets are future plans in NOTES.md.
+
+## Caret visibility and today's Daily
+The caret blinks only before a run starts. Once typing begins, it stays solid even after deleting all text, pausing/resuming Zen, or opening Settings. Restarting/new sessions restore the initial blink; reduced motion keeps it still from the start.
+
+A compact button beneath the logo shows **Daily available**, then **Daily best · score** after an eligible completion. It opens Daily directly and shows the highest score for the current UTC day, updating after each finish, reload and changes in another tab. Midnight offers the next challenge; finishing a pinned previous-day run does not become today's best. Scores are local to this browser. If saving fails, the best seen during the visit still stays visible; it cannot survive a reload without working storage.
+
+Finish confetti now uses 2.5× the previous particle budget, larger pieces, a wider spread and a longer 2.2-second fall: Medium 100/High 160 pieces at 100%, up to 320 at 200%. Saved amount, Off/Balanced/Intense, graphics and reduced-motion choices remain effective. Shared guest rankings are implemented through Supabase; activation needs the hosting configuration in DEPLOYMENT.md.

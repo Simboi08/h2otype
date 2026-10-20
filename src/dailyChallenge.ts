@@ -7,8 +7,8 @@ import {
 } from "./typingEngine";
 import type { Session } from "./typingEngine";
 
-export const dailyDuration = 60;
-export const dailyRulesVersion = 2;
+export const dailyDuration = 15;
+export const dailyRulesVersion = 4;
 export type DailyChallenge = { day: string; passage: string };
 export type DailyEvent = {
   at: number;
@@ -21,7 +21,7 @@ export function dailyDay(now = new Date()) {
 }
 export function createDaily(day = dailyDay()): DailyChallenge {
   let seed = 2166136261;
-  for (const char of `h2otype-daily-v2:${day}`)
+  for (const char of `h2otype-daily-v${dailyRulesVersion}:${day}`)
     seed = Math.imul(seed ^ char.charCodeAt(0), 16777619) >>> 0;
   return { day, passage: generateWords("english100", seed, 600).text };
 }
@@ -48,7 +48,7 @@ export function replayDaily(day: string, events: unknown) {
       typeof event.at !== "number" ||
       !Number.isFinite(event.at) ||
       event.at < previousAt ||
-      event.at >= 60000
+      event.at >= dailyDuration * 1000
     )
       throw new Error("Invalid timing");
     if (session.startedAt === null && event.at !== 0)
@@ -63,7 +63,11 @@ export function replayDaily(day: string, events: unknown) {
     )
       throw new Error("Invalid edit");
     if (event.reset) {
-      session = { ...session, streak: 0 };
+      session = {
+        ...advanceClock(session, event.at, dailyDuration * 1000),
+        streak: 0,
+        comboDecayFraction: 0,
+      };
       continue;
     }
     let next: string;
@@ -84,12 +88,18 @@ export function replayDaily(day: string, events: unknown) {
         throw new Error("Invalid deletion");
       next = [...session.typed].slice(0, -event.remove!).join("");
     }
-    const updated = editSession(session, next, passage, event.at, 60000);
+    const updated = editSession(
+      session,
+      next,
+      passage,
+      event.at,
+      dailyDuration * 1000,
+    );
     if (updated.typed === session.typed || updated.endedAt !== null)
       throw new Error("Invalid edit");
     session = updated;
   }
-  session = advanceClock(session, 60000, 60000);
+  session = advanceClock(session, dailyDuration * 1000, dailyDuration * 1000);
   const metrics = getMetrics(session, passage);
   if (session.startedAt === null || metrics.correctCharacters < 1)
     throw new Error("No correct characters");

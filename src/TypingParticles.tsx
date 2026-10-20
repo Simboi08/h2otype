@@ -42,7 +42,7 @@ export default function TypingParticles({
   function draw(now: number) {
     const ctx = drawing.current;
     if (!ctx) return;
-    if (now - previous.current < 1000 / profile.fps - 0.1) {
+    if (tier === "low" && now - previous.current < 1000 / profile.fps - 0.1) {
       frame.current = requestAnimationFrame(draw);
       return;
     }
@@ -58,13 +58,7 @@ export default function TypingParticles({
       particle.vy += 70 * dt;
       ctx.globalAlpha = (1 - (now - particle.born) / profile.lifetime) * 0.8;
       ctx.fillStyle = particle.color;
-      if (particle.pixel)
-        ctx.fillRect(
-          Math.round(particle.x / 2) * 2,
-          Math.round(particle.y / 2) * 2,
-          6,
-          6,
-        );
+      if (particle.pixel) ctx.fillRect(particle.x, particle.y, 6, 6);
       else {
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, 1.6, 0, Math.PI * 2);

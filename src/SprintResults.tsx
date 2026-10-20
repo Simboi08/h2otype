@@ -98,7 +98,7 @@ export default function SprintResults({
         </h2>
         <p className="results-context">
           {challenge
-            ? `${challenge.day} · English 100`
+            ? `${challenge.day} · 15s · English 100`
             : `${wordSets.find((set) => set.id === wordSet)!.label} · ${duration}s`}
         </p>
       </div>

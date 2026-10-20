@@ -7,6 +7,7 @@ import {
 } from "react";
 import { usePreferences } from "./preferences";
 import type { ParticleStyle } from "./preferences";
+import { advanceClock } from "./typingEngine";
 import type { Session } from "./typingEngine";
 import { getTypingFeedback } from "./typingFeedback";
 import { playTypingSound, stopTypingSounds } from "./typingSound";
@@ -35,11 +36,11 @@ export function useTypingFeedback(enabled: boolean) {
     preferences.graphicsTier !== "low" &&
     !reducedMotion;
   const active = enabled && preferences.comboFeedback;
-  const [combo, setCombo] = useState({ active, streak: 0 });
-  // A stopped/disabled combo must not reappear on resume or re-enable.
-  if (combo.active !== active) setCombo({ active, streak: 0 });
+  const [combo, setCombo] = useState({ active, streak: 0, fraction: 0 });
+  // Clear stopped/disabled decorations; active clock updates follow engine charge.
+  if (combo.active !== active) setCombo({ active, streak: 0, fraction: 0 });
   const reset = useCallback(() => {
-    setCombo((current) => ({ ...current, streak: 0 }));
+    setCombo((current) => ({ ...current, streak: 0, fraction: 0 }));
     pending.current = null;
     clearEdge.current?.();
     particles.current?.clear();
@@ -70,14 +71,33 @@ export function useTypingFeedback(enabled: boolean) {
     reducedMotion,
   ]);
 
+  const onClock = useCallback(
+    (session: Session) => {
+      if (!enabled) return;
+      setCombo((current) => {
+        const streak = active ? session.streak : 0;
+        const fraction = active ? session.comboDecayFraction : 0;
+        return current.active === active &&
+          current.streak === streak &&
+          current.fraction === fraction
+          ? current
+          : { active, streak, fraction };
+      });
+      if (!session.streak) clearEdge.current?.();
+    },
+    [enabled, active],
+  );
+
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
     const streak = active ? after.streak : 0;
-    setCombo({ active, streak });
+    setCombo({ active, streak, fraction: after.comboDecayFraction });
     if (!streak) clearEdge.current?.();
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
-    const tier = active ? comboImpact(before.streak, after.streak) : 0;
+    const tier = active
+      ? comboImpact(advanceClock(before, after.now, null).streak, after.streak)
+      : 0;
     if (
       tier &&
       !reducedMotion &&
@@ -181,6 +201,7 @@ export function useTypingFeedback(enabled: boolean) {
   return {
     container,
     onEdit,
+    onClock,
     reset,
     vignetteLayer: (
       <>
@@ -203,7 +224,7 @@ export function useTypingFeedback(enabled: boolean) {
     ),
     comboMeter:
       active && getCombo(combo.streak).tier > 0 ? (
-        <ComboMeter streak={combo.streak} />
+        <ComboMeter streak={combo.streak} fraction={combo.fraction} />
       ) : null,
     layer:
       enabled &&

@@ -91,6 +91,7 @@ test("particles start beyond the letter's right edge and graphics tiers change d
   });
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await expect(input).toBeFocused();
   for (const tier of ["low", "medium", "high"] as const) {
@@ -136,6 +137,7 @@ test("large XP rail eases toward exact XP and rolls into the next level without 
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
   await input.fill(passage.slice(0, 50));
@@ -176,6 +178,7 @@ test("reduced motion and Low quality use exact fills and hidden XP restores corr
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
   await input.fill(passage.slice(0, 50));
@@ -209,6 +212,7 @@ test("arcade light and dark themes keep the XP rail and typing workspace within 
     ]) {
       await page.setViewportSize(viewport);
       await page.goto("/");
+      await page.getByRole("button", { name: "30s", exact: true }).click();
       await expect(page.getByRole("textbox")).toBeFocused();
       await page.evaluate(() => document.fonts.ready);
       expect(

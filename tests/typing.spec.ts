@@ -3,8 +3,10 @@ import { expect, test } from "./practice-fixture";
 test("typing marks characters, supports correction, and expires with honest accuracy", async ({
   page,
 }) => {
-  await page.clock.install();
+  await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-20T12:00:01Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await input.focus();
   await page.clock.fastForward(40_000);
@@ -44,6 +46,7 @@ test("restart while running cancels the old deadline and changing mode resets in
 }) => {
   await page.clock.install();
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await input.pressSequentially("slow");
   await page.clock.fastForward(20_000);
@@ -65,6 +68,7 @@ test("mobile input events work, repeat/paste are blocked, and a passage can comp
 }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await input.focus();
   await page.keyboard.down("s");
@@ -95,6 +99,7 @@ test("composition commits once and keeps intermediate text out of scoring", asyn
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await input.focus();
   await input.evaluate((element) => {
@@ -142,6 +147,7 @@ test("completed words clear the field, preserve progress, and can be corrected a
 }) => {
   await page.clock.install();
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await input.pressSequentially("slow ");
   await expect(input).toHaveValue("");
@@ -184,6 +190,7 @@ test("practice is centered and fully visible without page scrolling", async ({
   ]) {
     await page.setViewportSize(viewport);
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     const bounds = await page.locator(".typing-space").boundingBox();
     expect(bounds).not.toBeNull();
     expect(bounds!.y).toBeGreaterThanOrEqual(0);

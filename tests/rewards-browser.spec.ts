@@ -5,6 +5,7 @@ async function ready(page: Page) {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
 }
 async function audioProbe(page: Page, volume = 35) {
   await page.addInitScript((volume) => {
@@ -116,16 +117,16 @@ test("shake only rewards actual tier upgrades, with no pulses between upgrades",
   const input = page.getByRole("textbox");
   await input.pressSequentially(passage.slice(0, 25));
   await page.clock.runFor(300);
-  await page.keyboard.insertText(passage.slice(25, 60));
+  await page.keyboard.insertText(passage.slice(25, 61));
   await page.clock.runFor(300);
-  await page.keyboard.insertText(passage.slice(60, 119));
+  await page.keyboard.insertText(passage.slice(61, 120));
   expect(
     await page.evaluate(
       () =>
         (window as typeof window & { shakeDurations: number[] }).shakeDurations,
     ),
   ).toEqual([220, 220]);
-  await input.press(passage[119]);
+  await input.press(passage[120]);
   expect(
     await page.evaluate(
       () =>
@@ -143,7 +144,7 @@ test("results show base and bonus XP, best combo and readable main statistics", 
   await page.clock.fastForward(30000);
   await expect(page.getByTestId("base-xp")).toHaveText("100");
   await expect(page.getByTestId("bonus-xp")).toHaveText("+27 XP");
-  await expect(page.getByTestId("best-combo")).toHaveText("100 chars");
+  await expect(page.getByTestId("best-combo")).toHaveText("100");
   await expect(page.locator(".session-xp")).toHaveText("+127 XP this run");
   await expect(page.getByTestId("result-wpm")).toHaveText("40");
   await page.keyboard.press("Enter");
@@ -164,13 +165,13 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   const input = page.getByRole("textbox");
   await expect(input).toBeFocused();
-  await expect(page.getByRole("timer")).toHaveText("60s remaining");
+  await expect(page.getByRole("timer")).toHaveText("15s remaining");
   await expect(
     page.getByRole("button", { name: "Choose word set" }),
   ).toBeDisabled();
   const passage = (await page.locator(".passage").textContent())!;
   await input.fill(passage.slice(0, 100));
-  await page.clock.fastForward(60000);
+  await page.clock.fastForward(15000);
   await expect(
     page.getByRole("heading", { name: "Daily results" }),
   ).toBeFocused();
@@ -191,7 +192,7 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
   await page.keyboard.press("Tab");
   expect(await page.locator(".passage").textContent()).toBe(passage);
   await input.fill(passage.slice(0, 50));
-  await page.clock.fastForward(60000);
+  await page.clock.fastForward(15000);
   await page
     .getByRole("button", { name: "Daily rankings", exact: true })
     .click();
@@ -212,7 +213,7 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
   expect(
     await page.evaluate(
       () =>
-        JSON.parse(localStorage.getItem("h2otype.daily-scores.v2")!).records
+        JSON.parse(localStorage.getItem("h2otype.daily-scores.v4")!).records
           .length,
     ),
   ).toBe(2);
@@ -233,10 +234,11 @@ test("Daily results and rankings fit narrow phones and short landscape screens, 
   ]) {
     await page.setViewportSize(viewport);
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     await page.getByRole("button", { name: "Daily", exact: true }).click();
     const passage = (await page.locator(".passage").textContent())!;
     await page.getByRole("textbox").fill(passage.slice(0, 100));
-    await page.clock.fastForward(60000);
+    await page.clock.fastForward(15000);
     await expect(
       page.getByRole("heading", { name: "Daily results" }),
     ).toBeFocused();
@@ -266,12 +268,13 @@ test("Daily stays on its starting date across UTC midnight and refreshes on rest
   page,
 }) => {
   await page.clock.install({ time: new Date("2026-10-19T23:58:00Z") });
-  await page.clock.pauseAt(new Date("2026-10-19T23:59:30Z"));
+  await page.clock.pauseAt(new Date("2026-10-19T23:59:50Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   const initial = await page.locator(".passage").textContent();
   await page.getByRole("textbox").press(initial![0]);
-  await page.clock.fastForward(60000);
+  await page.clock.fastForward(15000);
   await expect(page.locator(".results-context")).toContainText("2026-10-19");
   await page.keyboard.press("Tab");
   await expect(page.locator(".daily-label")).toContainText("2026-10-20");
@@ -304,14 +307,14 @@ test("shared Daily submission sends the run for server replay and renders the re
           day,
           started_at: "2026-10-19T12:00:00Z",
           used: false,
-          rules_version: 2,
+          rules_version: 4,
         }),
         run: async () => ({
           id,
           day: "2026-10-19",
           started_at: "2026-10-19T12:00:00Z",
           used: false,
-          rules_version: 2,
+          rules_version: 4,
         }),
         list: async () => scores,
         complete: async (record) => {
@@ -336,8 +339,14 @@ test("shared Daily submission sends the run for server replay and renders the re
   await ready(page);
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   const passage = (await page.locator(".passage").textContent())!;
+  const started = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/daily") &&
+      response.request().postDataJSON().action === "begin",
+  );
   await page.getByRole("textbox").fill(passage.slice(0, 100));
-  await page.clock.fastForward(60000);
+  await started;
+  await page.clock.fastForward(15000);
   await page
     .getByRole("button", { name: "Daily rankings", exact: true })
     .click();
@@ -351,7 +360,7 @@ test("shared Daily submission sends the run for server replay and renders the re
     {
       display_name: "Simon",
       score: 1275,
-      wpm: 20,
+      wpm: 80,
       accuracy: 100,
       best_combo: 100,
     },

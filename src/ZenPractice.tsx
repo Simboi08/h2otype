@@ -11,6 +11,7 @@ import { useTypingFeedback } from "./useTypingFeedback";
 import TypingPassage from "./TypingPassage";
 import { getWordInput } from "./typingEngine";
 import {
+  advanceZen,
   createZen,
   editZen,
   pauseZen,
@@ -48,6 +49,7 @@ export default function ZenPractice({
   const {
     container: feedbackRef,
     onEdit: emitFeedback,
+    onClock: clockFeedback,
     reset: resetFeedback,
     layer: particleLayer,
     comboMeter,
@@ -72,8 +74,20 @@ export default function ZenPractice({
     setStorageAvailable(saveZen(next, timestamp));
   }
 
+  const clockFeedbackRef = useRef(clockFeedback);
   useEffect(() => {
-    const tick = () => setNow(performance.now());
+    clockFeedbackRef.current = clockFeedback;
+  });
+
+  useEffect(() => {
+    const tick = () => {
+      const timestamp = performance.now();
+      const next = advanceZen(latest.current, timestamp);
+      latest.current = next;
+      setState(next);
+      setNow(timestamp);
+      clockFeedbackRef.current(next.session);
+    };
     const autosave = () =>
       setStorageAvailable(saveZen(latest.current, performance.now()));
     const stop = () => {
@@ -89,7 +103,7 @@ export default function ZenPractice({
     const visibility = () => {
       if (document.hidden) stop();
     };
-    const clock = window.setInterval(tick, 250);
+    const clock = window.setInterval(tick, 100);
     const save = window.setInterval(autosave, 5000);
     document.addEventListener("visibilitychange", visibility);
     window.addEventListener("pagehide", stop);
@@ -211,6 +225,7 @@ export default function ZenPractice({
             <TypingPassage
               passage={state.passage}
               typed={state.session.typed}
+              started={state.session.attempts > 0}
               focused={focused}
               finished={false}
             />

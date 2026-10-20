@@ -11,7 +11,8 @@ export function useFinishCelebration(completed: boolean) {
   const allowed =
     !reduced &&
     preferences.graphicsTier !== "low" &&
-    preferences.effectIntensity > 0;
+    preferences.effectIntensity > 0 &&
+    preferences.confettiAmount > 0;
   useEffect(() => {
     const fresh = completed && !previous.current;
     previous.current = completed;
@@ -21,6 +22,8 @@ export function useFinishCelebration(completed: boolean) {
       "finish",
       preferences.graphicsTier,
       preferences.effectIntensity,
+      1,
+      preferences.confettiAmount,
     );
     const hidden = () => {
       if (document.hidden) clear();
@@ -37,6 +40,7 @@ export function useFinishCelebration(completed: boolean) {
     allowed,
     preferences.graphicsTier,
     preferences.effectIntensity,
+    preferences.confettiAmount,
   ]);
   return (
     <div

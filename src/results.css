@@ -47,7 +47,7 @@
   font: 12px var(--hud);
 }
 .reward-details small {
-  font: 11px monospace;
+  font: 11px var(--hud);
   color: var(--secondary);
 }
 .reward-details [data-testid="bonus-xp"] {
@@ -63,7 +63,7 @@
 .daily-label small {
   display: block;
   color: var(--secondary);
-  font: 10px monospace;
+  font: 10px var(--hud);
   margin-top: 6px;
 }
 .daily-score {
@@ -87,7 +87,7 @@
   margin-top: 6px;
 }
 .combo-heading strong small {
-  font: 10px monospace;
+  font: 10px var(--hud);
   margin-left: 4px;
 }
 .daily-rankings {

@@ -29,6 +29,7 @@ async function ready(page: Page) {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
 }
 
 test("local pools are distinct nested common-word sets and seeded batches continue without adjacent repeats", () => {
@@ -354,6 +355,7 @@ test("word picker, settings, and game header fit phones, tablets, and landscape 
   ]) {
     await page.setViewportSize(viewport);
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     await choose(page, "English sentences");
     const mode = (await page.locator(".mode-switch").boundingBox())!;
     const tools = (await page.locator(".header-tools").boundingBox())!;
@@ -383,8 +385,11 @@ test("word picker, settings, and game header fit phones, tablets, and landscape 
 test("malformed or unknown word choices fall back safely and can be replaced", async ({
   page,
 }) => {
+  // This exercises three corrupt saves with six reloads and two modal visits each.
+  test.setTimeout(60000);
   for (const raw of ["{broken", '"unknown"', '{"wordSet":"english500"}']) {
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     await page.evaluate(
       (raw) => localStorage.setItem("h2otype.word-set.v1", raw),
       raw,

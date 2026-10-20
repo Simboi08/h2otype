@@ -9,6 +9,7 @@ async function ready(page: Page) {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.getByRole("textbox")).toBeFocused();
 }
 const passage = async (page: Page) =>
@@ -36,7 +37,7 @@ test("harder combo thresholds give larger bounded rewards and particles have str
     expect(burstProfile(kind, "medium", 2).count).toBeLessThan(
       burstProfile(kind, "high", 2).count,
     );
-    expect(burstProfile(kind, "high", 2).count).toBeLessThanOrEqual(32);
+    expect(burstProfile(kind, "high", 2).count).toBeLessThanOrEqual(320);
   }
 });
 
@@ -67,7 +68,7 @@ test("finish confetti runs once, stays pointer-transparent, expires, and never r
   await page.getByRole("button", { name: "15s", exact: true }).click();
   await page.getByRole("textbox").pressSequentially("slow");
   await page.clock.fastForward(15000);
-  await expect(page.locator(".finish-confetti i")).toHaveCount(20);
+  await expect(page.locator(".finish-confetti i")).toHaveCount(50);
   await expect(page.locator(".finish-confetti")).toHaveCSS(
     "pointer-events",
     "none",
@@ -80,12 +81,17 @@ test("finish confetti runs once, stays pointer-transparent, expires, and never r
     .evaluateAll((nodes) =>
       nodes.map((node) => ({
         x: Number.parseFloat((node as HTMLElement).style.left),
+        y: Number.parseFloat((node as HTMLElement).style.top),
         duration: node.getAnimations()[0].effect!.getTiming().duration,
       })),
     );
-  expect(geometry.every((item) => item.x <= 10 || item.x >= 1270)).toBe(true);
-  expect(geometry.every((item) => item.duration === 1400)).toBe(true);
-  await page.clock.runFor(1400);
+  expect(
+    geometry.every(
+      (item) => item.x <= 10 || item.x >= 1270 || item.y <= 10 || item.y >= 710,
+    ),
+  ).toBe(true);
+  expect(geometry.every((item) => item.duration === 2200)).toBe(true);
+  await page.clock.runFor(2200);
   await expect(page.locator(".finish-confetti i")).toHaveCount(0);
   await page.keyboard.press("F2");
   await setGraphicsQuality(page, "high");
@@ -110,11 +116,13 @@ test("combo edge bursts only fire at tier gains and clear on a mistake or restar
     "data-tier",
     "1",
   );
+  // Keep one charge above the boundary so decay does not re-enter tier one.
+  await input.press(text[25]);
   await page.clock.runFor(750);
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
-  await input.pressSequentially(text.slice(25, 59));
+  await input.pressSequentially(text.slice(26, 60));
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
-  await input.press(text[59]);
+  await input.press(text[60]);
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(12);
   await input.press("#");
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
@@ -167,7 +175,7 @@ test("Zen Finish celebrates, Pause and restored summaries do not, and hiding can
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await page.getByRole("button", { name: "Finish", exact: true }).click();
-  await expect(page.locator(".finish-confetti i")).toHaveCount(20);
+  await expect(page.locator(".finish-confetti i")).toHaveCount(50);
   await page.evaluate(() => {
     Object.defineProperty(document, "hidden", {
       configurable: true,
@@ -204,13 +212,13 @@ test("new Daily scores never mix with or overwrite old reward-rule records", asy
   await ready(page);
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   await page.getByRole("textbox").fill((await passage(page)).slice(0, 100));
-  await page.clock.fastForward(60000);
+  await page.clock.fastForward(15000);
   await expect(
     page.getByRole("heading", { name: "Daily results" }),
   ).toBeFocused();
   const saved = await page.evaluate(() => ({
     old: localStorage.getItem("h2otype.daily-scores.v1"),
-    current: JSON.parse(localStorage.getItem("h2otype.daily-scores.v2")!),
+    current: JSON.parse(localStorage.getItem("h2otype.daily-scores.v4")!),
   }));
   expect(saved.old).toBe(old);
   expect(saved.current.records).toHaveLength(1);

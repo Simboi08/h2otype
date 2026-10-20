@@ -4,6 +4,7 @@ test("mode navigation switches practice without starting the timer", async ({
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "h2otype typing practice" }),
   ).toBeAttached();
@@ -31,6 +32,7 @@ test("theme follows the system, persists overrides, and supports keyboard dismis
 }) => {
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
@@ -65,6 +67,7 @@ test("appearance works when local storage is blocked", async ({ page }) => {
   });
   await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.getByRole("button", { name: "Open settings" }).click();
   await page.getByRole("radio", { name: "Light", exact: true }).check();
@@ -77,6 +80,7 @@ test("mobile layout fits the viewport and appearance remains usable", async ({
   await page.setViewportSize({ width: 320, height: 740 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.getByRole("timer")).toBeVisible();
   expect(
     await page.evaluate(

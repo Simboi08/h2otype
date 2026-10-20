@@ -1,5 +1,34 @@
 # h2otype — Design specification v0.7
 
+## Perimeter confetti, decaying combos and Supabase activation — 2026-10-20
+These requests supersede the earlier inactivity-preserves-combo and deferred-backend notes.
+- Spread finish particles across the full side borders (35% each), with lighter top (20%) and bottom (10%) sprays. Keep current counts, sizes, 2.2-second lifetime, settings, reduced-motion suppression and one-shot cancellation. Combo bursts retain their existing paths.
+- Combo is now charge: each fresh correct position adds one unit; active time drains 0.75/1.5/2.5/4/6/8 units per second at tiers 0–5. Integrate exactly across tier boundaries and preserve fractional drain between updates. Mistakes/deletion/pause/hide/restart still clear it. Tier thresholds and rewards stay 25/60/120/200/350 and up to 3×.
+- The meter uses a fixed 350-unit scale so dropping a tier cannot jump its fill upward; excess charge stays visible in its numeric label. The multiplier, vignette and subsequent typing-sound pitch follow current charge. Decay never removes earned XP, points or historical best. Effects preferences cannot change drain or rewards. Timer delays and server replay must produce the same outcome.
+- Daily rules version 4 separates decay-based scores, seeds, tokens and local records from previous rules. Preserve all old records and balances. Start shared run tokens at first accepted input, not mode selection.
+- Activate the existing private Supabase REST integration through the user's hosting configuration. No player accounts are needed. Keep credentials server-only, validate/replay on the server, and retain local play/results when unavailable. Live activation requires the user to save their project variables and run the current SQL; do not claim a live connection until checked.
+
+
+## Solid active caret, stronger confetti and Daily status — 2026-10-19
+These requests supersede the earlier always-blinking caret and confetti budgets below.
+- Blink only while ready and focused. Once a run accepts input, keep the caret solid through deletion to empty, focus changes, Settings and Zen pause/resume. Restart/new session restores ready blinking; reduced motion disables blinking altogether. Use session start/attempt history rather than retained text length.
+- Increase finish confetti to Medium 100/High 160 pieces at 100%, default High 240 at saved/default 150%, max 320 at 200%. Keep combo-edge budgets unchanged. Use larger 6–10 × 8–14px pieces, a wider inward spread and a 2.2-second lifetime, without capturing pointer/focus or adding an idle loop. Preserve saved amount and all motion/effects/quality suppression and cancellation rules.
+- Place a compact Daily button beneath the logo: availability prompt until today's eligible completion, then today's best points. Open Daily directly. Keep the typing workspace centered and header controls unobstructed on small/short screens.
+- Use current scoring-version browser records and UTC day. Update immediately on record save, reload, cross-tab storage changes, midnight and return to the page. Retain the best seen this visit when storage cannot save; do not mix a pinned previous-day completion into today's score. Keep results-heading focus.
+- Public leaderboard remains deferred. Do not activate Supabase or add networking for this local status display.
+
+
+## Reading flow, defaults and Daily 15s — 2026-10-20
+These requests supersede earlier defaults, font divisions, passage scrolling and Daily duration below.
+- New visits open Sprint 15s, High graphics, Screen shake on, 8-bit crush sound, 8-bit pixel particles and bundled 8-bit typing font. Preserve every valid saved returning-player choice; only missing fields take new defaults. Keep system/light/dark appearance and optional live statistics.
+- Use Silkscreen consistently for interface text, descriptions, controls, combo counters and results. The passage/input still honor the selectable saved typing font (8-bit, mono, system, serif).
+- As soon as a line is completed, scroll the active line to the top. Show four current/upcoming lines in normal windows; shrink the viewport in short windows to preserve visible controls. Use a short 120ms ease-out scroll and 70ms horizontal caret transition by default. Separate speed sliders offer Smooth through Instant (scroll 240–0ms, caret 140–0ms). Never delay typing/scoring. Wraps jump the caret directly; restart resets scroll immediately. Remeasure on resize/font load/font changes, handle backward edits and bounded Zen retirement, and force instant movement under reduced motion.
+- Medium/High typing particles use each available requestAnimationFrame; Low retains 30fps. Keep 6px sprites and all count/lifetime/voice budgets, removing two-pixel position quantization. No idle particle loop and no claimed device-independent frame-rate guarantee.
+- Double base confetti counts to Medium 40/High 64; new amount slider Off–200% in 25% steps, default 150%, max 128 pieces. Balanced halves the result; Low/Off/reduced motion still suppress it. Preference changes cancel existing confetti without replaying a finished test. Combo edge bursts and 25/60/120/200/350 tiers/up-to-3× rewards stay intact.
+- Daily now uses 15s with common date-seeded English-100 text, UTC rollover and optional shared scoring. Change all browser/replay/server/SQL duration checks together; use rules version 3 for passage seed, local records, tokens and rank filtering. Preserve prior versions separately, including saved XP. Per-duration Daily passages are deferred.
+- Racing, unlockable caret styles, earned currency and randomized pet unlocks are planning notes only. Supabase activation remains deferred.
+
+
 ## Finish celebrations and harder combos — 2026-10-19
 These user-requested rules supersede the older combo thresholds and reward rates below.
 - Tiers require 25/60/120/200/350 consecutive fresh correct characters, including spaces. Threshold characters earn their new tier rate: 1.2/1.5/2/2.5/3× XP and 12/15/20/25/30 Daily points per fresh position. Carry fractional XP tenths; mistakes/deletion break the streak and credited positions never repay. A perfect 100-character run earns 127 XP and 1,275 points.

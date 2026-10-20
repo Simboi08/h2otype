@@ -4,6 +4,7 @@ test("typing is ready on arrival and the first character is preserved after focu
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await expect(input).toBeFocused();
   await expect(page.getByRole("timer")).toHaveText("30s remaining");
@@ -32,6 +33,7 @@ test("Tab restarts and Shift+Tab stays in typing without cycling page controls",
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await expect(input).toBeVisible();
   await input.pressSequentially("slow");
@@ -55,6 +57,7 @@ test("F2 opens Settings, its keyboard controls leave typing intact, and closing 
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await expect(input).toBeFocused();
   await page.keyboard.type("s");
@@ -86,6 +89,7 @@ test("Zen is ready for typing, but paused and restored sessions stay paused unti
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   const input = page.getByRole("textbox");
   await expect(input).toBeFocused();

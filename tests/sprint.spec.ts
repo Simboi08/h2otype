@@ -8,6 +8,7 @@ for (const duration of [15, 30, 60]) {
     await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
     await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     await page
       .getByRole("button", { name: `${duration}s`, exact: true })
       .click();
@@ -46,6 +47,7 @@ test("duration changes discard an active run without saving and reset the clock"
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await input.pressSequentially("slow");
   await page.clock.fastForward(10_000);
@@ -67,6 +69,7 @@ test("personal bests survive reload, stay separate by duration, and retain faste
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });
   await page.getByRole("button", { name: "15s", exact: true }).click();
   await input.pressSequentially("slow down ");
@@ -75,6 +78,7 @@ test("personal bests survive reload, stay separate by duration, and retain faste
     "New best · 15s: 8 WPM",
   );
   await page.reload();
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await input.pressSequentially("slow down ");
   await page.clock.fastForward(30_000);
   await expect(page.locator(".record-summary")).toContainText(
@@ -108,6 +112,7 @@ test("blocked storage does not prevent results or restart", async ({
   await page.clock.install({ time: new Date("2026-10-18T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-18T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const passage = await page.locator(".passage").innerText();
   await page.getByRole("textbox").fill(passage.slice(0, 4));
   await page.clock.fastForward(30_000);
@@ -123,6 +128,7 @@ test("corrupt records recover and early passage completion cannot earn a best", 
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.evaluate(() =>
     localStorage.setItem("h2otype.sprint-bests.v1", "{broken"),
   );
@@ -185,6 +191,7 @@ test("results fit small screens and storage write failures are reported", async 
   ]) {
     await page.setViewportSize(viewport);
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     await page.getByRole("textbox").pressSequentially("slow");
     await page.clock.fastForward(30_000);
     await expect(page.locator(".record-summary")).toContainText(
