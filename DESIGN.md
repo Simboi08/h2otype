@@ -1,5 +1,10 @@
 # h2otype — Design specification v0.7
 
+## Vercel compiled API fix — 2026-10-20
+- Match runtime imports to emitted JavaScript (.js) in Vercel/Cloudflare handlers and the entire shared scoring dependency graph. TypeScript/Vite resolve those specifiers to source files during development. JSON word-bank data must remain present in the packaged function.
+- Validate a throwaway compiled JavaScript artifact without source TypeScript files as part of every production build. Exercise request handling and full score replay, not just a source import. The previously passing native .ts source check did not reflect Vercel's output.
+- Show a shared connection failure once when both starting a run and loading rankings fail for the same reason. Preserve the longer retry/fresh-run guidance and show distinct failures when appropriate.
+
 ## Discoverable leaderboard and automatic Daily bests — 2026-10-20
 These requests supersede the results-only manual submission flow.
 - Add a persistent Leaderboard button beside the Daily status under the logo, available in every mode before playing. Opening it never changes modes or starts a timer. Display the guest's saved rank for the current UTC day and clear that rank at midnight.
@@ -7,7 +12,7 @@ These requests supersede the results-only manual submission flow.
 - Own submission work above the practice component, capturing the run token and edit trace at completion. Restart, mode switching, a slow list response and retry must not change the run being verified. Keep the existing server replay, age validation and best-only database update. Let slow token responses mature before submitting rather than weakening server timing checks.
 - Show connection/submission errors and retry on results and in rankings. Loading the leaderboard must not disable an otherwise valid Submit button. Keep local records and all typing/progression available offline. If a run never obtained an online token, explain that a fresh test is required after reconnecting.
 - Return the guest's exact rank even outside the top 50, comparing score, accuracy and WPM; equal tuples share competition rank. Strip private guest identifiers from leaderboard responses. Refresh on opening and while the dialog is visible; preserve modal focus handling and compact phone/landscape layout.
-- Use native-resolvable .ts imports throughout the server scoring dependency chain. Server authentication accepts the existing service-role JWT or a modern Supabase server secret via apikey, without putting a non-JWT key into a Bearer header. Neither key belongs in the browser. No schema/scoring-version change or new application dependency is needed.
+- Use JavaScript .js runtime import specifiers throughout the server scoring dependency chain so they match Vercel's compiled output; source-only Node checks are insufficient. Server authentication accepts the existing service-role JWT or a modern Supabase server secret via apikey, without putting a non-JWT key into a Bearer header. Neither key belongs in the browser. No schema/scoring-version change or new application dependency is needed.
 
 
 ## Perimeter confetti, decaying combos and Supabase activation — 2026-10-20

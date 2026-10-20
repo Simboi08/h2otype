@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && npm run check:api && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "playwright test"
+    "test": "playwright test",
+    "check:api": "node scripts/check-api-build.mjs"
   },
   "dependencies": {
     "react": "^19.2.0",

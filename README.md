@@ -13,7 +13,7 @@ A focused pixel-arcade typing game with satisfying progression. Built for short 
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
-Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Fresh correct typing builds a time-decaying combo meter and edge vignette and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Daily adds fixed-date score challenges and local rankings, with optional shared guest rankings. Completion sounds, combo XP bonuses and clearer results are included. Achievements and unlockable themes are saved for later.
+Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Fresh correct typing builds a time-decaying combo meter and edge vignette and raises typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Daily adds fixed-date score challenges and local rankings, with optional shared guest rankings. Completion sounds, combo XP bonuses and clearer results are included. Achievements and unlockable themes are saved for later.
 
 ## Development
 Use Node.js 20.19+ (20.x) or 22.12+ and npm. Node 24 was used for validation.
@@ -26,7 +26,8 @@ npm run dev
 Vite prints the development server address. For a cloud host, run `npm run dev -- --host 0.0.0.0`.
 
 ```sh
-npm run build    # TypeScript checks and production bundle
+npm run build    # TypeScript, compiled API verification, production bundle
+npm run check:api # Build and exercise the isolated JavaScript API artifact
 npm run lint     # ESLint checks
 npm run preview  # Serve the production bundle after building
 ```

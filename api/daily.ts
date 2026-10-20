@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { handleDaily } from "../server/dailyApi.ts";
+import { handleDaily } from "../server/dailyApi.js";
 
 // Vercel Node function; no database key enters the browser bundle.
 export default async function handler(
