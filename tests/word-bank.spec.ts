@@ -71,7 +71,7 @@ test("generated Zen stays bounded, resumes identical future words, and never rep
       expect(
         state.passage.length - state.session.typed.length,
       ).toBeGreaterThanOrEqual(200);
-      expect(state.session.xpEarned).toBe(total);
+      expect(state.session.baseXp).toBe(total);
     }
     const restored = parseZen(
       JSON.stringify({ version: 1, state: pauseZen(state, 60000) }),
@@ -88,7 +88,7 @@ test("generated Zen stays bounded, resumes identical future words, and never rep
       resumed.session.typed,
       63000,
     );
-    expect(corrected.session.xpEarned).toBe(total);
+    expect(corrected.session.xpEarned).toBe(state.session.xpEarned);
     expect(zenMetrics(corrected, 64000).correctCharacters).toBe(total);
   }
 });
@@ -199,14 +199,14 @@ test("word-set choices apply immediately in both modes and persist independently
       .every((word) => wordPools.english500.includes(word)),
   ).toBe(true);
   await input.fill(passage.slice(0, 40));
-  expect(await xp(page)).toBe(55);
+  expect(await xp(page)).toBe(58);
   await choose(page, "English 1,000");
   await expect(input).toBeFocused();
   await expect(input).toHaveValue("");
   await expect(page.getByRole("timer")).toHaveText("0s elapsed");
   const fresh = await text(page);
   await input.fill(fresh.slice(0, 12));
-  expect(await xp(page)).toBe(67); // A fresh ledger must not subtract the old 40 XP.
+  expect(await xp(page)).toBe(70); // A fresh ledger must not subtract the old 40 XP.
   const saved = await page.evaluate(
     () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).zen,
   );
@@ -221,7 +221,7 @@ test("word-set choices apply immediately in both modes and persist independently
   await expect(input).toHaveValue(saved.session.typed.split(" ").at(-1)!);
   await input.press("Backspace");
   await input.press(saved.session.typed.at(-1)!);
-  expect(await xp(page)).toBe(67);
+  expect(await xp(page)).toBe(70);
 });
 
 test("switching sets in Sprint clears an old Zen draft without losing XP, including from a paused summary", async ({
@@ -341,7 +341,7 @@ test("unavailable word storage keeps in-memory choices, generated Zen, and XP ac
   await expect(page.locator(".session-xp")).toHaveText("+10 XP this session");
   await expect(
     page.getByRole("progressbar", { name: "Level XP" }),
-  ).toHaveAttribute("aria-valuenow", "40");
+  ).toHaveAttribute("aria-valuenow", "41");
 });
 
 test("word picker, settings, and game header fit phones, tablets, and landscape without overlapping controls", async ({

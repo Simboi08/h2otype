@@ -1,3 +1,4 @@
+import { comboBonusTenths } from "./combo";
 import { editSession, emptySession, getMetrics } from "./typingEngine";
 import type { Session } from "./typingEngine";
 import { generateWords, isWordSet } from "./wordBank";
@@ -130,6 +131,7 @@ export function pauseZen(
     ...state,
     elapsedMs: zenElapsed(state, now),
     runningSince: null,
+    session: { ...state.session, streak: 0 },
     paused: true,
     summary: state.summary || summary,
   };
@@ -202,6 +204,10 @@ export function parseZen(raw: string | null): ZenState | null {
         )
       : state.session.credited;
     const xpEarned = legacy ? 0 : state.session.xpEarned;
+    const baseXp = legacy ? 0 : (state.session.baseXp ?? xpEarned);
+    const bonusTenths = legacy ? 0 : (state.session.bonusTenths ?? 0);
+    const bestCombo = legacy ? 0 : (state.session.bestCombo ?? 0);
+    const streak = legacy ? 0 : (state.session.streak ?? 0);
     if (
       !Array.isArray(credited) ||
       credited.length > state.passage.length ||
@@ -212,9 +218,14 @@ export function parseZen(raw: string | null): ZenState | null {
           index >= state.passage.length,
       ) ||
       new Set(credited).size !== credited.length ||
-      !Number.isSafeInteger(xpEarned) ||
-      xpEarned < 0 ||
-      xpEarned > state.session.correctAttempts
+      ![xpEarned, baseXp, bonusTenths, bestCombo, streak].every(
+        (value) => Number.isSafeInteger(value) && value >= 0,
+      ) ||
+      baseXp > state.session.correctAttempts ||
+      bonusTenths > baseXp * comboBonusTenths.at(-1)! ||
+      bestCombo > state.session.correctAttempts ||
+      streak > bestCombo ||
+      xpEarned !== baseXp + Math.floor(bonusTenths / 10)
     )
       return null;
     return {
@@ -225,6 +236,10 @@ export function parseZen(raw: string | null): ZenState | null {
         ...state.session,
         credited,
         xpEarned,
+        baseXp,
+        bonusTenths,
+        bestCombo,
+        streak: 0,
         startedAt: 0,
         endedAt: null,
         now: 0,

@@ -5,10 +5,12 @@ import { trapDialogFocus } from "./dialogFocus";
 
 export default function WordSetPicker({
   value,
+  disabled = false,
   onChange,
   storageAvailable,
 }: {
   value: WordSet;
+  disabled?: boolean;
   onChange: (set: WordSet) => void;
   storageAvailable: boolean;
 }) {
@@ -17,6 +19,7 @@ export default function WordSetPicker({
   useEffect(() => {
     const open = (event: KeyboardEvent) => {
       if (
+        disabled ||
         event.key !== "F3" ||
         event.ctrlKey ||
         event.altKey ||
@@ -31,17 +34,22 @@ export default function WordSetPicker({
     };
     window.addEventListener("keydown", open);
     return () => window.removeEventListener("keydown", open);
-  }, []);
+  }, [disabled]);
   return (
     <>
       <button
         className="appearance-button wordset-button"
+        disabled={disabled}
         ref={button}
         onClick={() => dialog.current?.showModal()}
         aria-label="Choose word set"
         aria-haspopup="dialog"
         aria-keyshortcuts="F3"
-        title={`${wordSets.find((set) => set.id === value)!.label} (F3)`}
+        title={
+          disabled
+            ? "Daily uses English 100 for everyone"
+            : `${wordSets.find((set) => set.id === value)!.label} (F3)`
+        }
       >
         <svg
           width="18"

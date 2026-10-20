@@ -7,6 +7,11 @@ import {
   getWordInput,
 } from "./typingEngine";
 
+import { useFinishCelebration } from "./useFinishCelebration";
+import { useCompletionSound } from "./useCompletionSound";
+import { beginDaily } from "./dailyLeaderboard";
+import { createDaily, dailyEdit } from "./dailyChallenge";
+import type { DailyEvent } from "./dailyChallenge";
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
 import { useTypingFeedback } from "./useTypingFeedback";
@@ -25,18 +30,26 @@ export default function TypingPractice({
   onDurationChange,
   wordSet,
 }: {
-  mode: "sprint" | "zen";
+  mode: "sprint" | "daily";
   duration: SprintDuration;
   onDurationChange: (duration: SprintDuration) => void;
   wordSet: WordSet;
 }) {
   // Each generated run gets fresh words, with enough text for a full minute.
+  const [challenge, setChallenge] = useState(createDaily);
+  const events = useRef<DailyEvent[]>([]);
+  const dailyRun = useRef<Promise<string | null> | null>(null);
+  useEffect(() => {
+    if (mode === "daily") dailyRun.current = beginDaily(challenge.day);
+  }, [mode, challenge.day]);
   const createPassage = () =>
-    wordSet === "sentences"
-      ? Array(24).fill(sprintSentence).join(" ")
-      : generateWords(wordSet, freshSeed(), 600).text;
+    mode === "daily"
+      ? challenge.passage
+      : wordSet === "sentences"
+        ? Array(24).fill(sprintSentence).join(" ")
+        : generateWords(wordSet, freshSeed(), 600).text;
   const [passage, setPassage] = useState(createPassage);
-  const durationMs = mode === "sprint" ? duration * 1000 : null;
+  const durationMs = (mode === "daily" ? 60 : duration) * 1000;
   const [session, setSession] = useState(emptySession);
   const latest = useRef(session);
   const [focused, setFocused] = useState(false);
@@ -55,13 +68,20 @@ export default function TypingPractice({
     vignetteLayer,
   } = useTypingFeedback(!finished);
   const { prefix, word } = getWordInput(session.typed);
+  useCompletionSound(finished);
+  const finishCelebration = useFinishCelebration(finished);
   usePracticeKeyboard({ restart, composing, input, enabled: !finished });
 
   useEffect(() => {
     if (session.startedAt === null || finished) return;
     const tick = () => {
       const now = performance.now();
-      const next = advanceClock(latest.current, now, durationMs);
+      let next = advanceClock(latest.current, now, durationMs);
+      if (document.hidden && next.streak) {
+        if (mode === "daily" && next.endedAt === null)
+          events.current.push({ at: now - next.startedAt!, reset: true });
+        next = { ...next, streak: 0 };
+      }
       latest.current = next;
       setSession(next);
     };
@@ -71,12 +91,16 @@ export default function TypingPractice({
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", tick);
     };
-  }, [session.startedAt, finished, durationMs]);
+  }, [session.startedAt, finished, durationMs, mode]);
 
   function edit(value: string, now: number) {
     const current = latest.current;
     const next = editSession(current, prefix + value, passage, now, durationMs);
     emitFeedback(current, next, passage);
+    if (mode === "daily") {
+      const event = dailyEdit(current, next);
+      if (event) events.current.push(event);
+    }
     latest.current = next;
     setSession(next);
     if (next.xpEarned > current.xpEarned)
@@ -85,7 +109,11 @@ export default function TypingPractice({
 
   function restart() {
     resetFeedback();
-    setPassage(createPassage());
+    const daily = createDaily();
+    setChallenge(daily);
+    events.current = [];
+    if (mode === "daily") dailyRun.current = beginDaily(daily.day);
+    setPassage(mode === "daily" ? daily.passage : createPassage());
     focusOnAttach.current = true;
     const next = emptySession();
     latest.current = next;
@@ -97,6 +125,7 @@ export default function TypingPractice({
 
   return (
     <div className="passage-card" ref={feedbackRef}>
+      {finishCelebration}
       {particleLayer}
       {vignetteLayer}
       <div className="practice-surface">
@@ -120,7 +149,9 @@ export default function TypingPractice({
               ))}
             </div>
           ) : (
-            <span>Zen · single passage</span>
+            <span className="daily-label">
+              Daily · {challenge.day} <small>English 100 · UTC</small>
+            </span>
           )}
           {!finished && (
             <LiveStats
@@ -140,11 +171,14 @@ export default function TypingPractice({
               : `${Math.ceil((durationMs - metrics.elapsedMs) / 1000)}s remaining`}
           </span>
         </div>
-        {finished && mode === "sprint" ? (
+        {finished ? (
           <SprintResults
-            duration={duration}
+            duration={mode === "daily" ? 60 : duration}
             metrics={metrics}
-            xpEarned={session.xpEarned}
+            session={session}
+            challenge={mode === "daily" ? challenge : undefined}
+            events={events}
+            dailyRun={dailyRun}
             wordSet={wordSet}
             onRestart={restart}
           />
@@ -206,6 +240,10 @@ export default function TypingPractice({
                     durationMs,
                   );
                   emitFeedback(latest.current, next, passage);
+                  if (mode === "daily") {
+                    const event = dailyEdit(latest.current, next);
+                    if (event) events.current.push(event);
+                  }
                   latest.current = next;
                   setSession(next);
                 }

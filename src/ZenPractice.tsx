@@ -2,6 +2,9 @@ import { useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Ref } from "react";
 import { freshSeed } from "./wordBank";
 import type { WordSet } from "./wordBank";
+import RewardSummary from "./RewardSummary";
+import { useFinishCelebration } from "./useFinishCelebration";
+import { useCompletionSound } from "./useCompletionSound";
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
 import { useTypingFeedback } from "./useTypingFeedback";
@@ -50,6 +53,10 @@ export default function ZenPractice({
     comboMeter,
     vignetteLayer,
   } = useTypingFeedback(!stopped);
+  useCompletionSound(state.summary && state.session.attempts > 0);
+  const finishCelebration = useFinishCelebration(
+    state.summary && state.session.attempts > 0,
+  );
   usePracticeKeyboard({
     restart: newSession,
     composing,
@@ -131,6 +138,7 @@ export default function ZenPractice({
 
   return (
     <div className="passage-card" ref={feedbackRef}>
+      {finishCelebration}
       {particleLayer}
       {vignetteLayer}
       <div className="practice-surface">
@@ -185,9 +193,7 @@ export default function ZenPractice({
                 <dd>{metrics.correctCharacters}</dd>
               </div>
             </dl>
-            <p className="session-xp">
-              +{state.session.xpEarned} XP this session
-            </p>
+            <RewardSummary session={state.session} zen />
             <div className="results-footer">
               <p>Active time only. Enter resumes · Tab starts a new session.</p>
               <div className="zen-actions">

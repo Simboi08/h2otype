@@ -65,13 +65,13 @@ test("effects default to Intense with shake on while saved choices and invalid f
 });
 
 test("combo impacts reward tier changes and longer streak milestones instead of every keystroke", () => {
-  expect(comboImpact(9, 10)).toBe(1);
+  expect(comboImpact(9, 10)).toBe(0);
   expect(comboImpact(10, 11)).toBe(0);
-  expect(comboImpact(24, 25)).toBe(2);
-  expect(comboImpact(49, 50)).toBe(3);
-  expect(comboImpact(59, 60)).toBe(3);
+  expect(comboImpact(24, 25)).toBe(1);
+  expect(comboImpact(49, 50)).toBe(0);
+  expect(comboImpact(59, 60)).toBe(2);
   expect(comboImpact(60, 61)).toBe(0);
-  expect(comboImpact(69, 70)).toBe(3);
+  expect(comboImpact(69, 70)).toBe(0);
   expect(impactProfile(2, 5)).toEqual({
     strength: 7.5,
     duration: 220,
@@ -82,7 +82,7 @@ test("combo impacts reward tier changes and longer streak milestones instead of 
     duration: 160,
     cooldown: 250,
   });
-  expect(comboImpact(199, 200)).toBe(5);
+  expect(comboImpact(199, 200)).toBe(4);
   expect(comboImpact(220, 0)).toBe(0);
   expect(comboImpact(220, 220)).toBe(0);
 });
@@ -147,7 +147,7 @@ test("default combos add an edge vignette and stronger bounded shake without fla
   await expect(page.locator(".screen-lines")).toHaveCount(0);
   const vignette = page.locator(".combo-vignette");
   await expect(vignette).toHaveCSS("pointer-events", "none");
-  await expect(vignette).toHaveAttribute("data-tier", "2");
+  await expect(vignette).toHaveAttribute("data-tier", "1");
   await expect(
     page.locator(".fire-jet, .combo-flames, .combo-embers"),
   ).toHaveCount(0);
@@ -173,7 +173,7 @@ test("default combos add an edge vignette and stronger bounded shake without fla
   await input.press(passage[25]);
   expect(await impacts(page)).toHaveLength(1);
   await page.clock.runFor(300);
-  await input.pressSequentially(passage.slice(26, 50));
+  await input.pressSequentially(passage.slice(26, 60));
   expect(await impacts(page)).toHaveLength(2);
   await input.press("Tab");
   await expect(page.locator(".combo-vignette")).toHaveCount(0);
@@ -242,7 +242,7 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).totalXp,
     ),
-  ).toBe(100);
+  ).toBe(127);
   await page.reload();
   await expect(input).toBeFocused();
   await page.keyboard.press("F2");

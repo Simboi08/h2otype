@@ -3,7 +3,7 @@
 Read README.md, DESIGN.md, ROADMAP.md and PROGRESS.md before making changes.
 
 ## Product intent
-Build a focused pixel-arcade typing game with rewarding XP and level progression. The user-requested arcade refresh in DESIGN.md supersedes the original Apple-inspired styling. Two modes: Sprint (15/30/60-second tests) and Zen (endless typing). Keep the passage central, graphics configurable, and live statistics optional in Settings.
+Build a focused pixel-arcade typing game with rewarding XP and level progression. The user-requested arcade refresh in DESIGN.md supersedes the original Apple-inspired styling. Modes: Sprint (15/30/60-second tests), Zen (endless typing), and Daily (shared UTC passage, 60 seconds). Keep the passage central, graphics configurable, and live statistics optional in Settings.
 
 Prioritize fun, satisfying game feedback: stronger effects default on, with clear controls for intensity and screen shake. Keep text readable and respect reduced motion. Use combo-driven edge vignettes with a transparent center; do not restore flame sprites. Avoid always-on full-screen scanline/filter overlays and extra confirmation steps when switching modes.
 
@@ -14,8 +14,8 @@ Prioritize fun, satisfying game feedback: stronger effects default on, with clea
 - Use clean, intentional animation; respect prefers-reduced-motion.
 - Support light, dark, and system theme, defaulting to system.
 - Keep gameplay calculations and word generation in pure, independently testable functions. Preserve generator state when resuming Zen and keep best scores separate by word set and duration.
-- Correct typing earns XP; prevent holding a key or repeated incorrect keystrokes from farming XP.
-- Persist settings, XP and best scores in localStorage for MVP; no accounts or backend.
+- First-correct positions earn base XP plus capped combo bonuses; keep reward calculation independent of visual/audio preferences, carry fractional bonus tenths, and prevent correction/key-repeat farming. Shake only at combo tier gains.
+- Persist settings, XP and records locally. Daily supports an optional Supabase guest leaderboard through private server handlers; keep it optional and never put service credentials in the browser. No accounts are required.
 - Explain major changes in beginner-friendly terms and document important tradeoffs.
 - Update PROGRESS.md after each milestone: completed, tested, known issues, next task.
 - Do not override DESIGN.md product decisions without recording the change.

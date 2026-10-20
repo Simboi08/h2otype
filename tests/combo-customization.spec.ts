@@ -63,17 +63,17 @@ test("combos count new correct positions, reset on errors/deletion, and cannot b
   const rejected = editSession(mixed, "replaced", passage, 5, null);
   expect(advanceCombo(3, mixed, rejected, passage)).toBe(3);
   expect(getCombo(9).tier).toBe(0);
-  expect(getCombo(25).tier).toBe(2);
-  expect(getCombo(50).tier).toBe(3);
-  expect(getCombo(100).tier).toBe(4);
-  expect(getCombo(200).tier).toBe(5);
+  expect(getCombo(25).tier).toBe(1);
+  expect(getCombo(50).tier).toBe(1);
+  expect(getCombo(100).tier).toBe(2);
+  expect(getCombo(200).tier).toBe(4);
   expect(getCombo(30).pitch).toBeGreaterThan(getCombo(10).pitch);
   expect(getCombo(100).pitch).toBeGreaterThan(getCombo(30).pitch);
   expect(getCombo(10000).pitch).toBeLessThanOrEqual(1.5);
-  expect(getCombo(200).percent).toBe(100);
+  expect(getCombo(350).percent).toBe(100);
 });
 
-test("Zen combos survive retirement without extra XP or credit replay", () => {
+test("Zen combos survive retirement and retain base and bonus XP without credit replay", () => {
   let state = createZen();
   let streak = 0;
   let retired = false;
@@ -90,7 +90,8 @@ test("Zen combos survive retirement without extra XP or credit replay", () => {
   }
   expect(retired).toBe(true);
   expect(streak).toBe(960);
-  expect(state.session.xpEarned).toBe(960);
+  expect(state.session.baseXp).toBe(960);
+  expect(state.session.xpEarned).toBe(2524);
 });
 
 test("native spacing/stat-size/graphics sliders preserve typing and persist in both modes", async ({
@@ -179,7 +180,7 @@ test("correct-typing combo raises live sound pitch, breaks on errors/backspace, 
   await expect(
     page.getByRole("meter", { name: "Typing combo" }),
   ).toHaveAttribute("aria-valuenow", "60");
-  await expect(page.locator(".combo-meter")).toHaveAttribute("data-tier", "3");
+  await expect(page.locator(".combo-meter")).toHaveAttribute("data-tier", "2");
   const values = await rates();
   expect(values[1]).toBe(1);
   expect(values[values.length - 1]).toBeGreaterThan(values[21]);
@@ -188,7 +189,8 @@ test("correct-typing combo raises live sound pitch, breaks on errors/backspace, 
   await expect(page.getByRole("meter")).toHaveCount(0);
   expect((await rates()).at(-1)).toBe(1);
   await input.press("Tab");
-  await input.pressSequentially(passage.slice(0, 50));
+  // Per-key pitch growth is covered above; one native edit is enough for reset/deletion checks.
+  await input.fill(passage.slice(0, 50));
   await input.press("Shift+Tab");
   await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "50");
   await input.press("Backspace");
@@ -198,13 +200,13 @@ test("correct-typing combo raises live sound pitch, breaks on errors/backspace, 
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).totalXp,
     ),
-  ).toBe(110);
+  ).toBe(122);
   await input.press("s");
   expect((await rates()).at(-1)).toBe(1);
   await expect(input).toBeFocused();
 });
 
-test("Zen pause/reload and combo toggle clear a streak without restoring it or changing XP", async ({
+test("Zen pause/reload clear streaks while the feedback toggle keeps reward accounting", async ({
   page,
 }) => {
   await clock(page);
@@ -213,13 +215,13 @@ test("Zen pause/reload and combo toggle clear a streak without restoring it or c
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
   await input.pressSequentially(passage.slice(0, 20));
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "20");
+  await expect(page.getByRole("meter")).toHaveCount(0);
   await input.press("Escape");
   await expect(page.getByRole("meter")).toHaveCount(0);
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await expect(page.getByRole("meter")).toHaveCount(0);
   await input.pressSequentially(passage.slice(20, 40));
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "20");
+  await expect(page.getByRole("meter")).toHaveCount(0);
   await page.keyboard.press("F2");
   await page
     .getByRole("switch", { name: "Combo feedback", exact: true })
@@ -234,7 +236,7 @@ test("Zen pause/reload and combo toggle clear a streak without restoring it or c
   await page.keyboard.press("Escape");
   await expect(page.getByRole("meter")).toHaveCount(0);
   await input.pressSequentially(passage.slice(50, 65));
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "15");
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "45");
   await page.reload();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
@@ -243,7 +245,7 @@ test("Zen pause/reload and combo toggle clear a streak without restoring it or c
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).totalXp,
     ),
-  ).toBe(65);
+  ).toBe(69);
 });
 
 test("larger pixel particles use fewer sprites and remain bounded during rapid typing", async ({

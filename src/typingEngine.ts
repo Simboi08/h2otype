@@ -1,3 +1,5 @@
+import { getCombo } from "./combo";
+
 export type Session = {
   typed: string;
   startedAt: number | null;
@@ -7,6 +9,10 @@ export type Session = {
   correctAttempts: number;
   credited: number[];
   xpEarned: number;
+  baseXp: number;
+  bonusTenths: number;
+  streak: number;
+  bestCombo: number;
 };
 
 export const emptySession = (): Session => ({
@@ -18,6 +24,10 @@ export const emptySession = (): Session => ({
   correctAttempts: 0,
   credited: [],
   xpEarned: 0,
+  baseXp: 0,
+  bonusTenths: 0,
+  streak: 0,
+  bestCombo: 0,
 });
 
 export function advanceClock(
@@ -49,7 +59,12 @@ export function editSession(
   const typedLength = [...current.typed].length;
   if (current.endedAt !== null || nextCharacters.length > target.length)
     return current;
-  if (current.typed.startsWith(next)) return { ...current, typed: next };
+  if (current.typed.startsWith(next))
+    return {
+      ...current,
+      typed: next,
+      streak: next === current.typed ? current.streak : 0,
+    };
   if (!next.startsWith(current.typed)) return current;
   const added = next.slice(current.typed.length);
   if (!added || /[\r\n]/.test(added)) return current;
@@ -59,9 +74,14 @@ export function editSession(
   ).length;
   const credited = new Set(current.credited);
   let xpAdded = 0;
+  let { streak, bestCombo, bonusTenths } = current;
   [...added].forEach((char, index) => {
     const position = typedLength + index;
-    if (char === target[position] && !credited.has(position)) {
+    if (char !== target[position]) streak = 0;
+    else if (!credited.has(position)) {
+      streak++;
+      bestCombo = Math.max(bestCombo, streak);
+      bonusTenths += getCombo(streak).bonusTenths;
       credited.add(position);
       xpAdded++;
     }
@@ -69,7 +89,11 @@ export function editSession(
   return {
     ...current,
     credited: [...credited],
-    xpEarned: current.xpEarned + xpAdded,
+    baseXp: current.baseXp + xpAdded,
+    bonusTenths,
+    streak,
+    bestCombo,
+    xpEarned: current.baseXp + xpAdded + Math.floor(bonusTenths / 10),
     typed: next,
     startedAt,
     now,

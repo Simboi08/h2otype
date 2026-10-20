@@ -5,14 +5,15 @@
 A focused pixel-arcade typing game with satisfying progression. Built for short timed challenges and endless Zen typing sessions.
 
 ## Concept
-- **Sprint:** timed 15, 30, or 60 second typing tests, with WPM/accuracy results and local personal bests.
+- **Sprint:** timed 15, 30, or 60 second typing tests, with WPM/accuracy results, base/bonus XP and local personal bests.
 - **Zen:** endless uninterrupted typing, cumulative XP and persistent levels.
+- **Daily:** the same English-100 passage for everyone each UTC day, with 60-second score challenges and optional shared rankings.
 - **Progression:** accurate typing earns XP and levels, with combo vignettes, brief impacts, and prominent nonblocking level announcements.
 - **Presentation:** pixel HUD typography, crisp cyan/pink panels, atmospheric dark/light themes, system theme by default, and keyboard-first play.
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
-Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Streaks build a combo meter and edge vignette and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Achievements and unlockable themes are saved for later.
+Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Streaks build a combo meter and edge vignette and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Daily adds fixed-date score challenges and local rankings, with optional shared guest rankings. Completion sounds, combo XP bonuses and clearer results are included. Achievements and unlockable themes are saved for later.
 
 ## Development
 Use Node.js 20.19+ (20.x) or 22.12+ and npm. Node 24 was used for validation.
@@ -80,16 +81,36 @@ Zen automatically pauses when the page becomes hidden. Settings and ordinary inp
 
 One resumable draft is stored with lifetime XP in `h2otype.progress.v1`. Each edit saves its text, credit history, and total XP together in one write; periodic saves every five seconds also capture active elapsed time, with additional saves on pause/finish, leaving Zen, page hide, and unmount. Reloaded sessions open paused when you select Zen. A hard crash can lose up to the last five seconds of active elapsed time. New session clears the saved draft while retaining lifetime XP. Progress is intended for one active tab; tabs share one local profile and the last save wins. Corrupt saves are ignored; read/write failures show a message and play continues in memory.
 
-To keep long sessions responsive, Zen appends short local text batches and retires older history. At least the last 200 characters remain available for Backspace correction; older characters are finalized into session totals. Attempts and errors remain cumulative across batches and reloads. The current local text collection cycles; varied/generated content can be expanded later. XP credit follows the same character positions through retirement and resume without being awarded again.
+To keep long sessions responsive, Zen appends short local text batches and retires older history. At least the last 200 characters remain available for Backspace correction; older characters are finalized into session totals. Attempts and errors remain cumulative across batches and reloads. Generated word pools replenish continuously; the original sentence collection cycles. XP credit follows the same character positions through retirement and resume without being awarded again.
 
 ## XP and levels
-- Each character position earns **1 XP the first time it is typed correctly in a session**, including spaces and punctuation. Correcting a mistake can earn that position's first XP. Deleting and retyping a credited character does not earn more.
-- Held character-key repeats, incorrect attempts, paste/drop, uncommitted composition, paused input, and post-deadline input do not award XP. There are no speed/accuracy bonuses yet.
+- Each character position earns **1 base XP the first time it is typed correctly in a session**, including spaces and punctuation. Correcting a mistake can earn that position's first XP. Deleting and retyping a credited character does not earn more.
+- Combo tiers at 25/60/120/200/350 add **20/50/100/150/200%** to newly earned XP. Fractional bonuses carry forward: 100 perfect characters earn 100 base + 27 bonus XP. Highest combo and base/bonus XP appear in results. Existing drafts/balances migrate without retroactive bonuses.
+- Held character-key repeats, incorrect attempts, paste/drop, uncommitted composition, paused input, and post-deadline input do not award XP. There are no separate speed/accuracy bonuses.
 - Earned XP stays earned after Backspace, restart, mode changes, or abandoning a run. Restarting or opening results does not grant XP. Fresh correct typing in a new session is legitimate practice and can earn XP again.
 - Level 1 starts at 0 XP. Reaching level 2 costs 100 XP; the next level costs 200 more, then 300 more. Lifetime thresholds for levels 2/3/4/5 are 100/300/600/1000 XP. Levels are calculated from total XP.
 - The wide XP rail above the passage shows level, current/required XP, lifetime XP, and the next level. Its fill accelerates then slows toward earned XP, rolling over naturally between levels. The labels and accessible progressbar stay exact during that animation. A prominent four-second level-up banner never moves keyboard focus. Sprint results and Zen summaries show XP earned in that session.
 - Lifetime XP and the current Zen credit history share one versioned `h2otype.progress.v1` storage value, so a reload cannot pay again from an older saved draft. Milestone 3 drafts from `h2otype.zen-session.v1` migrate automatically without retroactive XP; existing correct positions are marked credited. Sprint personal bests and appearance settings remain intact.
 - If storage fails, play and XP continue in memory and the XP area says **XP not saved**. Closing/reloading can lose unsaved progress. Malformed saved data is ignored. Progress is local to this browser/origin, with no cloud sync; use one active tab to avoid concurrent writes overwriting each other.
+
+## Daily challenges
+Choose **Daily** at the top. Everyone gets the same English-100 passage and a
+60-second timer for that UTC date. First typing starts the clock. Restart repeats
+the same passage; after midnight UTC, restarting loads the new day. Daily keeps
+your Sprint word-set/duration preferences and saved Zen session intact.
+
+Every first-correct character earns 10 points, plus 2/5/10/15/20 bonus points at the five combo tiers. Mistakes
+break the combo; deleting/retyping cannot pay again. Results show points, WPM,
+accuracy, highest combo, and XP. **Daily rankings** sorts by score, then accuracy,
+then WPM. Local attempts are labelled **Scores on this browser**, with ten best
+attempts per day for thirty days. Only full-duration tests with correct text
+qualify. Daily scores stay separate from Sprint speed records.
+
+The optional shared guest leaderboard needs a database connection. Its server
+replays the run and calculates points itself; visitors explicitly submit a display
+name, and only their best score that day is kept. See [DEPLOYMENT.md](DEPLOYMENT.md)
+for Vercel/Cloudflare publishing and Supabase configuration. Without that setup,
+the static game and local Daily rankings still work normally.
 
 ## Settings
 Open **Settings** in the header or press **F2**. Changes take effect immediately in both Sprint and Zen without clearing the session:
@@ -110,7 +131,7 @@ Open **Settings** in the header or press **F2**. Changes take effect immediately
 | Graphics quality | Medium | Three-stop slider: Low uses fewer particles, a static vignette, no shake/glow, and instant XP. High adds denser bursts, richer glow, and longer XP easing. Reduced motion overrides visual animation at every tier. |
 | Visual effects | Intense | Off/Balanced/Intense slider, separate from quality. Intense strengthens the edge vignette and combo shake. Off keeps plain meters/notices and disables decorative effects and XP motion. |
 | Screen shake | On | Brief, bounded impacts at combo milestones. Can be turned off independently; Low quality, Effects Off, and reduced motion suppress it. |
-| Combo feedback | On | Consecutive fresh correct characters build a combo meter and edge vignette and progressively higher sound pitch. Turn off for quieter visuals and fixed pitch. No XP multiplier. |
+| Combo feedback | On | Consecutive fresh correct characters build a combo meter and edge vignette and progressively higher sound pitch. Turn off for quieter visuals and fixed pitch. Bonus XP remains active when visual feedback is hidden. |
 | Live accuracy | Off | Shows correct attempts divided by all attempts, including corrected mistakes. |
 | XP progress | On | Shows the wide level/XP rail above typing; hiding it keeps XP accruing and leaves session XP in results. |
 | Level-up notifications | On | Shows brief, nonblocking notices; turning it off dismisses an active notice and suppresses new ones. |
@@ -124,9 +145,11 @@ Particles start just beyond the letter's right edge and fan out through a right-
 
 Pixel particles are larger 6×6 sprites with fewer per burst (2/4/6 for Low/Medium/High) and lower caps (12/24/36) to keep the passage readable. Crunch has a stronger 95ms low-end hit. Level-ups now add a larger banner above the passage, an expanding ring, and a short pixel burst; Low/reduced motion keep a static banner, and notification Off hides the whole celebration.
 
-Level announcements scale up quickly (320ms), hold, then shrink over the same 320ms interval before disappearing at four seconds. Visual effects default to Intense: an earned screen-edge vignette grows with combos, while the center stays transparent and flame sprites are removed. Shake pulses at tier gains and every ten correct characters after 50, lasts 220ms, and grows to 7.5px (8px hard cap). Balanced reduces vignette opacity and uses 160ms/0.8px pulses. Only one shake animation runs at a time. Sound/particle choices stay independent. Choose Balanced, Off, or disable Screen shake in Settings; Low/reduced motion keep gameplay still.
+Level announcements scale up quickly (320ms), hold, then shrink over the same 320ms interval before disappearing at four seconds. Visual effects default to Intense: an earned screen-edge vignette grows with combos, while the center stays transparent and flame sprites are removed. Shake pulses only at combo tier gains, lasts 220ms, and grows to 7.5px (8px hard cap). Balanced reduces vignette opacity and uses 160ms/0.8px pulses. Only one shake animation runs at a time. Sound/particle choices stay independent. Choose Balanced, Off, or disable Screen shake in Settings; Low/reduced motion keep gameplay still.
 
-Combos begin at **10 fresh correct characters**, then reach higher tiers at 25, 50, 100, and 200. The footer becomes a combo meter with a progressively stronger edge vignette, while the selected sound rises in pitch up to seven semitones. Sound Off stays silent. Errors, Backspace, pause/finish, hiding the page, restart, mode changes, and reload break a streak; correcting an already credited position cannot farm it. Settings and idle time alone do not break it. Combos change feedback only: **XP, WPM, accuracy, and final scores retain their existing rules**. Low/reduced motion keep the vignette static; disabling Combo feedback clears the meter and pitch escalation.
+Combos begin at **25 fresh correct characters**, then reach higher tiers at 60, 120, 200, and 350. The footer becomes a combo meter with a progressively stronger edge vignette, while the selected sound rises in pitch up to seven semitones. Sound Off stays silent. Errors, Backspace, pause/finish, hiding the page, restart, mode changes, and reload break a streak; correcting an already credited position cannot farm it. Settings and idle time alone do not break it. Combos now award **up to 3× XP** on fresh correct positions and increase Daily points. WPM and accuracy formulas stay unchanged. Low/reduced motion keep the vignette static; disabling Combo feedback hides the meter and pitch escalation without changing rewards.
+
+Finishing Sprint/Daily or explicitly finishing a nonempty Zen session plays a short rising phrase matching the selected sound. Sound Off and volume apply; Pause, restored summaries and opening Settings do not replay it. Restart, mute, hiding and mode changes cancel audio.
 
 Keyboard users can Tab/Shift+Tab through the modal, use Space on switches, arrow keys on theme radios, and Escape to close. The panel scrolls on small screens while Close stays accessible. Live stats are not an announcing live region, so they do not read out every keystroke. Reduced-motion preferences disable caret blinking and transitions. Controls have larger hit areas, and the workspace stays centered with optional stats enabled.
 
@@ -134,6 +157,7 @@ Keyboard users can Tab/Shift+Tab through the modal, use Space on switches, arrow
 React + TypeScript + Vite. For the initial version, use localStorage rather than accounts or a backend.
 
 ## Project documents
+- [DEPLOYMENT.md](DEPLOYMENT.md): public playtest hosting and optional shared Daily rankings.
 - [NOTES.md](NOTES.md): user feedback and the wishlist for future improvements.
 - [DESIGN.md](DESIGN.md): product and visual specification.
 - [ROADMAP.md](ROADMAP.md): staged implementation milestones.
@@ -146,3 +170,8 @@ React + TypeScript + Vite. For the initial version, use localStorage rather than
 3. All MVP milestones are complete. Choose a specific bug fix, refinement, or release/deployment task and request tested changes with a PROGRESS.md update.
 
 Keep changes small and review them before merging.
+
+## Finish celebrations and harder combos
+Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst from the upper screen edges. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 1.4 seconds; combo bursts last 750ms. Medium budgets 20/12 particles (finish/combo), High 32/20, and Balanced halves those counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
+
+The larger combo rewards apply only to newly credited positions. Existing lifetime XP and saved Zen rewards keep their value. Daily uses scoring rules version 2 and `h2otype.daily-scores.v2`; older local rankings remain stored separately, while new shared rankings filter by rules version. WPM personal bests and accuracy calculations are unchanged.

@@ -72,4 +72,22 @@ Feedback added: 2026-10-19.
 - [x] Stronger and more frequent Intense shake, while Balanced/Off, Low graphics, reduced motion, and the independent shake switch remain effective.
 - Other languages and additional text packs can follow later; achievements and unlockable themes remain deferred.
 
+## Results, combo rewards, and Daily — latest notes
+- [x] Standard/8-bit completion phrases respecting sound Off and volume.
+- [x] Shake at tier upgrades only; remove intermediate milestone pulses.
+- [x] Better results: WPM/accuracy emphasis, highest combo, base/bonus/total XP.
+- [x] Combo bonuses affect earned XP, capped at 3× without correction farming.
+- [x] Daily challenges use common text/time and rank by combo-weighted points.
+- [x] Public playtest instructions for Vercel and Cloudflare; no domain purchase required.
+- [x] Shared leaderboard code and private Supabase schema prepared.
+- [ ] Connect a real Supabase project and verify the hosted leaderboard.
+- Achievements/themes remain deferred. Publishing is a separate step; this coding task does not create a hosted site.
+
 See PROGRESS.md for implementation and validation details. Add new feedback here as it comes up.
+
+## Finish celebrations and harder combos
+- [x] Brief finish confetti, including explicit nonempty Zen Finish.
+- [x] Light edge bursts at combo tier gains, following graphics/effects controls.
+- [x] Harder 25/60/120/200/350-character tiers, rewarding up to 3× XP and Daily points.
+- [x] Preserve saved XP and separate Daily scoring versions.
+- Next: collect playtest feedback on difficulty and effects. Supabase activation, achievements and unlockable themes remain deferred.

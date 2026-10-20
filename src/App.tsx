@@ -41,7 +41,7 @@ function SettingsIcon() {
 }
 
 export default function App() {
-  const [mode, setMode] = useState<"sprint" | "zen">("sprint");
+  const [mode, setMode] = useState<"sprint" | "zen" | "daily">("sprint");
   const [duration, setDuration] = useState<SprintDuration>(30);
   const [words, setWords] = useState(() =>
     loadWordSet(loadZenProgress().state?.wordSet),
@@ -129,10 +129,17 @@ export default function App() {
             >
               Zen
             </button>
+            <button
+              aria-pressed={mode === "daily"}
+              onClick={() => setMode("daily")}
+            >
+              Daily
+            </button>
           </nav>
           <div className="header-tools">
             <WordSetPicker
-              value={words.wordSet}
+              disabled={mode === "daily"}
+              value={mode === "daily" ? "english100" : words.wordSet}
               onChange={changeWords}
               storageAvailable={words.storageAvailable}
             />
@@ -164,7 +171,7 @@ export default function App() {
                 "--typing-spacing": `${preferences.characterSpacing}px`,
               } as CSSProperties
             }
-            aria-label={`${mode === "sprint" ? "Sprint" : "Zen"} typing practice`}
+            aria-label={`${mode === "sprint" ? "Sprint" : mode === "daily" ? "Daily" : "Zen"} typing practice`}
           >
             <h1 className="sr-only">h2otype typing practice</h1>
             <ProgressIndicator />

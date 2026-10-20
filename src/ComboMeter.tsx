@@ -1,18 +1,18 @@
 import { getCombo } from "./combo";
 
 export default function ComboMeter({ streak }: { streak: number }) {
-  const { tier, next, percent } = getCombo(streak);
+  const { tier, next, percent, multiplier } = getCombo(streak);
   if (!tier) return null;
   return (
     <div
       className="combo-meter"
       data-tier={tier}
-      title="Correct-typing streak. Feedback only; XP stays the same."
+      title="Correct-typing streak. New correct positions earn bonus XP."
     >
       <div className="combo-heading">
         <strong>Combo ×{tier}</strong>
         <span>
-          {streak} correct{tier >= 4 ? " · Peak combo" : ""}
+          {streak} · {multiplier.toFixed(1)}× XP
         </span>
       </div>
       <div
@@ -22,7 +22,7 @@ export default function ComboMeter({ streak }: { streak: number }) {
         aria-valuemin={0}
         aria-valuemax={next ?? streak}
         aria-valuenow={streak}
-        aria-valuetext={`${streak} correct characters in a row; combo tier ${tier}${next ? `; next tier at ${next}` : "; maximum tier"}`}
+        aria-valuetext={`${streak} correct characters in a row; combo tier ${tier}; ${multiplier.toFixed(1)} times XP${next ? `; next tier at ${next}` : "; maximum tier"}`}
       >
         <span style={{ width: `${percent}%` }} />
       </div>

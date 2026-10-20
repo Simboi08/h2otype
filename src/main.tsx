@@ -5,6 +5,8 @@ import "./styles.css";
 import "./arcade.css";
 import "./feedback.css";
 import "./wordsets.css";
+import "./results.css";
+import "./screenBursts.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

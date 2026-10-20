@@ -1,0 +1,18 @@
+.screen-burst {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+  contain: strict;
+}
+.screen-burst i {
+  display: block;
+  position: absolute;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .screen-burst {
+    display: none;
+  }
+}

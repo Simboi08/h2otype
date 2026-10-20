@@ -69,7 +69,8 @@ test("Zen retirement and restore retain credit history without replay XP", () =>
     expected += state.passage.length - state.session.typed.length;
     state = editZen(state, state.passage, i * 1000);
   }
-  expect(state.session.xpEarned).toBe(expected);
+  expect(state.session.baseXp).toBe(expected);
+  const earned = state.session.xpEarned;
   expect(state.session.credited.length).toBeLessThanOrEqual(600);
   const restored = resumeZen(
     parseZen(JSON.stringify({ version: 1, state: pauseZen(state, 15000) }))!,
@@ -81,7 +82,7 @@ test("Zen retirement and restore retain credit history without replay XP", () =>
     17000,
   );
   const replay = editZen(shortened, restored.session.typed, 18000);
-  expect(replay.session.xpEarned).toBe(expected);
+  expect(replay.session.xpEarned).toBe(earned);
 });
 
 test("legacy Zen drafts migrate with zero retroactive XP and retain old credits", () => {

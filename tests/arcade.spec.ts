@@ -140,7 +140,7 @@ test("large XP rail eases toward exact XP and rolls into the next level without 
   const passage = await page.locator(".passage").innerText();
   await input.fill(passage.slice(0, 50));
   const bar = page.getByRole("progressbar", { name: "Level XP" });
-  await expect(bar).toHaveAttribute("aria-valuenow", "50");
+  await expect(bar).toHaveAttribute("aria-valuenow", "55");
   const bounds = await bar.boundingBox();
   expect(bounds!.width).toBeGreaterThan(400);
   expect(bounds!.height).toBeGreaterThanOrEqual(12);
@@ -156,15 +156,15 @@ test("large XP rail eases toward exact XP and rolls into the next level without 
   const e = await scale(page);
   expect(b - a).toBeGreaterThan(a);
   expect(e - d).toBeLessThan(d - c);
-  expect(e).toBeCloseTo(0.5, 4);
+  expect(e).toBeCloseTo(0.55, 4);
   await input.press("Tab");
   await input.fill(passage.slice(0, 60));
-  await expect(bar).toHaveAttribute("aria-valuenow", "10");
+  await expect(bar).toHaveAttribute("aria-valuenow", "22");
   await expect(bar).toHaveAttribute("aria-valuemax", "200");
   await expect(page.locator(".level-up-banner")).toContainText("Level 2");
   await expect(input).toBeFocused();
   await page.clock.runFor(900);
-  expect(await scale(page)).toBeCloseTo(0.05, 4);
+  expect(await scale(page)).toBeCloseTo(0.11, 4);
   await expect(page.locator(".xp-fill")).toHaveAttribute(
     "data-visual-level",
     "2",
@@ -179,7 +179,7 @@ test("reduced motion and Low quality use exact fills and hidden XP restores corr
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
   await input.fill(passage.slice(0, 50));
-  expect(await scale(page)).toBeCloseTo(0.5, 4);
+  expect(await scale(page)).toBeCloseTo(0.55, 4);
   await page.keyboard.press("F2");
   await page
     .getByRole("switch", { name: "XP progress", exact: true })
@@ -190,11 +190,11 @@ test("reduced motion and Low quality use exact fills and hidden XP restores corr
   await setGraphicsQuality(page, "low");
   await page.getByRole("switch", { name: "XP progress", exact: true }).check();
   await page.keyboard.press("Escape");
-  expect(await scale(page)).toBeCloseTo(0.5, 4);
+  expect(await scale(page)).toBeCloseTo(0.55, 4);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await input.press("Tab");
   await input.press("s");
-  expect(await scale(page)).toBeCloseTo(0.51, 4);
+  expect(await scale(page)).toBeCloseTo(0.56, 4);
   await expect(page.locator(".screen-lines")).not.toBeVisible();
 });
 
