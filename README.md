@@ -175,7 +175,7 @@ React + TypeScript + Vite. For the initial version, use localStorage rather than
 Keep changes small and review them before merging.
 
 ## Finish celebrations and harder combos
-Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst from the upper screen edges. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 1.4 seconds; combo bursts last 750ms. At 100% confetti, Medium budgets 40 finish/12 combo pieces and High 64/20. Finish confetti defaults to 150% (96 pieces on High), adjusts from Off to 200%, and Balanced halves the counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
+Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst from the upper screen edges. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 2.2 seconds; combo bursts last 750ms. At 100% confetti, Medium budgets 100 finish/12 combo pieces and High 160/20. Finish confetti defaults to 150% (240 pieces on High), adjusts from Off to 200%, and Balanced halves the counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
 
 The larger combo rewards apply only to newly credited positions. Existing lifetime XP and saved Zen rewards keep their value. Daily uses scoring rules version 3 and `h2otype.daily-scores.v3`; older local rankings remain stored separately, while new shared rankings filter by rules version. WPM personal bests and accuracy calculations are unchanged.
 
@@ -187,3 +187,10 @@ The passage keeps its active line at the top as soon as the preceding line is co
 Medium and High particles now draw on each available display animation frame instead of skipping frames around a fixed cap. Larger pixel sprites move continuously rather than snapping to a two-pixel grid. Low retains a 30fps limit. Actual performance still depends on the device and browser.
 
 Daily is a shared-date 15s Sprint for now. Its score storage and optional server tokens use rules version 3, keeping earlier 60s scores separate. Per-duration Daily passages, multiplayer racing, unlockable carets, currency and randomized pets are future plans in NOTES.md.
+
+## Caret visibility and today's Daily
+The caret blinks only before a run starts. Once typing begins, it stays solid even after deleting all text, pausing/resuming Zen, or opening Settings. Restarting/new sessions restore the initial blink; reduced motion keeps it still from the start.
+
+A compact button beneath the logo shows **Daily available**, then **Daily best · score** after an eligible completion. It opens Daily directly and shows the highest score for the current UTC day, updating after each finish, reload and changes in another tab. Midnight offers the next challenge; finishing a pinned previous-day run does not become today's best. Scores are local to this browser. If saving fails, the best seen during the visit still stays visible; it cannot survive a reload without working storage.
+
+Finish confetti now uses 2.5× the previous particle budget, larger pieces, a wider spread and a longer 2.2-second fall: Medium 100/High 160 pieces at 100%, up to 320 at 200%. Saved amount, Off/Balanced/Intense, graphics and reduced-motion choices remain effective. A public leaderboard remains future work.

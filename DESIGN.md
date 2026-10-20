@@ -1,5 +1,14 @@
 # h2otype — Design specification v0.7
 
+## Solid active caret, stronger confetti and Daily status — 2026-10-19
+These requests supersede the earlier always-blinking caret and confetti budgets below.
+- Blink only while ready and focused. Once a run accepts input, keep the caret solid through deletion to empty, focus changes, Settings and Zen pause/resume. Restart/new session restores ready blinking; reduced motion disables blinking altogether. Use session start/attempt history rather than retained text length.
+- Increase finish confetti to Medium 100/High 160 pieces at 100%, default High 240 at saved/default 150%, max 320 at 200%. Keep combo-edge budgets unchanged. Use larger 6–10 × 8–14px pieces, a wider inward spread and a 2.2-second lifetime, without capturing pointer/focus or adding an idle loop. Preserve saved amount and all motion/effects/quality suppression and cancellation rules.
+- Place a compact Daily button beneath the logo: availability prompt until today's eligible completion, then today's best points. Open Daily directly. Keep the typing workspace centered and header controls unobstructed on small/short screens.
+- Use current scoring-version browser records and UTC day. Update immediately on record save, reload, cross-tab storage changes, midnight and return to the page. Retain the best seen this visit when storage cannot save; do not mix a pinned previous-day completion into today's score. Keep results-heading focus.
+- Public leaderboard remains deferred. Do not activate Supabase or add networking for this local status display.
+
+
 ## Reading flow, defaults and Daily 15s — 2026-10-20
 These requests supersede earlier defaults, font divisions, passage scrolling and Daily duration below.
 - New visits open Sprint 15s, High graphics, Screen shake on, 8-bit crush sound, 8-bit pixel particles and bundled 8-bit typing font. Preserve every valid saved returning-player choice; only missing fields take new defaults. Keep system/light/dark appearance and optional live statistics.

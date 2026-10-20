@@ -1,4 +1,12 @@
 export const dailyRecordsKey = "h2otype.daily-scores.v3";
+export const dailyRecordsChanged = "h2otype:daily-records-changed";
+export function loadDailyRecords() {
+  try {
+    return parseDailyRecords(localStorage.getItem(dailyRecordsKey));
+  } catch {
+    return [];
+  }
+}
 export type DailyRecord = {
   id: string;
   day: string;
@@ -62,6 +70,9 @@ export function recordDaily(record: DailyRecord) {
       available = false;
     }
   }
+  window.dispatchEvent(
+    new CustomEvent(dailyRecordsChanged, { detail: records }),
+  );
   return {
     records: records
       .filter((entry) => entry.day === record.day)

@@ -37,7 +37,7 @@ test("harder combo thresholds give larger bounded rewards and particles have str
     expect(burstProfile(kind, "medium", 2).count).toBeLessThan(
       burstProfile(kind, "high", 2).count,
     );
-    expect(burstProfile(kind, "high", 2).count).toBeLessThanOrEqual(128);
+    expect(burstProfile(kind, "high", 2).count).toBeLessThanOrEqual(320);
   }
 });
 
@@ -68,7 +68,7 @@ test("finish confetti runs once, stays pointer-transparent, expires, and never r
   await page.getByRole("button", { name: "15s", exact: true }).click();
   await page.getByRole("textbox").pressSequentially("slow");
   await page.clock.fastForward(15000);
-  await expect(page.locator(".finish-confetti i")).toHaveCount(20);
+  await expect(page.locator(".finish-confetti i")).toHaveCount(50);
   await expect(page.locator(".finish-confetti")).toHaveCSS(
     "pointer-events",
     "none",
@@ -85,8 +85,8 @@ test("finish confetti runs once, stays pointer-transparent, expires, and never r
       })),
     );
   expect(geometry.every((item) => item.x <= 10 || item.x >= 1270)).toBe(true);
-  expect(geometry.every((item) => item.duration === 1400)).toBe(true);
-  await page.clock.runFor(1400);
+  expect(geometry.every((item) => item.duration === 2200)).toBe(true);
+  await page.clock.runFor(2200);
   await expect(page.locator(".finish-confetti i")).toHaveCount(0);
   await page.keyboard.press("F2");
   await setGraphicsQuality(page, "high");
@@ -168,7 +168,7 @@ test("Zen Finish celebrates, Pause and restored summaries do not, and hiding can
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await page.getByRole("button", { name: "Finish", exact: true }).click();
-  await expect(page.locator(".finish-confetti i")).toHaveCount(20);
+  await expect(page.locator(".finish-confetti i")).toHaveCount(50);
   await page.evaluate(() => {
     Object.defineProperty(document, "hidden", {
       configurable: true,

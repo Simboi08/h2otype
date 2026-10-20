@@ -10,8 +10,8 @@ export function burstProfile(
   const maximum =
     kind === "finish"
       ? quality === "high"
-        ? 64
-        : 40
+        ? 160
+        : 100
       : quality === "high"
         ? 20
         : 12;
@@ -22,7 +22,7 @@ export function burstProfile(
         : intensity === 1
           ? Math.round((maximum * (kind === "finish" ? amount / 100 : 1)) / 2)
           : Math.round(maximum * (kind === "finish" ? amount / 100 : 1)),
-    duration: kind === "finish" ? 1400 : 750,
+    duration: kind === "finish" ? 2200 : 750,
   };
 }
 // Owned, short-lived Web Animations; no animation loop or accumulating particles.
@@ -36,28 +36,36 @@ export function playScreenBurst(
 ) {
   const profile = burstProfile(kind, quality, intensity, amount);
   const animations: Animation[] = [];
-  const sample = (index: number) =>
-    ((index * 137.508 + tier * 31.4) % 100) / 100;
+  // Independent finish samples avoid stacking hundreds of pieces on a few paths.
+  const sample = (index: number, salt = 0) => {
+    if (kind === "combo") return ((index * 137.508 + tier * 31.4) % 100) / 100;
+    let value = Math.imul(index + 1 + salt * 997, 0x45d9f3b) ^ (tier * 7919);
+    value = Math.imul(value ^ (value >>> 16), 0x45d9f3b);
+    return ((value ^ (value >>> 16)) >>> 0) / 4294967296;
+  };
   const colors = ["var(--accent)", "var(--pink)", "#efbb57"];
   for (let index = 0; index < profile.count; index++) {
     const left = index % 2 === 0;
     const unit = sample(index);
+    const travel = sample(index, 1);
+    const fall = sample(index, 2);
+    const launch = sample(index, 3);
     const particle = document.createElement("i");
     particle.style.background = colors[index % colors.length];
-    particle.style.width = `${kind === "finish" ? 4 + unit * 3 : 3 + unit * 2}px`;
-    particle.style.height = `${kind === "finish" ? 6 + unit * 4 : 3 + unit * 2}px`;
+    particle.style.width = `${kind === "finish" ? 6 + unit * 4 : 3 + unit * 2}px`;
+    particle.style.height = `${kind === "finish" ? 8 + unit * 6 : 3 + unit * 2}px`;
     particle.style.left = `${left ? 5 : innerWidth - 10}px`;
-    particle.style.top = `${innerHeight * (kind === "finish" ? 0.12 : 0.3 + unit * 0.5)}px`;
+    particle.style.top = `${innerHeight * (kind === "finish" ? 0.08 + launch * 0.16 : 0.3 + unit * 0.5)}px`;
     layer.append(particle);
     const direction = left ? 1 : -1;
     const distance = Math.min(
-      innerWidth * (kind === "finish" ? 0.27 : 0.12),
-      kind === "finish" ? 210 : 110,
+      innerWidth * (kind === "finish" ? 0.45 : 0.12),
+      kind === "finish" ? 480 : 110,
     );
-    const x = direction * distance * (0.35 + unit * 0.65);
+    const x = direction * distance * (0.35 + travel * 0.65);
     const y =
       kind === "finish"
-        ? 80 + unit * Math.min(innerHeight * 0.5, 280)
+        ? 180 + fall * Math.min(innerHeight * 0.85, 650)
         : -60 + unit * 120;
     animations.push(
       particle.animate(
@@ -65,7 +73,7 @@ export function playScreenBurst(
           { transform: "translate(0, 0) rotate(0deg) scale(0.6)", opacity: 0 },
           {
             transform: `translate(${x * 0.35}px, ${kind === "finish" ? -25 : y * 0.35}px) rotate(70deg) scale(1)`,
-            opacity: intensity === 1 ? 0.55 : 0.85,
+            opacity: intensity === 1 ? 0.55 : kind === "finish" ? 0.95 : 0.85,
             offset: 0.2,
           },
           {

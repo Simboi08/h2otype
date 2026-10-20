@@ -108,3 +108,9 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [ ] Unlockable caret styles.
 - [ ] Earned in-game currency and a randomized pet-unlock system; economy and reward rules still need planning.
 - Achievements and unlockable themes remain deferred. Supabase activation remains deferred until requested.
+
+## Caret, celebration and Daily reminder — 2026-10-19
+- [x] Blink the caret only before typing; keep it solid for the rest of the run, including after deleting text.
+- [x] More finish confetti: 2.5× the pieces, larger/wider/longer bursts, preserving the amount slider and effects settings.
+- [x] Compact Daily availability/today's-best display beneath the logo, with direct challenge access and UTC rollover.
+- [ ] Public leaderboard — future implementation; existing optional backend preparation remains inactive until requested.

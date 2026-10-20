@@ -211,6 +211,7 @@ export default function ZenPractice({
             <TypingPassage
               passage={state.passage}
               typed={state.session.typed}
+              started={state.session.attempts > 0}
               focused={focused}
               finished={false}
             />

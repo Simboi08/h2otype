@@ -7,6 +7,7 @@ type Props = {
   typed: string;
   focused: boolean;
   finished: boolean;
+  started: boolean;
 };
 
 // Timer ticks do not redraw thousands of unchanged character spans.
@@ -15,6 +16,7 @@ const TypingPassage = memo(function TypingPassage({
   typed,
   focused,
   finished,
+  started,
 }: Props) {
   const active = useRef<HTMLSpanElement>(null);
   const caret = useRef<HTMLSpanElement>(null);
@@ -146,7 +148,7 @@ const TypingPassage = memo(function TypingPassage({
   let position = 0;
   return (
     <div
-      className={`passage-window ${focused ? "is-focused" : ""}`}
+      className={`passage-window ${focused ? "is-focused" : ""} ${started ? "has-started" : "is-ready"}`}
       ref={windowRef}
     >
       <p className="passage" aria-hidden="true">

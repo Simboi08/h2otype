@@ -187,6 +187,7 @@ export default function TypingPractice({
             <TypingPassage
               passage={passage}
               typed={session.typed}
+              started={session.startedAt !== null}
               focused={focused}
               finished={finished}
             />

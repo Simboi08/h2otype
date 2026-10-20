@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
+import DailyStatus from "./DailyStatus";
 import CustomizationSettings from "./CustomizationSettings";
 import PreferenceSlider from "./PreferenceSlider";
 import ProgressIndicator from "./ProgressIndicator";
@@ -115,6 +116,7 @@ export default function App() {
               h<span className="wordmark-two">2</span>otype
               <span className="brand-dot" />
             </a>
+            <DailyStatus onPlay={() => setMode("daily")} />
           </div>
           <nav className="mode-switch" aria-label="Typing mode">
             <button

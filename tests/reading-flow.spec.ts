@@ -97,7 +97,7 @@ test("fresh visit starts Sprint 15s with matching pixel fonts and new-player fee
   await expect(
     page.getByRole("heading", { name: "Sprint results" }),
   ).toBeFocused();
-  await expect(page.locator(".finish-confetti i")).toHaveCount(96);
+  await expect(page.locator(".finish-confetti i")).toHaveCount(240);
   expect(
     await page
       .locator(".results-context")
