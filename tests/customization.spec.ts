@@ -43,6 +43,7 @@ test("font, weight, and size apply to both modes without clearing progress and s
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.pressSequentially("slow");
   await page.keyboard.press("F2");
@@ -88,6 +89,7 @@ test("font and size extremes keep the workspace in the viewport and the current 
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const text = (await page.locator(".passage").innerText()).slice(0, 100);
   await page.getByRole("textbox").fill(text);
   for (const viewport of [

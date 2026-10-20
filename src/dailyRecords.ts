@@ -1,4 +1,4 @@
-export const dailyRecordsKey = "h2otype.daily-scores.v2";
+export const dailyRecordsKey = "h2otype.daily-scores.v3";
 export type DailyRecord = {
   id: string;
   day: string;

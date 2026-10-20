@@ -91,3 +91,20 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [x] Harder 25/60/120/200/350-character tiers, rewarding up to 3× XP and Daily points.
 - [x] Preserve saved XP and separate Daily scoring versions.
 - Next: collect playtest feedback on difficulty and effects. Supabase activation, achievements and unlockable themes remain deferred.
+
+## Reading flow and defaults — 2026-10-20
+- [x] Default landing mode: Sprint 15s.
+- [x] Consistent pixel interface typography, with a saved typing-font override.
+- [x] Scroll on every completed line to expose the next lines; four-line view when space permits.
+- [x] Independent scroll and caret speed sliders, including Instant.
+- [x] More finish confetti with a persistent Off–200% amount slider.
+- [x] New players: High graphics, shake on, 8-bit crush sound and 8-bit particles; keep saved returning-player choices.
+- [x] Medium/High particles follow display frames and move without grid snapping; Low retains 30fps.
+- [x] Daily temporarily becomes a shared 15s Sprint, with older scoring versions kept separate.
+
+## Future ideas — do not implement yet
+- [ ] Racing: everyone types the same passage, each player has a distinct caret color, a versus lineup introduces players/colors, a short passage preview appears first, and the remaining text is revealed when the race begins.
+- [ ] Each Sprint duration (15s/30s/60s) gets its own Daily passage.
+- [ ] Unlockable caret styles.
+- [ ] Earned in-game currency and a randomized pet-unlock system; economy and reward rules still need planning.
+- Achievements and unlockable themes remain deferred. Supabase activation remains deferred until requested.

@@ -8,6 +8,7 @@ async function ready(page: Page) {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.getByRole("textbox")).toBeFocused();
 }
 async function probeShake(page: Page) {

@@ -62,4 +62,7 @@ with an isolated database adapter; the SQL migration is also exercised with a
 PostgreSQL-compatible local engine. Configure the hosting values above to turn
 on shared rankings.
 
-Daily now uses scoring rules version 2. When activating shared rankings later, use the current SQL script (or rerun it if a project already has the old schema) before deploying the matching handlers and client. The migration preserves old scores under version 1 and new rankings only compare version 2. Stale clients/tokens are rejected with a refresh message. Supabase activation remains optional and deferred.
+Daily now uses scoring rules version 3 (15 seconds). When activating shared rankings later, use the current SQL script (or rerun it if a project already has the old schema) before deploying the matching handlers and client. The migration preserves old scores under their original versions and new rankings only compare version 3. Stale clients/tokens are rejected with a refresh message. Supabase activation remains optional and deferred.
+
+## When the public site has not updated
+The current implementation branch is `codex/milestone-1-typing-engine`. A push there only updates deployments watching that branch. If production watches `main`, merge the tested branch into `main` on GitHub and check Vercel Deployments for that merge commit. A redeploy of an older deployment rebuilds its old commit. Alternatively, configure Vercel to use the implementation branch as production and deploy its latest commit. Check the deployment source commit before refreshing the site.

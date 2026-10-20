@@ -1,0 +1,76 @@
+/* Four fresh lines in normal windows; short windows retain a smaller usable view. */
+.passage-window,
+.typing-space:has(.live-stats) .passage-window {
+  position: relative;
+  height: calc(var(--passage-line-height, 46px) * 4 + 8px);
+  max-height: 36svh;
+  overflow: hidden;
+}
+.character.current::before {
+  content: none;
+}
+.typing-caret {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  transition-property: transform;
+  transition-timing-function: ease-out;
+  will-change: transform;
+}
+.is-focused .typing-caret {
+  animation: caret-blink 1.1s step-end infinite;
+}
+main {
+  padding-bottom: 48px;
+}
+/* Consistent UI font, including native controls and descriptive copy. */
+.settings-dialog,
+.settings-dialog select,
+.settings-dialog input,
+.settings-dialog textarea {
+  font-family: var(--hud);
+}
+@media (max-width: 700px) {
+  .settings-dialog {
+    width: min(540px, calc(100% - 24px));
+    padding: 20px;
+  }
+}
+@media (max-height: 600px) {
+  .passage-window,
+  .typing-space:has(.live-stats) .passage-window {
+    max-height: 18svh;
+  }
+  main {
+    padding-bottom: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .typing-caret {
+    animation: none;
+    transition: none;
+  }
+}
+@media (max-height: 600px) {
+  main:has(.results-updated) {
+    padding-block: 0;
+  }
+}
+@media (max-height: 350px) {
+  main {
+    padding-block: 8px;
+  }
+  .progress-hud {
+    margin-bottom: 4px;
+  }
+  .progress-hud .level-indicator {
+    display: none;
+  }
+  .passage-window,
+  .typing-space:has(.live-stats) .passage-window {
+    max-height: 24svh;
+  }
+}

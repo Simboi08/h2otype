@@ -1,5 +1,6 @@
 import {
   dailyDay,
+  dailyDuration,
   replayDaily,
   dailyRulesVersion,
 } from "../src/dailyChallenge.ts";
@@ -150,7 +151,11 @@ export async function handleDaily(
         : reply({ error: "This run has already been submitted." }, 409);
     const elapsed = now - Date.parse(run.started_at);
     // Two seconds of transport tolerance; a browser cannot immediately submit a fabricated test.
-    if (!Number.isFinite(elapsed) || elapsed < 58000 || elapsed > 600000)
+    if (
+      !Number.isFinite(elapsed) ||
+      elapsed < (dailyDuration - 2) * 1000 ||
+      elapsed > 600000
+    )
       return reply(
         { error: "Run expired or finished too early. Play again to submit." },
         409,

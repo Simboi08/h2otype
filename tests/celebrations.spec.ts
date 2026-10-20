@@ -9,6 +9,7 @@ async function ready(page: Page) {
   await page.clock.install({ time: new Date("2026-10-19T12:00:00Z") });
   await page.clock.pauseAt(new Date("2026-10-19T12:01:00Z"));
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.getByRole("textbox")).toBeFocused();
 }
 const passage = async (page: Page) =>
@@ -36,7 +37,7 @@ test("harder combo thresholds give larger bounded rewards and particles have str
     expect(burstProfile(kind, "medium", 2).count).toBeLessThan(
       burstProfile(kind, "high", 2).count,
     );
-    expect(burstProfile(kind, "high", 2).count).toBeLessThanOrEqual(32);
+    expect(burstProfile(kind, "high", 2).count).toBeLessThanOrEqual(128);
   }
 });
 
@@ -204,13 +205,13 @@ test("new Daily scores never mix with or overwrite old reward-rule records", asy
   await ready(page);
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   await page.getByRole("textbox").fill((await passage(page)).slice(0, 100));
-  await page.clock.fastForward(60000);
+  await page.clock.fastForward(15000);
   await expect(
     page.getByRole("heading", { name: "Daily results" }),
   ).toBeFocused();
   const saved = await page.evaluate(() => ({
     old: localStorage.getItem("h2otype.daily-scores.v1"),
-    current: JSON.parse(localStorage.getItem("h2otype.daily-scores.v2")!),
+    current: JSON.parse(localStorage.getItem("h2otype.daily-scores.v3")!),
   }));
   expect(saved.old).toBe(old);
   expect(saved.current.records).toHaveLength(1);

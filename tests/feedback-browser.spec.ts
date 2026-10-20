@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 
 async function ready(page: Page) {
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await expect(page.getByRole("textbox")).toBeFocused();
 }
 async function open(page: Page) {

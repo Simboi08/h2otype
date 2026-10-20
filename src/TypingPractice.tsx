@@ -10,7 +10,7 @@ import {
 import { useFinishCelebration } from "./useFinishCelebration";
 import { useCompletionSound } from "./useCompletionSound";
 import { beginDaily } from "./dailyLeaderboard";
-import { createDaily, dailyEdit } from "./dailyChallenge";
+import { createDaily, dailyEdit, dailyDuration } from "./dailyChallenge";
 import type { DailyEvent } from "./dailyChallenge";
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
@@ -49,7 +49,7 @@ export default function TypingPractice({
         ? Array(24).fill(sprintSentence).join(" ")
         : generateWords(wordSet, freshSeed(), 600).text;
   const [passage, setPassage] = useState(createPassage);
-  const durationMs = (mode === "daily" ? 60 : duration) * 1000;
+  const durationMs = (mode === "daily" ? dailyDuration : duration) * 1000;
   const [session, setSession] = useState(emptySession);
   const latest = useRef(session);
   const [focused, setFocused] = useState(false);
@@ -173,7 +173,7 @@ export default function TypingPractice({
         </div>
         {finished ? (
           <SprintResults
-            duration={mode === "daily" ? 60 : duration}
+            duration={mode === "daily" ? dailyDuration : duration}
             metrics={metrics}
             session={session}
             challenge={mode === "daily" ? challenge : undefined}

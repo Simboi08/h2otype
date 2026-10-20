@@ -202,7 +202,7 @@ body {
   justify-content: space-between;
   margin-top: 6px;
   color: var(--muted);
-  font-family: monospace;
+  font-family: var(--hud);
   font-size: 10px;
 }
 .progress-notice {
@@ -298,7 +298,7 @@ body {
   color: var(--accent);
 }
 .practice-footer p {
-  font-family: monospace;
+  font-family: var(--hud);
 }
 .settings-dialog {
   border-radius: 4px;
@@ -322,7 +322,7 @@ body {
   border-radius: 1px;
 }
 .theme-option {
-  font-family: monospace;
+  font-family: var(--hud);
 }
 .theme-swatch,
 .theme-swatch span {

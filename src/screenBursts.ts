@@ -5,12 +5,13 @@ export function burstProfile(
   kind: BurstKind,
   quality: GraphicsTier,
   intensity: number,
+  amount = 100,
 ) {
   const maximum =
     kind === "finish"
       ? quality === "high"
-        ? 32
-        : 20
+        ? 64
+        : 40
       : quality === "high"
         ? 20
         : 12;
@@ -19,8 +20,8 @@ export function burstProfile(
       quality === "low" || intensity === 0
         ? 0
         : intensity === 1
-          ? Math.floor(maximum / 2)
-          : maximum,
+          ? Math.round((maximum * (kind === "finish" ? amount / 100 : 1)) / 2)
+          : Math.round(maximum * (kind === "finish" ? amount / 100 : 1)),
     duration: kind === "finish" ? 1400 : 750,
   };
 }
@@ -31,8 +32,9 @@ export function playScreenBurst(
   quality: GraphicsTier,
   intensity: number,
   tier = 1,
+  amount = 100,
 ) {
-  const profile = burstProfile(kind, quality, intensity);
+  const profile = burstProfile(kind, quality, intensity, amount);
   const animations: Animation[] = [];
   const sample = (index: number) =>
     ((index * 137.508 + tier * 31.4) % 100) / 100;

@@ -17,7 +17,7 @@ create table if not exists public.daily_scores (
   best_combo integer not null check (best_combo between 0 and 10000),
   primary key (day, player_id)
 );
--- Old scores/tokens remain in rules version 1; new runs use version 2.
+-- Existing scores keep their rules version; 15-second runs now use version 3.
 alter table public.daily_runs add column if not exists rules_version smallint not null default 1;
 alter table public.daily_scores add column if not exists rules_version smallint not null default 1;
 alter table public.daily_scores drop constraint if exists daily_scores_pkey;
@@ -33,7 +33,7 @@ drop function if exists public.begin_daily(date);
 create or replace function public.begin_daily(p_day date, p_rules_version smallint)
 returns setof public.daily_runs language plpgsql security invoker set search_path = '' as $$
 begin
-  if p_rules_version <> 2 or p_day <> (now() at time zone 'UTC')::date then raise exception 'Invalid day'; end if;
+  if p_rules_version <> 3 or p_day <> (now() at time zone 'UTC')::date then raise exception 'Invalid day'; end if;
   delete from public.daily_runs where started_at < now() - interval '2 days';
   return query insert into public.daily_runs(day, rules_version) values (p_day, p_rules_version) returning *;
 end;
@@ -44,7 +44,7 @@ returns void language plpgsql security invoker set search_path = '' as $$
 declare r public.daily_runs%rowtype;
 begin
   select * into r from public.daily_runs where id = p_id for update;
-  if not found or r.rules_version <> 2 or r.used or r.started_at > now() - interval '58 seconds' or r.started_at < now() - interval '10 minutes' then raise exception 'Invalid run'; end if;
+  if not found or r.rules_version <> 3 or r.used or r.started_at > now() - interval '13 seconds' or r.started_at < now() - interval '10 minutes' then raise exception 'Invalid run'; end if;
   update public.daily_runs set used = true, player_id = p_player where id = p_id;
   insert into public.daily_scores(day, rules_version, player_id, display_name, score, wpm, accuracy, best_combo)
     values (r.day, r.rules_version, p_player, p_name, p_score, p_wpm, p_accuracy, p_combo)

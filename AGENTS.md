@@ -3,7 +3,7 @@
 Read README.md, DESIGN.md, ROADMAP.md and PROGRESS.md before making changes.
 
 ## Product intent
-Build a focused pixel-arcade typing game with rewarding XP and level progression. The user-requested arcade refresh in DESIGN.md supersedes the original Apple-inspired styling. Modes: Sprint (15/30/60-second tests), Zen (endless typing), and Daily (shared UTC passage, 60 seconds). Keep the passage central, graphics configurable, and live statistics optional in Settings.
+Build a focused pixel-arcade typing game with rewarding XP and level progression. The user-requested arcade refresh in DESIGN.md supersedes the original Apple-inspired styling. Modes: Sprint (15/30/60-second tests), Zen (endless typing), and Daily (shared UTC passage, 15 seconds). Keep the passage central, graphics configurable, and live statistics optional in Settings. New visits start Sprint 15s, High graphics, shake on, and 8-bit sound/particles; preserve returning players' saved settings. Keep the active line at the top with upcoming lines visible.
 
 Prioritize fun, satisfying game feedback: stronger effects default on, with clear controls for intensity and screen shake. Keep text readable and respect reduced motion. Use combo-driven edge vignettes with a transparent center; do not restore flame sprites. Avoid always-on full-screen scanline/filter overlays and extra confirmation steps when switching modes.
 

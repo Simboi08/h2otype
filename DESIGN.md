@@ -1,5 +1,16 @@
 # h2otype — Design specification v0.7
 
+## Reading flow, defaults and Daily 15s — 2026-10-20
+These requests supersede earlier defaults, font divisions, passage scrolling and Daily duration below.
+- New visits open Sprint 15s, High graphics, Screen shake on, 8-bit crush sound, 8-bit pixel particles and bundled 8-bit typing font. Preserve every valid saved returning-player choice; only missing fields take new defaults. Keep system/light/dark appearance and optional live statistics.
+- Use Silkscreen consistently for interface text, descriptions, controls, combo counters and results. The passage/input still honor the selectable saved typing font (8-bit, mono, system, serif).
+- As soon as a line is completed, scroll the active line to the top. Show four current/upcoming lines in normal windows; shrink the viewport in short windows to preserve visible controls. Use a short 120ms ease-out scroll and 70ms horizontal caret transition by default. Separate speed sliders offer Smooth through Instant (scroll 240–0ms, caret 140–0ms). Never delay typing/scoring. Wraps jump the caret directly; restart resets scroll immediately. Remeasure on resize/font load/font changes, handle backward edits and bounded Zen retirement, and force instant movement under reduced motion.
+- Medium/High typing particles use each available requestAnimationFrame; Low retains 30fps. Keep 6px sprites and all count/lifetime/voice budgets, removing two-pixel position quantization. No idle particle loop and no claimed device-independent frame-rate guarantee.
+- Double base confetti counts to Medium 40/High 64; new amount slider Off–200% in 25% steps, default 150%, max 128 pieces. Balanced halves the result; Low/Off/reduced motion still suppress it. Preference changes cancel existing confetti without replaying a finished test. Combo edge bursts and 25/60/120/200/350 tiers/up-to-3× rewards stay intact.
+- Daily now uses 15s with common date-seeded English-100 text, UTC rollover and optional shared scoring. Change all browser/replay/server/SQL duration checks together; use rules version 3 for passage seed, local records, tokens and rank filtering. Preserve prior versions separately, including saved XP. Per-duration Daily passages are deferred.
+- Racing, unlockable caret styles, earned currency and randomized pet unlocks are planning notes only. Supabase activation remains deferred.
+
+
 ## Finish celebrations and harder combos — 2026-10-19
 These user-requested rules supersede the older combo thresholds and reward rates below.
 - Tiers require 25/60/120/200/350 consecutive fresh correct characters, including spaces. Threshold characters earn their new tier rate: 1.2/1.5/2/2.5/3× XP and 12/15/20/25/30 Daily points per fresh position. Carry fractional XP tenths; mistakes/deletion break the streak and credited positions never repay. A perfect 100-character run earns 127 XP and 1,275 points.

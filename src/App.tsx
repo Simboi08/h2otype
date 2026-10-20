@@ -42,7 +42,7 @@ function SettingsIcon() {
 
 export default function App() {
   const [mode, setMode] = useState<"sprint" | "zen" | "daily">("sprint");
-  const [duration, setDuration] = useState<SprintDuration>(30);
+  const [duration, setDuration] = useState<SprintDuration>(15);
   const [words, setWords] = useState(() =>
     loadWordSet(loadZenProgress().state?.wordSet),
   );

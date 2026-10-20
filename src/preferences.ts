@@ -10,6 +10,11 @@ export const wpmRefreshOptions = [
 type WpmRefreshMs = (typeof wpmRefreshOptions)[number]["value"];
 export const typingFonts = [
   {
+    value: "pixel",
+    label: "8-bit",
+    family: '"Silkscreen", "Courier New", monospace',
+  },
+  {
     value: "mono",
     label: "Monospace",
     family: '"SFMono-Regular", Consolas, "Liberation Mono", monospace',
@@ -49,6 +54,9 @@ export type Preferences = {
   soundVolume: number;
   particleStyle: ParticleStyle;
   graphicsTier: GraphicsTier;
+  confettiAmount: number;
+  scrollDuration: number;
+  caretDuration: number;
 };
 export const defaultPreferences: Preferences = {
   liveWpm: false,
@@ -56,7 +64,7 @@ export const defaultPreferences: Preferences = {
   xpProgress: true,
   levelNotifications: true,
   wpmRefreshMs: 500,
-  typingFont: "mono",
+  typingFont: "pixel",
   typingWeight: 400,
   typingScale: 100,
   characterSpacing: 0,
@@ -65,10 +73,13 @@ export const defaultPreferences: Preferences = {
   comboFeedback: true,
   effectIntensity: 2,
   screenShake: true,
-  soundStyle: "off",
+  soundStyle: "bitcrush",
   soundVolume: 35,
-  particleStyle: "off",
-  graphicsTier: "medium",
+  particleStyle: "pixel",
+  graphicsTier: "high",
+  confettiAmount: 150,
+  scrollDuration: 120,
+  caretDuration: 70,
 };
 export type BooleanPreferenceKey =
   | "liveWpm"
@@ -138,6 +149,9 @@ export function parsePreferences(raw: string | null): Preferences {
       ["accuracyScale", 80, 200, 10],
       ["effectIntensity", 0, 2, 1],
       ["soundVolume", 0, 100, 5],
+      ["confettiAmount", 0, 200, 25],
+      ["scrollDuration", 0, 240, 30],
+      ["caretDuration", 0, 140, 10],
     ] as const) {
       const value = data.preferences[key];
       if (

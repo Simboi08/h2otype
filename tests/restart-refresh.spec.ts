@@ -31,6 +31,7 @@ test("Tab restarts from initial page focus, header controls, passage clicks, and
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await expect(input).toBeVisible();
   await page.keyboard.press("Tab");
@@ -76,6 +77,7 @@ test("Tab restarts Sprint during play and results, retains XP/bests/duration, an
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "15s", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.pressSequentially("slow");
@@ -113,6 +115,7 @@ test("Tab clears a Zen draft during play and pause, refocuses input, and keeps l
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.pressSequentially("there");
@@ -148,6 +151,7 @@ test("Shift+Tab stays in typing, Settings retains Tab navigation, and held/compo
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox");
   await input.pressSequentially("slow");
   await input.press("Shift+Tab");
@@ -195,6 +199,7 @@ for (const mode of ["Sprint", "Zen"]) {
   }) => {
     await clock(page);
     await page.goto("/");
+    await page.getByRole("button", { name: "30s", exact: true }).click();
     await settings(page);
     const rate = page.getByRole("slider", { name: "WPM refresh rate" });
     await expect(rate).toHaveValue("1");
@@ -248,6 +253,7 @@ test("slow WPM refresh cannot delay Sprint's exact results or final XP", async (
 }) => {
   await clock(page);
   await page.goto("/");
+  await page.getByRole("button", { name: "30s", exact: true }).click();
   await settings(page);
   await setWpmRefresh(page, 2000);
   await page.getByRole("switch", { name: "Live WPM", exact: true }).check();
