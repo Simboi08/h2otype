@@ -105,8 +105,27 @@ The current implementation branch is `codex/milestone-1-typing-engine`. A push t
   error, even after switching modes. Browser storage keeps guest identity, name,
   daily opt-in and last confirmed best/rank; pending run traces stay in memory
   for this visit. Reloading during a failed submission requires a fresh run.
-- The API must deploy with the latest native .ts import fix. `node api/daily.ts`
-  on Node 24 checks that the server can load without Vite's import resolver.
-  Check Vercel function logs if the host returns an HTML error instead of JSON.
+- The API must deploy with JavaScript `.js` import specifiers matching the files
+  Vercel emits. The earlier `.ts` source-import fix still crashed after deployment.
+  `npm run check:api` compiles the server dependency graph into a temporary directory
+  containing only emitted JavaScript/JSON, then checks requests and score replay.
+  `npm run build` includes this check automatically. Check Vercel function logs if
+  the host returns an HTML error instead of JSON.
 - The current SQL from the previous setup still works; this update needs no new
   SQL migration. A live hosted submission must be checked after deployment.
+
+
+## Recovering from the missing dailyApi.ts error
+If logs show `Cannot find module '/var/task/server/dailyApi.ts' imported from
+'/var/task/api/daily.js'`, deploy the compiled-import fix. Rebuilding the same old
+commit repeats the bug. Merge the fix into the branch Vercel watches and wait for
+its new deployment to become Ready. Your existing Supabase SQL and environment
+variables remain applicable.
+
+Open `https://h2otype.vercel.app/api/daily` after deploying. With server credentials
+configured, a browser GET should return JSON `{"error":"Use POST."}` (HTTP 405),
+not a Vercel function crash. The game sends POST requests. Play a fresh Daily in
+a private window to test the first-name prompt and submission; failed offline
+attempts cannot acquire run tokens retroactively. Confirm ranking and then a
+better run's automatic update. A live hosted submission is still required to
+validate the actual project credentials.

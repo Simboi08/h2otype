@@ -3,7 +3,7 @@ import {
   dailyDuration,
   replayDaily,
   dailyRulesVersion,
-} from "../src/dailyChallenge.ts";
+} from "../src/dailyChallenge.js";
 
 export type DailyEnvironment = {
   SUPABASE_URL?: string;

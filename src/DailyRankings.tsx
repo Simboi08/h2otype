@@ -34,14 +34,14 @@ export default function DailyRankings() {
     }, 30000);
     return () => clearInterval(refresh);
   }, [day, store]);
-  const status = [
+  const publicationMessage =
     attempt?.status === "sent"
       ? "Score submitted. Your best score today counts; better runs update automatically."
-      : attempt?.error,
-    state.message,
-  ]
-    .filter(Boolean)
-    .join(" ");
+      : (attempt?.error ?? "");
+  // Starting a run and loading its rankings can fail for the same reason.
+  const status = publicationMessage.includes(state.message)
+    ? publicationMessage
+    : [publicationMessage, state.message].filter(Boolean).join(" ");
   return (
     <dialog
       className="settings-dialog daily-rankings"

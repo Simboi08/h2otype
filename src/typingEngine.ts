@@ -1,4 +1,4 @@
-import { getCombo, decayCombo } from "./combo.ts";
+import { getCombo, decayCombo } from "./combo.js";
 
 export type Session = {
   typed: string;

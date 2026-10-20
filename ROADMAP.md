@@ -146,3 +146,10 @@ Do not start later milestones until the current one is reasonably stable.
 - [x] Exact own rank outside the top 50, shared tie ordering and private guest IDs.
 - [x] Native Node server import fix and modern server-key support; no new SQL needed.
 - [ ] Verify the user's live Vercel deployment after merging these fixes.
+
+## Vercel compiled API deployment repair — 2026-10-20
+- [x] Reproduce the reported dailyApi.ts failure with Vercel's function builder.
+- [x] Use .js import specifiers matching the compiled handler and scoring files.
+- [x] Compile and exercise an isolated JavaScript API artifact during production builds.
+- [x] Prevent duplicate connection errors from run-start and ranking-load failures.
+- [ ] Merge/deploy this fix, then verify a real hosted first Daily submission and automatic improvement.

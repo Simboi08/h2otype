@@ -5,24 +5,14 @@ import { handleDaily } from "../server/dailyApi";
 import type { Run } from "../server/dailyApi";
 import { dailyRulesVersion, replayDaily } from "../src/dailyChallenge";
 
-test("Vercel handler loads under native Node and serves a private database-backed request", () => {
-  const script = `
-    import assert from 'node:assert/strict';
-    const { default: handler } = await import('./api/daily.ts');
-    process.env.SUPABASE_URL='https://example.supabase.co';
-    process.env.SUPABASE_SERVICE_ROLE_KEY='dummy-test-jwt';
-    globalThis.fetch=async (url, init)=>{ assert.equal(new Headers(init.headers).get('apikey'),'dummy-test-jwt'); return Response.json([]); };
-    let status;let body;const headers={};
-    await handler({method:'POST',headers:{host:'h2otype.test',origin:'https://h2otype.test'},body:{action:'list',day:'2026-10-20',rulesVersion:${dailyRulesVersion}}},{set statusCode(value){status=value},setHeader(key,value){headers[key]=value},end(value){body=value}});
-    assert.equal(status,200);assert.deepEqual(JSON.parse(body),{scores:[]});assert.equal(headers['cache-control'],'no-store');
-    console.log('PASS native handler');
-  `;
+test("compiled API artifact works without source TypeScript files", () => {
   expect(
-    execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+    execFileSync(process.execPath, ["scripts/check-api-build.mjs"], {
       cwd: process.cwd(),
       encoding: "utf8",
+      timeout: 20000,
     }),
-  ).toContain("PASS native handler");
+  ).toContain("PASS compiled API artifact");
 });
 
 test("modern Supabase server keys use apikey without an invalid Bearer token", async () => {
@@ -290,6 +280,13 @@ test("missing backend explains failure and retains local scores without promptin
     page.getByRole("button", { name: "Submit score", exact: true }),
   ).toHaveCount(0);
   expect(api.submitCalls).toBe(0);
+  await expect(
+    rankings(page).getByRole("button", { name: "Refresh rankings" }),
+  ).toBeEnabled();
+  const message = await rankings(page).getByRole("status").textContent();
+  expect(
+    message!.match(/Shared rankings are not connected yet\./g),
+  ).toHaveLength(1);
 });
 
 test("failed submission survives mode switches and retries the same immutable run", async ({
@@ -450,4 +447,29 @@ test("closing leaderboard returns paused Zen to its summary for Enter to resume"
   await expect(page.getByRole("heading", { name: "Zen paused" })).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("textbox")).toBeFocused();
+});
+
+test("Vercel non-JSON failures appear once with the original run guidance", async ({
+  page,
+}) => {
+  await page.route("**/api/daily", (route) =>
+    route.fulfill({
+      status: 500,
+      contentType: "text/plain",
+      body: "FUNCTION_INVOCATION_FAILED",
+    }),
+  );
+  await ready(page);
+  await page.getByRole("button", { name: "Daily", exact: true }).click();
+  await finish(page, 100);
+  await page.getByRole("button", { name: "Open daily leaderboard" }).click();
+  const status = rankings(page).getByRole("status");
+  await expect(status).toContainText("Play a fresh Daily");
+  await expect(
+    rankings(page).getByRole("button", { name: "Refresh rankings" }),
+  ).toBeEnabled();
+  const text = await status.textContent();
+  expect(text!.match(/The leaderboard server is unavailable\./g)).toHaveLength(
+    1,
+  );
 });

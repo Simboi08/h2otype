@@ -1,5 +1,5 @@
-import { handleDaily } from "../../server/dailyApi.ts";
-import type { DailyEnvironment } from "../../server/dailyApi.ts";
+import { handleDaily } from "../../server/dailyApi.js";
+import type { DailyEnvironment } from "../../server/dailyApi.js";
 
 // Cloudflare Pages equivalent of the Vercel function.
 export function onRequest({
