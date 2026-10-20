@@ -138,3 +138,8 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [x] Per-tier fill targets and full-bar upgrade acknowledgement, retaining shared scoring and earned XP.
 - [x] Pulse the Leaderboard button after a ready Daily instead of automatically opening the submission dialog. Respect Low/Off/reduced motion.
 - Deployment: rerun updated `supabase/daily.sql` before rules-5 deployment. Preserve old scores and server settings.
+
+## Combo follow-up — 2026-10-20
+- [x] Hide Build combo after charge expires; show it again when fresh correct typing rebuilds charge.
+- [x] Remove milestone flicker/bounce: one persistent fill and five continuous milestone sections, with no forced full-bar animation or tier remount.
+- Scoring/drain remain unchanged; no SQL change for this follow-up.

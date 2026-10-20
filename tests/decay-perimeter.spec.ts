@@ -246,44 +246,72 @@ test("actual finish confetti launches along all four edges without taking focus 
   await expect(page.locator(".finish-confetti i")).toHaveCount(0);
 });
 
-test("meter acknowledges a full stage at upgrades and remains visible through zero with linear drain", async ({
+test("meter drains linearly, hides at expiry and returns only with fresh charge", async ({
   page,
 }) => {
   await ready(page);
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   const text = (await page.locator(".passage").textContent())!;
-  await page.getByRole("textbox").fill(text.slice(0, 24));
-  await expect(page.locator(".combo-meter")).toHaveAttribute("data-tier", "0");
+  await page.getByRole("textbox").fill(text.slice(0, 25));
   await expect(page.locator(".combo-track > span")).toHaveCSS(
     "transition-timing-function",
     "linear",
   );
-  expect(
-    await page
-      .locator(".combo-track > span")
-      .evaluate((n) => parseFloat((n as HTMLElement).style.width)),
-  ).toBe(96);
-  await page.keyboard.insertText(text[24]);
-  await expect(page.locator(".combo-meter")).toHaveAttribute("data-tier", "1");
-  expect(
-    await page
-      .locator(".combo-track > span")
-      .evaluate((n) =>
-        n
-          .getAnimations()
-          .some(
-            (a) =>
-              a.effect instanceof KeyframeEffect &&
-              a.effect.getKeyframes()[0].width === "100%",
-          ),
-      ),
-  ).toBe(true);
   await page.clock.runFor(500);
   await expect(page.locator(".combo-meter")).toHaveAttribute("data-tier", "0");
   await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "24");
   await page.clock.runFor(20000);
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "0");
-  await expect(page.locator(".combo-track > span")).toHaveCSS("width", "0px");
+  await expect(page.getByRole("meter")).toHaveCount(0);
+  await expect(page.getByText("Build combo", { exact: true })).toHaveCount(0);
+  await page.clock.runFor(1000);
+  await expect(page.getByRole("meter")).toHaveCount(0);
+  await page.keyboard.insertText(text[25]);
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "1");
   await expect(page.locator(".combo-meter")).toContainText("Build combo");
   await expect(page.getByRole("textbox")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("meter")).toHaveCount(0);
+});
+
+test("all five milestone sections carry forward without remounting, flashing full or bouncing on tier loss", async ({
+  page,
+}) => {
+  await ready(page);
+  await page.getByRole("button", { name: "60s", exact: true }).click();
+  for (const [index, threshold] of [25, 60, 120, 200, 350].entries()) {
+    await page.keyboard.press("Tab");
+    const text = (await page.locator(".passage").textContent())!;
+    await page.getByRole("textbox").fill(text.slice(0, threshold - 1));
+    const fill = await page.locator(".combo-track > span").elementHandle();
+    await page.keyboard.insertText(text[threshold - 1]);
+    await expect(page.locator(".combo-meter")).toHaveAttribute(
+      "data-tier",
+      String(index + 1),
+    );
+    expect(
+      await fill!.evaluate(
+        (n) => n === document.querySelector(".combo-track > span"),
+      ),
+    ).toBe(true);
+    const target = (index + 1) * 20;
+    const samples: number[] = [];
+    for (let frame = 0; frame < 24; frame++) {
+      await page.clock.runFor(16);
+      samples.push(
+        await fill!.evaluate(
+          (n) =>
+            (n.getBoundingClientRect().width /
+              n.parentElement!.getBoundingClientRect().width) *
+            100,
+        ),
+      );
+    }
+    // Allow the small real drain between timer samples, never a full-bar flash
+    // or the old stage reset from nearly full to zero and back.
+    expect(Math.max(...samples)).toBeLessThanOrEqual(target + 0.1);
+    expect(Math.min(...samples)).toBeGreaterThan(target - 3);
+    for (let frame = 1; frame < samples.length; frame++)
+      expect(Math.abs(samples[frame] - samples[frame - 1])).toBeLessThan(2);
+    expect(await fill!.evaluate((n) => n.isConnected)).toBe(true);
+  }
 });

@@ -1,7 +1,4 @@
 import { comboThresholds, getCombo } from "./combo";
-import { useEffect, useRef } from "react";
-import { useReducedMotion } from "./useReducedMotion";
-import { usePreferences } from "./preferences";
 
 export default function ComboMeter({
   streak,
@@ -11,36 +8,17 @@ export default function ComboMeter({
   fraction?: number;
 }) {
   const { tier, next, percent, multiplier } = getCombo(streak, fraction);
-  const fill = useRef<HTMLSpanElement>(null);
-  const previousTier = useRef(0);
-  const reduced = useReducedMotion();
-  const { preferences } = usePreferences();
-  const animated =
-    !reduced &&
-    preferences.effectIntensity > 0 &&
-    preferences.graphicsTier !== "low";
-  useEffect(() => {
-    // Finish the old stage visibly before revealing progress in the new one.
-    // This is cosmetic only: earned rewards and accessible labels stay exact.
-    const animation =
-      tier > previousTier.current && animated
-        ? fill.current?.animate(
-            [
-              { width: "100%" },
-              { width: "100%", offset: 0.6 },
-              { width: fill.current?.style.width ?? "0%" },
-            ],
-            { duration: 180, easing: "linear" },
-          )
-        : undefined;
-    previousTier.current = tier;
-    return () => animation?.cancel();
-  }, [tier, animated]); // Progress ticks must not cancel an upgrade's full-bar acknowledgement.
+  // Each section is one upgrade. Crossing a threshold carries progress forward
+  // instead of resetting the fill or competing with a second animation.
+  const progress = next
+    ? ((tier + percent / 100) / comboThresholds.length) * 100
+    : 100;
+  if (streak <= 0) return null;
   return (
     <div
       className="combo-meter"
       data-tier={tier}
-      title="Typing replenishes combo. Higher tiers drain faster; new correct positions earn bonus XP."
+      title="Each filled section unlocks the next XP multiplier. Typing replenishes combo; higher tiers drain faster."
     >
       <div className="combo-heading">
         <strong>{tier ? `${multiplier.toFixed(1)}× XP` : "Build combo"}</strong>
@@ -57,7 +35,7 @@ export default function ComboMeter({
         aria-valuenow={Math.min(streak, comboThresholds[4])}
         aria-valuetext={`${streak} combo charge; combo tier ${tier}; ${multiplier.toFixed(1)} times XP${next ? `; next tier at ${next}` : "; maximum tier"}`}
       >
-        <span key={tier} ref={fill} style={{ width: `${percent}%` }} />
+        <span style={{ width: `${progress}%` }} />
       </div>
     </div>
   );

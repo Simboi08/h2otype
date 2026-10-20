@@ -1,5 +1,11 @@
 # h2otype — Design specification v0.7
 
+## Stable combo rail and expiry cleanup — 2026-10-20
+This follow-up supersedes the retained empty meter and full-bar upgrade animation below.
+- Hide combo feedback when actual engine charge reaches zero, and show it again only when fresh correct positions rebuild charge. Keep the meter while positive charge remains, even below the first bonus tier.
+- Use a single persistent fill with five equal-width milestone sections. Each filled section corresponds to the next multiplier threshold; carry progress forward on upgrades and backward on downgrades. Remove the tier-keyed fill remount and the separate forced-100% Web Animation that competed with live progress.
+- Keep 100ms linear width interpolation, current reduced-motion/effects behavior, exact reward labels, scoring rules 5 and all existing drain/reward math. This is a display correction, with no new SQL migration.
+
 ## Tablet particles, staged combo and voluntary Daily invitation — 2026-10-20
 These requests supersede the fixed 350-unit meter, slower drain and automatic name dialog below.
 - Render per-letter particles in a body-level canvas, measuring its actual CSS bounds for coordinates and bitmap resolution. Listen for visual-viewport resize as well as window resize. Accept partially visible glyphs during scrolling/subpixel font layout; reject only wholly clipped glyphs. Keep the existing right-facing fan, bounded sprites/RAF and lifecycle cleanup.

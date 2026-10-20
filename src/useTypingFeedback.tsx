@@ -40,17 +40,14 @@ export function useTypingFeedback(enabled: boolean) {
     active,
     streak: 0,
     fraction: 0,
-    visible: false,
   });
   // Clear stopped/disabled decorations; active clock updates follow engine charge.
-  if (combo.active !== active)
-    setCombo({ active, streak: 0, fraction: 0, visible: false });
+  if (combo.active !== active) setCombo({ active, streak: 0, fraction: 0 });
   const reset = useCallback(() => {
     setCombo((current) => ({
       ...current,
       streak: 0,
       fraction: 0,
-      visible: false,
     }));
     pending.current = null;
     clearEdge.current?.();
@@ -92,7 +89,7 @@ export function useTypingFeedback(enabled: boolean) {
           current.streak === streak &&
           current.fraction === fraction
           ? current
-          : { active, streak, fraction, visible: current.visible };
+          : { active, streak, fraction };
       });
       if (!session.streak) clearEdge.current?.();
     },
@@ -106,7 +103,6 @@ export function useTypingFeedback(enabled: boolean) {
       active,
       streak,
       fraction: after.comboDecayFraction,
-      visible: streak > 0,
     });
     if (!streak) clearEdge.current?.();
     const feedback = getTypingFeedback(before, after, passage);
@@ -247,7 +243,7 @@ export function useTypingFeedback(enabled: boolean) {
       </>
     ),
     comboMeter:
-      active && combo.visible ? (
+      active && combo.streak > 0 ? (
         <ComboMeter streak={combo.streak} fraction={combo.fraction} />
       ) : null,
     layer:
