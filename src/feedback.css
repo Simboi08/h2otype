@@ -83,7 +83,7 @@
   display: block;
   height: 100%;
   background: var(--combo-color);
-  transition: width 140ms ease-out;
+  transition: width 100ms linear;
 }
 :root[data-effects="2"] .combo-meter {
   box-shadow: 0 0 26px #f1782840;

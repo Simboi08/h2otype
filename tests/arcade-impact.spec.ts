@@ -198,6 +198,9 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
   const intenseOpacity = await page
     .locator(".combo-vignette")
     .evaluate((el) => Number(getComputedStyle(el).opacity));
+  const chargeBeforePreferences = await page
+    .getByRole("meter")
+    .getAttribute("aria-valuenow");
   await page.keyboard.press("F2");
   await page.getByRole("slider", { name: "Visual effects" }).press("Home");
   await page
@@ -210,7 +213,10 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
     .getByRole("combobox", { name: "Typing particles", exact: true })
     .selectOption("pixel");
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "60");
+  await expect(page.getByRole("meter")).toHaveAttribute(
+    "aria-valuenow",
+    chargeBeforePreferences!,
+  );
   await page.clock.runFor(300);
   expect(
     await page
@@ -232,7 +238,7 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
       .evaluate((element) => element.getAnimations().length),
   ).toBe(0);
   await input.pressSequentially(passage.slice(80, 100));
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "99");
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "98");
   await expect(page.locator(".level-up-banner")).toContainText("Level 2");
   await expect(page.locator(".level-up-banner")).toHaveCSS(
     "animation-name",

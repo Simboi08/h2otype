@@ -1,4 +1,5 @@
 import PreferenceSlider from "./PreferenceSlider";
+import ParticleStatus from "./ParticleStatus";
 import {
   isParticleStyle,
   isSoundStyle,
@@ -279,10 +280,7 @@ export default function CustomizationSettings() {
             <option value="pixel">8-bit pixels</option>
           </select>
         </label>
-        <p className="settings-note">
-          Particles appear on correct characters and stay off when reduced
-          motion is enabled.
-        </p>
+        <ParticleStatus />
       </fieldset>
     </>
   );

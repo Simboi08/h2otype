@@ -12,12 +12,6 @@ export default function DailyRankings() {
   const attempt = day ? state.attempts[day] : undefined;
   const records = day ? store.localRecords(day) : [];
   useEffect(() => {
-    if (!state.prompt || document.querySelector("dialog[open]")) return;
-    const results = document.querySelector<HTMLElement>("#results-title");
-    if (results?.dataset.dailyRun === state.prompt)
-      store.open(state.today, false);
-  }, [store, state.prompt, state.today]);
-  useEffect(() => {
     if (day && !dialog.current?.open) {
       restore.current =
         document.activeElement instanceof HTMLElement

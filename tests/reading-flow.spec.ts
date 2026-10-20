@@ -232,7 +232,7 @@ test("Daily is now a fixed shared 15-second Sprint with separate rules-version r
   expect(
     await page.evaluate(
       () =>
-        JSON.parse(localStorage.getItem("h2otype.daily-scores.v4")!).records[0]
+        JSON.parse(localStorage.getItem("h2otype.daily-scores.v5")!).records[0]
           .score,
     ),
   ).toBe(1275);

@@ -28,7 +28,7 @@ export function advanceCombo(
   return streak;
 }
 
-export const comboDecayRates = [0.75, 1.5, 2.5, 4, 6, 8] as const;
+export const comboDecayRates = [1.5, 3, 5, 8, 12, 16] as const;
 
 // Integrate across tier boundaries so delayed ticks and server replay agree exactly.
 export function decayCombo(
@@ -65,16 +65,21 @@ export function getCombo(streak: number, fraction = 0) {
     (threshold) => streak >= threshold,
   ).length;
   const next = comboThresholds[tier] ?? null;
+  const start = tier ? comboThresholds[tier - 1] : 0;
+  const end = next ?? comboThresholds[4];
   return {
     tier,
     bonusTenths: comboBonusTenths[tier],
     multiplier: 1 + comboBonusTenths[tier] / 10,
     next,
-    // One fixed scale prevents a falling tier from making the bar jump upward.
-    percent: Math.max(
-      0,
-      Math.min(100, ((streak - fraction) / comboThresholds[4]) * 100),
-    ),
+    // Each stage fills toward its actual upgrade target. The maximum tier
+    // instead shows remaining total charge, since it has no further upgrade.
+    percent: next
+      ? Math.max(
+          0,
+          Math.min(100, ((streak - fraction - start) / (end - start)) * 100),
+        )
+      : Math.max(0, Math.min(100, ((streak - fraction) / end) * 100)),
     pitch: Math.pow(
       2,
       Math.min(7, Math.max(0, streak - comboThresholds[0]) / 40) / 12,

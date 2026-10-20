@@ -1,4 +1,4 @@
-export const dailyRecordsKey = "h2otype.daily-scores.v4";
+export const dailyRecordsKey = "h2otype.daily-scores.v5";
 export const dailyRecordsChanged = "h2otype:daily-records-changed";
 export function loadDailyRecords() {
   try {

@@ -130,3 +130,11 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [x] Keep rank visible until the next Daily; show own rank beyond the top 50.
 - [x] Fix native API startup imports and show actionable submission errors/retry.
 - [ ] Verify the live Vercel API after the user deploys the update.
+
+## Tablet particles, combo clarity and Daily invitation — 2026-10-20
+- [x] Diagnose per-letter particles with tablet input/resize coverage and an explicit Settings status. Harden fractional visibility, viewport coordinates and canvas placement.
+- [ ] Verify on the user's real iPad Chrome with its onscreen keyboard; WebKit download is blocked in this environment.
+- [x] Faster tier-dependent combo decay with linear meter animation; building and empty states remain visible through idle expiry.
+- [x] Per-tier fill targets and full-bar upgrade acknowledgement, retaining shared scoring and earned XP.
+- [x] Pulse the Leaderboard button after a ready Daily instead of automatically opening the submission dialog. Respect Low/Off/reduced motion.
+- Deployment: rerun updated `supabase/daily.sql` before rules-5 deployment. Preserve old scores and server settings.
