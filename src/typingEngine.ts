@@ -81,7 +81,7 @@ export function editSession(
     else if (!credited.has(position)) {
       streak++;
       bestCombo = Math.max(bestCombo, streak);
-      bonusTenths += getCombo(streak).tier;
+      bonusTenths += getCombo(streak).bonusTenths;
       credited.add(position);
       xpAdded++;
     }

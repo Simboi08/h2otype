@@ -1,5 +1,13 @@
 # h2otype — Design specification v0.7
 
+## Finish celebrations and harder combos — 2026-10-19
+These user-requested rules supersede the older combo thresholds and reward rates below.
+- Tiers require 25/60/120/200/350 consecutive fresh correct characters, including spaces. Threshold characters earn their new tier rate: 1.2/1.5/2/2.5/3× XP and 12/15/20/25/30 Daily points per fresh position. Carry fractional XP tenths; mistakes/deletion break the streak and credited positions never repay. A perfect 100-character run earns 127 XP and 1,275 points.
+- Keep saved lifetime and Zen bonus totals unchanged. Resume breaks the current streak and future credits use the new rates. Version Daily passage seeds, local score storage and server requests/runs/rankings as rules version 2 so older scores cannot compete under different rules. Preserve old records separately.
+- Celebrate fresh Sprint/Daily completion and explicit nonempty Zen Finish once with 1.4-second edge confetti; Pause, empty Finish and restored summaries do not trigger it. On combo tier gain only, emit a 750ms light pixel burst from both vignette edges. Keep the passage center clear, with no input/focus interception or animation loop.
+- Medium finish/combo budgets: 20/12 pieces; High: 32/20; Balanced halves counts. Low, Effects Off and reduced motion suppress these decorations. These follow Visual effects independently of the optional per-letter particles setting. Clear on restart, hide, resize, unmount and relevant effects/quality changes; do not replay when re-enabled. Mistakes/deletion clear combo bursts.
+
+
 ## Results, combo rewards, and Daily — 2026-10-19
 The user requests meaningful combo rewards, finish sounds, less frequent shake, clearer results, and Daily challenges ranked by score. These rules supersede the earlier feedback-only combo and ten-character shake rules.
 

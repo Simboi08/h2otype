@@ -14,6 +14,7 @@ import TypingParticles from "./TypingParticles";
 import type { ParticleHandle } from "./TypingParticles";
 import { useReducedMotion } from "./useReducedMotion";
 import { getCombo, comboImpact, impactProfile } from "./combo";
+import { playScreenBurst } from "./screenBursts";
 import ComboMeter from "./ComboMeter";
 import ComboVignette from "./ComboVignette";
 
@@ -23,6 +24,8 @@ export function useTypingFeedback(enabled: boolean) {
   const container = useRef<HTMLDivElement>(null);
   const particles = useRef<ParticleHandle>(null);
   const pending = useRef<{ index: number; style: ParticleStyle } | null>(null);
+  const edge = useRef<HTMLDivElement>(null);
+  const clearEdge = useRef<(() => void) | null>(null);
   const impact = useRef<Animation | null>(null);
   const lastImpactAt = useRef(-Infinity);
   const canShake =
@@ -38,6 +41,7 @@ export function useTypingFeedback(enabled: boolean) {
   const reset = useCallback(() => {
     setCombo((current) => ({ ...current, streak: 0 }));
     pending.current = null;
+    clearEdge.current?.();
     particles.current?.clear();
     impact.current?.cancel();
     impact.current = null;
@@ -52,13 +56,45 @@ export function useTypingFeedback(enabled: boolean) {
     [canShake, preferences.effectIntensity],
   );
 
+  useEffect(() => {
+    const clear = () => clearEdge.current?.();
+    window.addEventListener("resize", clear);
+    return () => {
+      clear();
+      window.removeEventListener("resize", clear);
+    };
+  }, [
+    active,
+    preferences.effectIntensity,
+    preferences.graphicsTier,
+    reducedMotion,
+  ]);
+
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
     const streak = active ? after.streak : 0;
     setCombo({ active, streak });
+    if (!streak) clearEdge.current?.();
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
     const tier = active ? comboImpact(before.streak, after.streak) : 0;
+    if (
+      tier &&
+      !reducedMotion &&
+      preferences.graphicsTier !== "low" &&
+      preferences.effectIntensity > 0 &&
+      !document.hidden &&
+      edge.current
+    ) {
+      clearEdge.current?.();
+      clearEdge.current = playScreenBurst(
+        edge.current,
+        "combo",
+        preferences.graphicsTier,
+        preferences.effectIntensity,
+        tier,
+      );
+    }
     const timestamp = performance.now();
     const profile = impactProfile(preferences.effectIntensity, tier);
     const surface =
@@ -146,12 +182,27 @@ export function useTypingFeedback(enabled: boolean) {
     container,
     onEdit,
     reset,
-    vignetteLayer:
-      active && combo.streak >= 10 && preferences.effectIntensity > 0 ? (
-        <ComboVignette tier={getCombo(combo.streak).tier} />
-      ) : null,
+    vignetteLayer: (
+      <>
+        {active &&
+        getCombo(combo.streak).tier > 0 &&
+        preferences.effectIntensity > 0 ? (
+          <ComboVignette tier={getCombo(combo.streak).tier} />
+        ) : null}
+        {active &&
+        !reducedMotion &&
+        preferences.graphicsTier !== "low" &&
+        preferences.effectIntensity > 0 ? (
+          <div
+            className="screen-burst combo-edge-particles"
+            aria-hidden="true"
+            ref={edge}
+          />
+        ) : null}
+      </>
+    ),
     comboMeter:
-      active && combo.streak >= 10 ? (
+      active && getCombo(combo.streak).tier > 0 ? (
         <ComboMeter streak={combo.streak} />
       ) : null,
     layer:

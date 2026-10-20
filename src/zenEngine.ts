@@ -1,3 +1,4 @@
+import { comboBonusTenths } from "./combo";
 import { editSession, emptySession, getMetrics } from "./typingEngine";
 import type { Session } from "./typingEngine";
 import { generateWords, isWordSet } from "./wordBank";
@@ -221,7 +222,7 @@ export function parseZen(raw: string | null): ZenState | null {
         (value) => Number.isSafeInteger(value) && value >= 0,
       ) ||
       baseXp > state.session.correctAttempts ||
-      bonusTenths > baseXp * 5 ||
+      bonusTenths > baseXp * comboBonusTenths.at(-1)! ||
       bestCombo > state.session.correctAttempts ||
       streak > bestCombo ||
       xpEarned !== baseXp + Math.floor(bonusTenths / 10)

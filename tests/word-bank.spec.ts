@@ -199,14 +199,14 @@ test("word-set choices apply immediately in both modes and persist independently
       .every((word) => wordPools.english500.includes(word)),
   ).toBe(true);
   await input.fill(passage.slice(0, 40));
-  expect(await xp(page)).toBe(59);
+  expect(await xp(page)).toBe(58);
   await choose(page, "English 1,000");
   await expect(input).toBeFocused();
   await expect(input).toHaveValue("");
   await expect(page.getByRole("timer")).toHaveText("0s elapsed");
   const fresh = await text(page);
   await input.fill(fresh.slice(0, 12));
-  expect(await xp(page)).toBe(71); // A fresh ledger must not subtract the old 40 XP.
+  expect(await xp(page)).toBe(70); // A fresh ledger must not subtract the old 40 XP.
   const saved = await page.evaluate(
     () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).zen,
   );
@@ -221,7 +221,7 @@ test("word-set choices apply immediately in both modes and persist independently
   await expect(input).toHaveValue(saved.session.typed.split(" ").at(-1)!);
   await input.press("Backspace");
   await input.press(saved.session.typed.at(-1)!);
-  expect(await xp(page)).toBe(71);
+  expect(await xp(page)).toBe(70);
 });
 
 test("switching sets in Sprint clears an old Zen draft without losing XP, including from a paused summary", async ({
@@ -232,11 +232,11 @@ test("switching sets in Sprint clears an old Zen draft without losing XP, includ
   await page.getByRole("textbox").fill((await text(page)).slice(0, 20));
   await page.getByRole("button", { name: "Sprint", exact: true }).click();
   await choose(page, "English 500");
-  expect(await xp(page)).toBe(21);
+  expect(await xp(page)).toBe(20);
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   await expect(page.getByRole("textbox")).toBeFocused();
   await page.getByRole("textbox").fill((await text(page)).slice(0, 10));
-  expect(await xp(page)).toBe(31);
+  expect(await xp(page)).toBe(30);
   await page.getByRole("button", { name: "Pause", exact: true }).click();
   await page.keyboard.press("F3");
   await page.keyboard.press("Escape");
@@ -245,7 +245,7 @@ test("switching sets in Sprint clears an old Zen draft without losing XP, includ
   await expect(page.getByRole("textbox")).toBeFocused();
   expect(await text(page)).toMatch(/^there is/);
   await page.getByRole("textbox").pressSequentially("there");
-  expect(await xp(page)).toBe(36);
+  expect(await xp(page)).toBe(35);
 });
 
 test("existing Zen drafts choose their original sentences even when a new word preference exists", async ({
@@ -341,7 +341,7 @@ test("unavailable word storage keeps in-memory choices, generated Zen, and XP ac
   await expect(page.locator(".session-xp")).toHaveText("+10 XP this session");
   await expect(
     page.getByRole("progressbar", { name: "Level XP" }),
-  ).toHaveAttribute("aria-valuenow", "42");
+  ).toHaveAttribute("aria-valuenow", "41");
 });
 
 test("word picker, settings, and game header fit phones, tablets, and landscape without overlapping controls", async ({

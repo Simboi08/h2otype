@@ -20,20 +20,21 @@ import { handleDaily } from "../server/dailyApi";
 import type { DailyDatabase } from "../server/dailyApi";
 
 for (const [characters, bonus] of [
-  [9, 0],
-  [10, 0],
-  [19, 1],
-  [25, 1],
-  [50, 6],
-  [100, 21],
-  [200, 62],
-  [220, 72],
+  [24, 0],
+  [25, 0],
+  [29, 1],
+  [59, 7],
+  [60, 7],
+  [100, 27],
+  [120, 38],
+  [200, 118],
+  [350, 344],
 ]) {
   test(`${characters} perfect characters earn ${characters} base and ${bonus} combo XP`, () => {
     const state = editSession(
       emptySession(),
       "a".repeat(characters),
-      "a".repeat(300),
+      "a".repeat(500),
       0,
       null,
     );
@@ -46,29 +47,29 @@ for (const [characters, bonus] of [
     expect(Math.floor(state.bonusTenths / 10)).toBe(bonus);
   });
 }
-
 test("fractional bonuses, mixed commits and correction replay obey fresh-position credits", () => {
   let state = editSession(
     emptySession(),
-    "a".repeat(15),
-    "a".repeat(300),
+    "a".repeat(28),
+    "a".repeat(500),
     0,
     null,
   );
-  expect(state.bonusTenths).toBe(6);
-  state = editSession(state, "a".repeat(19), "a".repeat(300), 1, null);
-  expect(state.xpEarned).toBe(20);
-  const earned = state.xpEarned;
-  state = editSession(state, "", "a".repeat(300), 2, null);
+  expect(state.bonusTenths).toBe(8);
+  state = editSession(state, "a".repeat(29), "a".repeat(500), 1, null);
+  expect(state.xpEarned).toBe(30);
+  state = editSession(state, "", "a".repeat(500), 2, null);
   expect(state.streak).toBe(0);
-  state = editSession(state, "a".repeat(19), "a".repeat(300), 3, null);
+  state = editSession(state, "a".repeat(29), "a".repeat(500), 3, null);
   expect(state.streak).toBe(0);
-  expect(state.xpEarned).toBe(earned);
-  state = editSession(state, state.typed + "xaa", "a".repeat(300), 4, null);
-  expect(state.streak).toBe(2);
-  expect(state.bestCombo).toBe(19);
-  expect(state.baseXp).toBe(21);
-  expect(state.bonusTenths).toBe(10);
+  expect(state.xpEarned).toBe(30);
+  state = editSession(state, state.typed + "xaa", "a".repeat(500), 4, null);
+  expect(state).toMatchObject({
+    streak: 2,
+    bestCombo: 29,
+    baseXp: 31,
+    bonusTenths: 10,
+  });
 });
 
 test("Zen restores base, fractional bonus, best combo, and replay protection without resuming a streak", () => {
@@ -79,16 +80,16 @@ test("Zen restores base, fractional bonus, best combo, and replay protection wit
   )!;
   expect(restored.session).toMatchObject({
     baseXp: 115,
-    xpEarned: 142,
-    bonusTenths: 279,
+    xpEarned: 150,
+    bonusTenths: 350,
     bestCombo: 115,
     streak: 0,
   });
   let active = resumeZen(restored, 2000);
   active = editZen(active, active.session.typed.slice(0, -1), 2100);
   active = editZen(active, restored.session.typed, 2200);
-  expect(active.session.xpEarned).toBe(142);
-  expect(active.session.bonusTenths).toBe(279);
+  expect(active.session.xpEarned).toBe(150);
+  expect(active.session.bonusTenths).toBe(350);
   for (const broken of [
     { bonusTenths: -1 },
     { bonusTenths: 9000 },
@@ -134,11 +135,11 @@ test("Daily is shared by UTC date, uses a stable passage, and scores fresh credi
     0,
     60000,
   );
-  expect(dailyScore(first)).toBe(1219);
+  expect(dailyScore(first)).toBe(1275);
   const event = dailyEdit(emptySession(), first)!;
   expect(replayDaily(daily.day, [event])).toMatchObject({
-    score: 1219,
-    session: { xpEarned: 121 },
+    score: 1275,
+    session: { xpEarned: 127 },
     metrics: { wpm: 20, accuracy: 100 },
   });
   expect(
@@ -147,7 +148,7 @@ test("Daily is shared by UTC date, uses a stable passage, and scores fresh credi
       { at: 2000, remove: 1 },
       { at: 3000, add: first.typed.at(-1)! },
     ]).score,
-  ).toBe(1219);
+  ).toBe(1275);
   for (const events of [
     [],
     [{ at: 60000, add: "a" }],
@@ -214,6 +215,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
     day,
     started_at: new Date(now - 60000).toISOString(),
     used: false,
+    rules_version: 2,
     player_id: player,
   };
   const db: DailyDatabase = {
@@ -229,13 +231,19 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
     handleDaily(
       new Request("https://h2otype.test/api/daily", {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+          rulesVersion: 2,
+          ...(body as Record<string, unknown>),
+        }),
       }),
       {},
       database,
       now,
     );
   expect((await call({ action: "begin", day })).status).toBe(200);
+  expect((await call({ action: "begin", day, rulesVersion: 1 })).status).toBe(
+    409,
+  );
   expect((await call({ action: "begin", day: "2026-10-18" })).status).toBe(400);
   const events = [{ at: 0, add: createDaily(day).passage.slice(0, 100) }];
   const submission = {
@@ -246,6 +254,9 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
     events,
     score: 999999,
   };
+  run.rules_version = 1;
+  expect((await call(submission)).status).toBe(409);
+  run.rules_version = 2;
   run.started_at = new Date(now - 1000).toISOString();
   expect((await call(submission)).status).toBe(409);
   run.started_at = new Date(now - 60000).toISOString();
@@ -255,7 +266,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
   expect((await call({ ...submission, name: "<script>" })).status).toBe(400);
   expect((await call(submission)).status).toBe(200);
   expect(records[0]).toMatchObject({
-    p_score: 1219,
+    p_score: 1275,
     p_wpm: 20,
     p_accuracy: 100,
     p_combo: 100,
@@ -290,7 +301,7 @@ test("Daily replay handles a Unicode mistake and its deletion using character po
     { at: 1000, remove: 1 },
     { at: 2000, add: daily.passage.slice(0, 100) },
   ]);
-  expect(replay.score).toBe(1219);
+  expect(replay.score).toBe(1275);
   expect(replay.metrics.errors).toBe(1);
   expect(replay.metrics.accuracy).toBe(99);
 });

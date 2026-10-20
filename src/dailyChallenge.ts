@@ -8,6 +8,7 @@ import {
 import type { Session } from "./typingEngine";
 
 export const dailyDuration = 60;
+export const dailyRulesVersion = 2;
 export type DailyChallenge = { day: string; passage: string };
 export type DailyEvent = {
   at: number;
@@ -20,7 +21,7 @@ export function dailyDay(now = new Date()) {
 }
 export function createDaily(day = dailyDay()): DailyChallenge {
   let seed = 2166136261;
-  for (const char of `h2otype-daily-v1:${day}`)
+  for (const char of `h2otype-daily-v2:${day}`)
     seed = Math.imul(seed ^ char.charCodeAt(0), 16777619) >>> 0;
   return { day, passage: generateWords("english100", seed, 600).text };
 }

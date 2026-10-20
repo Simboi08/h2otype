@@ -7,6 +7,7 @@ import {
   getWordInput,
 } from "./typingEngine";
 
+import { useFinishCelebration } from "./useFinishCelebration";
 import { useCompletionSound } from "./useCompletionSound";
 import { beginDaily } from "./dailyLeaderboard";
 import { createDaily, dailyEdit } from "./dailyChallenge";
@@ -68,6 +69,7 @@ export default function TypingPractice({
   } = useTypingFeedback(!finished);
   const { prefix, word } = getWordInput(session.typed);
   useCompletionSound(finished);
+  const finishCelebration = useFinishCelebration(finished);
   usePracticeKeyboard({ restart, composing, input, enabled: !finished });
 
   useEffect(() => {
@@ -123,6 +125,7 @@ export default function TypingPractice({
 
   return (
     <div className="passage-card" ref={feedbackRef}>
+      {finishCelebration}
       {particleLayer}
       {vignetteLayer}
       <div className="practice-surface">

@@ -1,3 +1,4 @@
+import { dailyRulesVersion } from "./dailyChallenge";
 export const sharedRankings = import.meta.env.VITE_DAILY_LEADERBOARD === "true";
 export type RankedScore = {
   display_name: string;
@@ -15,7 +16,10 @@ export async function dailyRequest(body: unknown, signal?: AbortSignal) {
     const response = await fetch("/api/daily", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        ...(body as Record<string, unknown>),
+        rulesVersion: dailyRulesVersion,
+      }),
       signal: controller.signal,
     });
     const result = await response.json();

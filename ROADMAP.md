@@ -98,3 +98,10 @@ The game changes are complete. Shared leaderboard activation needs hosting/datab
 - [ ] Achievements and interesting text packs
 
 Do not start later milestones until the current one is reasonably stable.
+
+## Finish celebrations and harder combos
+- [x] Brief finish confetti, including explicit nonempty Zen Finish.
+- [x] Light edge bursts at combo tier gains, following graphics/effects controls.
+- [x] Harder 25/60/120/200/350-character tiers, rewarding up to 3× XP and Daily points.
+- [x] Preserve saved XP and separate Daily scoring versions.
+- Next: collect playtest feedback on difficulty and effects. Supabase activation, achievements and unlockable themes remain deferred.

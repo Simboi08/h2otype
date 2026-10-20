@@ -101,7 +101,7 @@ export default function CustomizationSettings() {
         </p>
         <PreferenceSlider
           label="Visual effects"
-          description="Control vignette, shake strength, bursts, and level-up motion. Off keeps plain meters and notices."
+          description="Control vignette, shake, combo bursts, finish confetti, and level-up motion. Off keeps plain meters and notices."
           min={0}
           max={2}
           step={1}

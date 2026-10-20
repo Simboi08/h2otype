@@ -61,3 +61,5 @@ and a real hosted submission have not been tested. API behavior is tested
 with an isolated database adapter; the SQL migration is also exercised with a
 PostgreSQL-compatible local engine. Configure the hosting values above to turn
 on shared rankings.
+
+Daily now uses scoring rules version 2. When activating shared rankings later, use the current SQL script (or rerun it if a project already has the old schema) before deploying the matching handlers and client. The migration preserves old scores under version 1 and new rankings only compare version 2. Stale clients/tokens are rejected with a refresh message. Supabase activation remains optional and deferred.

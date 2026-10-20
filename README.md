@@ -85,7 +85,7 @@ To keep long sessions responsive, Zen appends short local text batches and retir
 
 ## XP and levels
 - Each character position earns **1 base XP the first time it is typed correctly in a session**, including spaces and punctuation. Correcting a mistake can earn that position's first XP. Deleting and retyping a credited character does not earn more.
-- Combo tiers at 10/25/50/100/200 add **10/20/30/40/50%** to newly earned XP. Fractional bonuses carry forward: 100 perfect characters earn 100 base + 21 bonus XP. Highest combo and base/bonus XP appear in results. Existing drafts/balances migrate without retroactive bonuses.
+- Combo tiers at 25/60/120/200/350 add **20/50/100/150/200%** to newly earned XP. Fractional bonuses carry forward: 100 perfect characters earn 100 base + 27 bonus XP. Highest combo and base/bonus XP appear in results. Existing drafts/balances migrate without retroactive bonuses.
 - Held character-key repeats, incorrect attempts, paste/drop, uncommitted composition, paused input, and post-deadline input do not award XP. There are no separate speed/accuracy bonuses.
 - Earned XP stays earned after Backspace, restart, mode changes, or abandoning a run. Restarting or opening results does not grant XP. Fresh correct typing in a new session is legitimate practice and can earn XP again.
 - Level 1 starts at 0 XP. Reaching level 2 costs 100 XP; the next level costs 200 more, then 300 more. Lifetime thresholds for levels 2/3/4/5 are 100/300/600/1000 XP. Levels are calculated from total XP.
@@ -99,7 +99,7 @@ Choose **Daily** at the top. Everyone gets the same English-100 passage and a
 the same passage; after midnight UTC, restarting loads the new day. Daily keeps
 your Sprint word-set/duration preferences and saved Zen session intact.
 
-Every first-correct character earns 10 points, plus 1–5 combo-tier points. Mistakes
+Every first-correct character earns 10 points, plus 2/5/10/15/20 bonus points at the five combo tiers. Mistakes
 break the combo; deleting/retyping cannot pay again. Results show points, WPM,
 accuracy, highest combo, and XP. **Daily rankings** sorts by score, then accuracy,
 then WPM. Local attempts are labelled **Scores on this browser**, with ten best
@@ -147,7 +147,7 @@ Pixel particles are larger 6×6 sprites with fewer per burst (2/4/6 for Low/Medi
 
 Level announcements scale up quickly (320ms), hold, then shrink over the same 320ms interval before disappearing at four seconds. Visual effects default to Intense: an earned screen-edge vignette grows with combos, while the center stays transparent and flame sprites are removed. Shake pulses only at combo tier gains, lasts 220ms, and grows to 7.5px (8px hard cap). Balanced reduces vignette opacity and uses 160ms/0.8px pulses. Only one shake animation runs at a time. Sound/particle choices stay independent. Choose Balanced, Off, or disable Screen shake in Settings; Low/reduced motion keep gameplay still.
 
-Combos begin at **10 fresh correct characters**, then reach higher tiers at 25, 50, 100, and 200. The footer becomes a combo meter with a progressively stronger edge vignette, while the selected sound rises in pitch up to seven semitones. Sound Off stays silent. Errors, Backspace, pause/finish, hiding the page, restart, mode changes, and reload break a streak; correcting an already credited position cannot farm it. Settings and idle time alone do not break it. Combos now award **up to 1.5× XP** on fresh correct positions and increase Daily points. WPM and accuracy formulas stay unchanged. Low/reduced motion keep the vignette static; disabling Combo feedback hides the meter and pitch escalation without changing rewards.
+Combos begin at **25 fresh correct characters**, then reach higher tiers at 60, 120, 200, and 350. The footer becomes a combo meter with a progressively stronger edge vignette, while the selected sound rises in pitch up to seven semitones. Sound Off stays silent. Errors, Backspace, pause/finish, hiding the page, restart, mode changes, and reload break a streak; correcting an already credited position cannot farm it. Settings and idle time alone do not break it. Combos now award **up to 3× XP** on fresh correct positions and increase Daily points. WPM and accuracy formulas stay unchanged. Low/reduced motion keep the vignette static; disabling Combo feedback hides the meter and pitch escalation without changing rewards.
 
 Finishing Sprint/Daily or explicitly finishing a nonempty Zen session plays a short rising phrase matching the selected sound. Sound Off and volume apply; Pause, restored summaries and opening Settings do not replay it. Restart, mute, hiding and mode changes cancel audio.
 
@@ -170,3 +170,8 @@ React + TypeScript + Vite. For the initial version, use localStorage rather than
 3. All MVP milestones are complete. Choose a specific bug fix, refinement, or release/deployment task and request tested changes with a PROGRESS.md update.
 
 Keep changes small and review them before merging.
+
+## Finish celebrations and harder combos
+Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst from the upper screen edges. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 1.4 seconds; combo bursts last 750ms. Medium budgets 20/12 particles (finish/combo), High 32/20, and Balanced halves those counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
+
+The larger combo rewards apply only to newly credited positions. Existing lifetime XP and saved Zen rewards keep their value. Daily uses scoring rules version 2 and `h2otype.daily-scores.v2`; older local rankings remain stored separately, while new shared rankings filter by rules version. WPM personal bests and accuracy calculations are unchanged.

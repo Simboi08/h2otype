@@ -1,6 +1,8 @@
 import type { Session } from "./typingEngine";
 
-export const comboThresholds = [10, 25, 50, 100, 200] as const;
+export const comboThresholds = [25, 60, 120, 200, 350] as const;
+
+export const comboBonusTenths = [0, 2, 5, 10, 15, 20] as const;
 
 // Shared combo thresholds; pure transitions are also used in reward validation.
 export function advanceCombo(
@@ -34,16 +36,20 @@ export function getCombo(streak: number) {
   const next = comboThresholds[tier] ?? null;
   return {
     tier,
-    multiplier: 1 + tier / 10,
+    bonusTenths: comboBonusTenths[tier],
+    multiplier: 1 + comboBonusTenths[tier] / 10,
     next,
     percent: next === null ? 100 : ((streak - start) / (next - start)) * 100,
-    pitch: Math.pow(2, Math.min(7, Math.max(0, streak - 10) / 25) / 12),
+    pitch: Math.pow(
+      2,
+      Math.min(7, Math.max(0, streak - comboThresholds[0]) / 40) / 12,
+    ),
   };
 }
 
 // Impacts are discrete rewards, rather than constant shaking on every key.
 export function comboImpact(before: number, after: number) {
-  if (after <= before || after < 10) return 0;
+  if (after <= before || after < comboThresholds[0]) return 0;
   const tier = getCombo(after).tier;
   return tier > getCombo(before).tier ? tier : 0;
 }

@@ -3,6 +3,7 @@ import type { Ref } from "react";
 import { freshSeed } from "./wordBank";
 import type { WordSet } from "./wordBank";
 import RewardSummary from "./RewardSummary";
+import { useFinishCelebration } from "./useFinishCelebration";
 import { useCompletionSound } from "./useCompletionSound";
 import LiveStats from "./LiveStats";
 import { usePracticeKeyboard } from "./usePracticeKeyboard";
@@ -53,6 +54,9 @@ export default function ZenPractice({
     vignetteLayer,
   } = useTypingFeedback(!stopped);
   useCompletionSound(state.summary && state.session.attempts > 0);
+  const finishCelebration = useFinishCelebration(
+    state.summary && state.session.attempts > 0,
+  );
   usePracticeKeyboard({
     restart: newSession,
     composing,
@@ -134,6 +138,7 @@ export default function ZenPractice({
 
   return (
     <div className="passage-card" ref={feedbackRef}>
+      {finishCelebration}
       {particleLayer}
       {vignetteLayer}
       <div className="practice-surface">

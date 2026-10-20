@@ -114,26 +114,24 @@ test("shake only rewards actual tier upgrades, with no pulses between upgrades",
   await ready(page);
   const passage = (await page.locator(".passage").textContent())!;
   const input = page.getByRole("textbox");
-  await input.pressSequentially(passage.slice(0, 10));
+  await input.pressSequentially(passage.slice(0, 25));
   await page.clock.runFor(300);
-  await input.pressSequentially(passage.slice(10, 25));
+  await page.keyboard.insertText(passage.slice(25, 60));
   await page.clock.runFor(300);
-  await input.pressSequentially(passage.slice(25, 50));
-  await page.clock.runFor(300);
-  await input.pressSequentially(passage.slice(50, 99));
+  await page.keyboard.insertText(passage.slice(60, 119));
+  expect(
+    await page.evaluate(
+      () =>
+        (window as typeof window & { shakeDurations: number[] }).shakeDurations,
+    ),
+  ).toEqual([220, 220]);
+  await input.press(passage[119]);
   expect(
     await page.evaluate(
       () =>
         (window as typeof window & { shakeDurations: number[] }).shakeDurations,
     ),
   ).toEqual([220, 220, 220]);
-  await input.press(passage[99]);
-  expect(
-    await page.evaluate(
-      () =>
-        (window as typeof window & { shakeDurations: number[] }).shakeDurations,
-    ),
-  ).toEqual([220, 220, 220, 220]);
 });
 
 test("results show base and bonus XP, best combo and readable main statistics", async ({
@@ -144,9 +142,9 @@ test("results show base and bonus XP, best combo and readable main statistics", 
   await page.getByRole("textbox").fill(passage.slice(0, 100));
   await page.clock.fastForward(30000);
   await expect(page.getByTestId("base-xp")).toHaveText("100");
-  await expect(page.getByTestId("bonus-xp")).toHaveText("+21 XP");
+  await expect(page.getByTestId("bonus-xp")).toHaveText("+27 XP");
   await expect(page.getByTestId("best-combo")).toHaveText("100 chars");
-  await expect(page.locator(".session-xp")).toHaveText("+121 XP this run");
+  await expect(page.locator(".session-xp")).toHaveText("+127 XP this run");
   await expect(page.getByTestId("result-wpm")).toHaveText("40");
   await page.keyboard.press("Enter");
   await expect(page.getByRole("textbox")).toBeFocused();
@@ -154,7 +152,7 @@ test("results show base and bonus XP, best combo and readable main statistics", 
     await page.evaluate(
       () => JSON.parse(localStorage.getItem("h2otype.progress.v1")!).totalXp,
     ),
-  ).toBe(121);
+  ).toBe(127);
 });
 
 test("Daily fixes its text and duration, saves score-ranked attempts, and preserves Sprint and Zen data", async ({
@@ -176,15 +174,15 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
   await expect(
     page.getByRole("heading", { name: "Daily results" }),
   ).toBeFocused();
-  await expect(page.getByTestId("daily-score")).toHaveText("1,219");
-  await expect(page.getByTestId("bonus-xp")).toHaveText("+21 XP");
+  await expect(page.getByTestId("daily-score")).toHaveText("1,275");
+  await expect(page.getByTestId("bonus-xp")).toHaveText("+27 XP");
   await page
     .getByRole("button", { name: "Daily rankings", exact: true })
     .click();
   await expect(
     page.getByRole("heading", { name: "Scores on this browser" }),
   ).toBeVisible();
-  await expect(page.locator(".current-score")).toContainText("1,219");
+  await expect(page.locator(".current-score")).toContainText("1,275");
   await page.keyboard.press("Shift+Tab");
   await page.keyboard.press("Escape");
   await expect(
@@ -199,8 +197,8 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
     .click();
   const rows = page.locator(".daily-rankings tbody tr");
   await expect(rows).toHaveCount(2);
-  await expect(rows.first()).toContainText("1,219");
-  await expect(rows.last()).toContainText("568");
+  await expect(rows.first()).toContainText("1,275");
+  await expect(rows.last()).toContainText("552");
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Zen", exact: true }).click();
   await page.getByRole("button", { name: "Resume", exact: true }).click();
@@ -214,7 +212,7 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
   expect(
     await page.evaluate(
       () =>
-        JSON.parse(localStorage.getItem("h2otype.daily-scores.v1")!).records
+        JSON.parse(localStorage.getItem("h2otype.daily-scores.v2")!).records
           .length,
     ),
   ).toBe(2);
@@ -306,12 +304,14 @@ test("shared Daily submission sends the run for server replay and renders the re
           day,
           started_at: "2026-10-19T12:00:00Z",
           used: false,
+          rules_version: 2,
         }),
         run: async () => ({
           id,
           day: "2026-10-19",
           started_at: "2026-10-19T12:00:00Z",
           used: false,
+          rules_version: 2,
         }),
         list: async () => scores,
         complete: async (record) => {
@@ -350,7 +350,7 @@ test("shared Daily submission sends the run for server replay and renders the re
   expect(scores).toEqual([
     {
       display_name: "Simon",
-      score: 1219,
+      score: 1275,
       wpm: 20,
       accuracy: 100,
       best_combo: 100,

@@ -1,4 +1,8 @@
-import { dailyDay, replayDaily } from "../src/dailyChallenge.ts";
+import {
+  dailyDay,
+  replayDaily,
+  dailyRulesVersion,
+} from "../src/dailyChallenge.ts";
 
 export type DailyEnvironment = {
   SUPABASE_URL?: string;
@@ -9,6 +13,7 @@ export type Run = {
   day: string;
   started_at: string;
   used: boolean;
+  rules_version: number;
   player_id?: string;
 };
 export type DailyDatabase = {
@@ -50,16 +55,21 @@ function supabase(env: DailyEnvironment): DailyDatabase {
   }
   return {
     begin: async (day) =>
-      (await rest("rpc/begin_daily", "POST", { p_day: day }))[0],
+      (
+        await rest("rpc/begin_daily", "POST", {
+          p_day: day,
+          p_rules_version: dailyRulesVersion,
+        })
+      )[0],
     run: async (id) =>
       (
         await rest(
-          `daily_runs?id=eq.${id}&select=id,day,started_at,used,player_id`,
+          `daily_runs?id=eq.${id}&select=id,day,started_at,used,player_id,rules_version`,
         )
       )[0] ?? null,
     list: (day) =>
       rest(
-        `daily_scores?day=eq.${day}&select=display_name,score,wpm,accuracy,best_combo&order=score.desc,accuracy.desc,wpm.desc&limit=50`,
+        `daily_scores?day=eq.${day}&rules_version=eq.${dailyRulesVersion}&select=display_name,score,wpm,accuracy,best_combo&order=score.desc,accuracy.desc,wpm.desc&limit=50`,
       ),
     complete: async (record) => {
       await rest("rpc/complete_daily", "POST", record);
@@ -91,6 +101,14 @@ export async function handleDaily(
   } catch {
     return reply({ error: "Invalid request." }, 400);
   }
+  if (body.rulesVersion !== dailyRulesVersion)
+    return reply(
+      {
+        error:
+          "Challenge rules have changed. Refresh the page and start a new run.",
+      },
+      409,
+    );
   const db = database ?? supabase(env);
   try {
     if (body.action === "list") {
@@ -121,6 +139,11 @@ export async function handleDaily(
     const run = await db.run(body.id);
     if (!run)
       return reply({ error: "Run not found. Play again to submit." }, 404);
+    if (run.rules_version !== dailyRulesVersion)
+      return reply(
+        { error: "Challenge rules have changed. Play a fresh run to submit." },
+        409,
+      );
     if (run.used)
       return run.player_id === body.player
         ? reply({ scores: await db.list(run.day) })
