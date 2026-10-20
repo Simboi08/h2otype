@@ -13,7 +13,7 @@ A focused pixel-arcade typing game with satisfying progression. Built for short 
 - **Customizable HUD:** optional live WPM and accuracy, XP progress, and level-up feedback.
 
 ## Status
-Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Streaks build a combo meter and edge vignette and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Daily adds fixed-date score challenges and local rankings, with optional shared guest rankings. Completion sounds, combo XP bonuses and clearer results are included. Achievements and unlockable themes are saved for later.
+Milestones 0–5 and the current arcade feedback refinements are implemented. Sprint supports 15/30/60-second tests, results, and local personal bests. Zen replenishes continuously, pauses/resumes, and saves a local draft. Correct typing earns persistent XP, animated progression, and a level-up celebration. Fresh correct typing builds a time-decaying combo meter and edge vignette and raise typing-sound pitch. Settings controls appearance, spacing, fonts, graphics, sound/particles, and live-stat sizes. Daily adds fixed-date score challenges and local rankings, with optional shared guest rankings. Completion sounds, combo XP bonuses and clearer results are included. Achievements and unlockable themes are saved for later.
 
 ## Development
 Use Node.js 20.19+ (20.x) or 22.12+ and npm. Node 24 was used for validation.
@@ -86,6 +86,7 @@ To keep long sessions responsive, Zen appends short local text batches and retir
 ## XP and levels
 - Each character position earns **1 base XP the first time it is typed correctly in a session**, including spaces and punctuation. Correcting a mistake can earn that position's first XP. Deleting and retyping a credited character does not earn more.
 - Combo tiers at 25/60/120/200/350 add **20/50/100/150/200%** to newly earned XP. Fractional bonuses carry forward: 100 perfect characters earn 100 base + 27 bonus XP. Highest combo and base/bonus XP appear in results. Existing drafts/balances migrate without retroactive bonuses.
+- Combo charge drains steadily while active, faster at higher tiers (0.75/1.5/2.5/4/6/8 units per second). Fresh correct positions replenish it; the current tier sets future bonuses and sound pitch. Decay preserves earned XP and historical best.
 - Held character-key repeats, incorrect attempts, paste/drop, uncommitted composition, paused input, and post-deadline input do not award XP. There are no separate speed/accuracy bonuses.
 - Earned XP stays earned after Backspace, restart, mode changes, or abandoning a run. Restarting or opening results does not grant XP. Fresh correct typing in a new session is legitimate practice and can earn XP again.
 - Level 1 starts at 0 XP. Reaching level 2 costs 100 XP; the next level costs 200 more, then 300 more. Lifetime thresholds for levels 2/3/4/5 are 100/300/600/1000 XP. Levels are calculated from total XP.
@@ -100,7 +101,7 @@ the same passage; after midnight UTC, restarting loads the new day. Daily keeps
 your Sprint word-set/duration preferences and saved Zen session intact.
 
 Every first-correct character earns 10 points, plus 2/5/10/15/20 bonus points at the five combo tiers. Mistakes
-break the combo; deleting/retyping cannot pay again. Results show points, WPM,
+break the combo; idle time drains it faster at higher tiers, and deleting/retyping cannot pay again. Results show points, WPM,
 accuracy, highest combo, and XP. **Daily rankings** sorts by score, then accuracy,
 then WPM. Local attempts are labelled **Scores on this browser**, with ten best
 attempts per day for thirty days. Only full-duration tests with correct text
@@ -109,7 +110,7 @@ qualify. Daily scores stay separate from Sprint speed records.
 The optional shared guest leaderboard needs a database connection. Its server
 replays the run and calculates points itself; visitors explicitly submit a display
 name, and only their best score that day is kept. See [DEPLOYMENT.md](DEPLOYMENT.md)
-for Vercel/Cloudflare publishing and Supabase configuration. Without that setup,
+for step-by-step Vercel/Cloudflare publishing and Supabase configuration (no player accounts required). Daily rules version 4 keeps decay-based rankings separate from older scores. Without that setup,
 the static game and local Daily rankings still work normally.
 
 ## Settings
@@ -175,9 +176,9 @@ React + TypeScript + Vite. For the initial version, use localStorage rather than
 Keep changes small and review them before merging.
 
 ## Finish celebrations and harder combos
-Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst from the upper screen edges. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 2.2 seconds; combo bursts last 750ms. At 100% confetti, Medium budgets 100 finish/12 combo pieces and High 160/20. Finish confetti defaults to 150% (240 pieces on High), adjusts from Off to 200%, and Balanced halves the counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
+Completed Sprint/Daily tests and nonempty Zen Finish trigger one short confetti burst around the full screen perimeter, mainly along the sides with smaller top/bottom sprays. Combo tier upgrades emit light pixel bursts from the vignette edges; ordinary keystrokes do not. Effects stay away from the central passage and never capture clicks or focus. Confetti lasts 2.2 seconds; combo bursts last 750ms. At 100% confetti, Medium budgets 100 finish/12 combo pieces and High 160/20. Finish confetti defaults to 150% (240 pieces on High), adjusts from Off to 200%, and Balanced halves the counts. Low, Effects Off, and reduced motion disable these moving decorations. Restart, hiding the page, resize and relevant setting changes clear them; restored summaries and Pause do not celebrate.
 
-The larger combo rewards apply only to newly credited positions. Existing lifetime XP and saved Zen rewards keep their value. Daily uses scoring rules version 3 and `h2otype.daily-scores.v3`; older local rankings remain stored separately, while new shared rankings filter by rules version. WPM personal bests and accuracy calculations are unchanged.
+The larger combo rewards apply only to newly credited positions. Existing lifetime XP and saved Zen rewards keep their value. Daily uses scoring rules version 4 and `h2otype.daily-scores.v4`; older local rankings remain stored separately, while new shared rankings filter by rules version. WPM personal bests and accuracy calculations are unchanged.
 
 ## Reading flow and new-player defaults
 New visits start in Sprint 15s, with High graphics, Screen shake on, and 8-bit sound and particles enabled. Every saved returning-player setting is preserved. Pixel typography is consistent across menus, descriptions, statistics and results; the typing font remains selectable and saved.
@@ -186,11 +187,11 @@ The passage keeps its active line at the top as soon as the preceding line is co
 
 Medium and High particles now draw on each available display animation frame instead of skipping frames around a fixed cap. Larger pixel sprites move continuously rather than snapping to a two-pixel grid. Low retains a 30fps limit. Actual performance still depends on the device and browser.
 
-Daily is a shared-date 15s Sprint for now. Its score storage and optional server tokens use rules version 3, keeping earlier 60s scores separate. Per-duration Daily passages, multiplayer racing, unlockable carets, currency and randomized pets are future plans in NOTES.md.
+Daily is a shared-date 15s Sprint for now. Its score storage and optional server tokens use rules version 4, keeping earlier 60s and nondecaying 15s scores separate. Per-duration Daily passages, multiplayer racing, unlockable carets, currency and randomized pets are future plans in NOTES.md.
 
 ## Caret visibility and today's Daily
 The caret blinks only before a run starts. Once typing begins, it stays solid even after deleting all text, pausing/resuming Zen, or opening Settings. Restarting/new sessions restore the initial blink; reduced motion keeps it still from the start.
 
 A compact button beneath the logo shows **Daily available**, then **Daily best · score** after an eligible completion. It opens Daily directly and shows the highest score for the current UTC day, updating after each finish, reload and changes in another tab. Midnight offers the next challenge; finishing a pinned previous-day run does not become today's best. Scores are local to this browser. If saving fails, the best seen during the visit still stays visible; it cannot survive a reload without working storage.
 
-Finish confetti now uses 2.5× the previous particle budget, larger pieces, a wider spread and a longer 2.2-second fall: Medium 100/High 160 pieces at 100%, up to 320 at 200%. Saved amount, Off/Balanced/Intense, graphics and reduced-motion choices remain effective. A public leaderboard remains future work.
+Finish confetti now uses 2.5× the previous particle budget, larger pieces, a wider spread and a longer 2.2-second fall: Medium 100/High 160 pieces at 100%, up to 320 at 200%. Saved amount, Off/Balanced/Intense, graphics and reduced-motion choices remain effective. Shared guest rankings are implemented through Supabase; activation needs the hosting configuration in DEPLOYMENT.md.

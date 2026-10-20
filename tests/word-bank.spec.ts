@@ -385,6 +385,8 @@ test("word picker, settings, and game header fit phones, tablets, and landscape 
 test("malformed or unknown word choices fall back safely and can be replaced", async ({
   page,
 }) => {
+  // This exercises three corrupt saves with six reloads and two modal visits each.
+  test.setTimeout(60000);
   for (const raw of ["{broken", '"unknown"', '{"wordSet":"english500"}']) {
     await page.goto("/");
     await page.getByRole("button", { name: "30s", exact: true }).click();

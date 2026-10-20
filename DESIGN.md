@@ -1,5 +1,14 @@
 # h2otype — Design specification v0.7
 
+## Perimeter confetti, decaying combos and Supabase activation — 2026-10-20
+These requests supersede the earlier inactivity-preserves-combo and deferred-backend notes.
+- Spread finish particles across the full side borders (35% each), with lighter top (20%) and bottom (10%) sprays. Keep current counts, sizes, 2.2-second lifetime, settings, reduced-motion suppression and one-shot cancellation. Combo bursts retain their existing paths.
+- Combo is now charge: each fresh correct position adds one unit; active time drains 0.75/1.5/2.5/4/6/8 units per second at tiers 0–5. Integrate exactly across tier boundaries and preserve fractional drain between updates. Mistakes/deletion/pause/hide/restart still clear it. Tier thresholds and rewards stay 25/60/120/200/350 and up to 3×.
+- The meter uses a fixed 350-unit scale so dropping a tier cannot jump its fill upward; excess charge stays visible in its numeric label. The multiplier, vignette and subsequent typing-sound pitch follow current charge. Decay never removes earned XP, points or historical best. Effects preferences cannot change drain or rewards. Timer delays and server replay must produce the same outcome.
+- Daily rules version 4 separates decay-based scores, seeds, tokens and local records from previous rules. Preserve all old records and balances. Start shared run tokens at first accepted input, not mode selection.
+- Activate the existing private Supabase REST integration through the user's hosting configuration. No player accounts are needed. Keep credentials server-only, validate/replay on the server, and retain local play/results when unavailable. Live activation requires the user to save their project variables and run the current SQL; do not claim a live connection until checked.
+
+
 ## Solid active caret, stronger confetti and Daily status — 2026-10-19
 These requests supersede the earlier always-blinking caret and confetti budgets below.
 - Blink only while ready and focused. Once a run accepts input, keep the caret solid through deletion to empty, focus changes, Settings and Zen pause/resume. Restart/new session restores ready blinking; reduced motion disables blinking altogether. Use session start/attempt history rather than retained text length.

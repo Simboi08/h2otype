@@ -232,7 +232,7 @@ test("visual intensity and shake controls apply immediately, preserve a combo, a
       .evaluate((element) => element.getAnimations().length),
   ).toBe(0);
   await input.pressSequentially(passage.slice(80, 100));
-  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "100");
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "99");
   await expect(page.locator(".level-up-banner")).toContainText("Level 2");
   await expect(page.locator(".level-up-banner")).toHaveCSS(
     "animation-name",

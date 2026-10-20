@@ -39,9 +39,6 @@ export default function TypingPractice({
   const [challenge, setChallenge] = useState(createDaily);
   const events = useRef<DailyEvent[]>([]);
   const dailyRun = useRef<Promise<string | null> | null>(null);
-  useEffect(() => {
-    if (mode === "daily") dailyRun.current = beginDaily(challenge.day);
-  }, [mode, challenge.day]);
   const createPassage = () =>
     mode === "daily"
       ? challenge.passage
@@ -62,6 +59,7 @@ export default function TypingPractice({
   const {
     container: feedbackRef,
     onEdit: emitFeedback,
+    onClock: clockFeedback,
     reset: resetFeedback,
     layer: particleLayer,
     comboMeter,
@@ -80,10 +78,11 @@ export default function TypingPractice({
       if (document.hidden && next.streak) {
         if (mode === "daily" && next.endedAt === null)
           events.current.push({ at: now - next.startedAt!, reset: true });
-        next = { ...next, streak: 0 };
+        next = { ...next, streak: 0, comboDecayFraction: 0 };
       }
       latest.current = next;
       setSession(next);
+      clockFeedback(next);
     };
     const interval = window.setInterval(tick, 100);
     document.addEventListener("visibilitychange", tick);
@@ -91,13 +90,15 @@ export default function TypingPractice({
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", tick);
     };
-  }, [session.startedAt, finished, durationMs, mode]);
+  }, [session.startedAt, finished, durationMs, mode, clockFeedback]);
 
   function edit(value: string, now: number) {
     const current = latest.current;
     const next = editSession(current, prefix + value, passage, now, durationMs);
     emitFeedback(current, next, passage);
     if (mode === "daily") {
+      if (current.startedAt === null && next.startedAt !== null)
+        dailyRun.current = beginDaily(challenge.day);
       const event = dailyEdit(current, next);
       if (event) events.current.push(event);
     }
@@ -112,7 +113,7 @@ export default function TypingPractice({
     const daily = createDaily();
     setChallenge(daily);
     events.current = [];
-    if (mode === "daily") dailyRun.current = beginDaily(daily.day);
+    dailyRun.current = null;
     setPassage(mode === "daily" ? daily.passage : createPassage());
     focusOnAttach.current = true;
     const next = emptySession();

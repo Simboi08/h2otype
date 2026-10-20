@@ -8,7 +8,7 @@ import {
 import type { Session } from "./typingEngine";
 
 export const dailyDuration = 15;
-export const dailyRulesVersion = 3;
+export const dailyRulesVersion = 4;
 export type DailyChallenge = { day: string; passage: string };
 export type DailyEvent = {
   at: number;
@@ -63,7 +63,11 @@ export function replayDaily(day: string, events: unknown) {
     )
       throw new Error("Invalid edit");
     if (event.reset) {
-      session = { ...session, streak: 0 };
+      session = {
+        ...advanceClock(session, event.at, dailyDuration * 1000),
+        streak: 0,
+        comboDecayFraction: 0,
+      };
       continue;
     }
     let next: string;

@@ -34,14 +34,16 @@ rankings across visitors:
 2. In your hosting project's **server environment**, set `SUPABASE_URL` to the
    project URL and `SUPABASE_SERVICE_ROLE_KEY` to its private service-role JWT
    from **Project Settings → API Keys → Legacy anon, service_role API keys**
-   (reveal `service_role`, not `anon`). This integration uses that legacy JWT. Keep these on the server; never give the key a
-   `VITE_` prefix, paste it into source files, or share it in chat.
+   (reveal `service_role`, not `anon`). This integration uses that legacy JWT.
+   Keep these on the server; never give the key a `VITE_` prefix, paste it into
+   source files, or share it in chat.
    In Vercel, open **Project → Settings → Environment Variables** and select
    **Production** (and **Preview** if testing a branch deployment) for all three
    values. The URL is under Supabase **Project Settings → Data API**.
-3. Set the public build flag `VITE_DAILY_LEADERBOARD=true`. Deploy the **latest commit** after saving the variables so Vite
-   includes the shared rankings interface. Cloudflare Pages also needs the two
-   private values available to its Functions runtime.
+3. Set the public build flag `VITE_DAILY_LEADERBOARD=true`. Deploy the
+   **latest commit** after saving the variables so Vite includes the shared
+   rankings interface. Cloudflare Pages also needs the two private values
+   available to its Functions runtime.
 4. Complete Daily, open Daily rankings, enter a display name and choose
    **Submit score**. A successful submission appears on the guest leaderboard.
    Keep the flag false/unset if you only want the static game.

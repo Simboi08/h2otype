@@ -81,10 +81,15 @@ test("finish confetti runs once, stays pointer-transparent, expires, and never r
     .evaluateAll((nodes) =>
       nodes.map((node) => ({
         x: Number.parseFloat((node as HTMLElement).style.left),
+        y: Number.parseFloat((node as HTMLElement).style.top),
         duration: node.getAnimations()[0].effect!.getTiming().duration,
       })),
     );
-  expect(geometry.every((item) => item.x <= 10 || item.x >= 1270)).toBe(true);
+  expect(
+    geometry.every(
+      (item) => item.x <= 10 || item.x >= 1270 || item.y <= 10 || item.y >= 710,
+    ),
+  ).toBe(true);
   expect(geometry.every((item) => item.duration === 2200)).toBe(true);
   await page.clock.runFor(2200);
   await expect(page.locator(".finish-confetti i")).toHaveCount(0);
@@ -111,11 +116,13 @@ test("combo edge bursts only fire at tier gains and clear on a mistake or restar
     "data-tier",
     "1",
   );
+  // Keep one charge above the boundary so decay does not re-enter tier one.
+  await input.press(text[25]);
   await page.clock.runFor(750);
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
-  await input.pressSequentially(text.slice(25, 59));
+  await input.pressSequentially(text.slice(26, 60));
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
-  await input.press(text[59]);
+  await input.press(text[60]);
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(12);
   await input.press("#");
   await expect(page.locator(".combo-edge-particles i")).toHaveCount(0);
@@ -211,7 +218,7 @@ test("new Daily scores never mix with or overwrite old reward-rule records", asy
   ).toBeFocused();
   const saved = await page.evaluate(() => ({
     old: localStorage.getItem("h2otype.daily-scores.v1"),
-    current: JSON.parse(localStorage.getItem("h2otype.daily-scores.v3")!),
+    current: JSON.parse(localStorage.getItem("h2otype.daily-scores.v4")!),
   }));
   expect(saved.old).toBe(old);
   expect(saved.current.records).toHaveLength(1);

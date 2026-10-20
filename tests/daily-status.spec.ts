@@ -117,7 +117,7 @@ test("Daily badge updates across browser tabs and clears when stored records are
   await page.locator(".daily-status").click();
   await finishDaily(page, 100);
   await expect(other.locator(".daily-status")).toContainText("1,275");
-  await page.evaluate(() => localStorage.removeItem("h2otype.daily-scores.v3"));
+  await page.evaluate(() => localStorage.removeItem("h2otype.daily-scores.v4"));
   await expect(other.locator(".daily-status")).toHaveAccessibleName(
     "Daily challenge available",
   );

@@ -117,16 +117,16 @@ test("shake only rewards actual tier upgrades, with no pulses between upgrades",
   const input = page.getByRole("textbox");
   await input.pressSequentially(passage.slice(0, 25));
   await page.clock.runFor(300);
-  await page.keyboard.insertText(passage.slice(25, 60));
+  await page.keyboard.insertText(passage.slice(25, 61));
   await page.clock.runFor(300);
-  await page.keyboard.insertText(passage.slice(60, 119));
+  await page.keyboard.insertText(passage.slice(61, 120));
   expect(
     await page.evaluate(
       () =>
         (window as typeof window & { shakeDurations: number[] }).shakeDurations,
     ),
   ).toEqual([220, 220]);
-  await input.press(passage[119]);
+  await input.press(passage[120]);
   expect(
     await page.evaluate(
       () =>
@@ -144,7 +144,7 @@ test("results show base and bonus XP, best combo and readable main statistics", 
   await page.clock.fastForward(30000);
   await expect(page.getByTestId("base-xp")).toHaveText("100");
   await expect(page.getByTestId("bonus-xp")).toHaveText("+27 XP");
-  await expect(page.getByTestId("best-combo")).toHaveText("100 chars");
+  await expect(page.getByTestId("best-combo")).toHaveText("100");
   await expect(page.locator(".session-xp")).toHaveText("+127 XP this run");
   await expect(page.getByTestId("result-wpm")).toHaveText("40");
   await page.keyboard.press("Enter");
@@ -213,7 +213,7 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
   expect(
     await page.evaluate(
       () =>
-        JSON.parse(localStorage.getItem("h2otype.daily-scores.v3")!).records
+        JSON.parse(localStorage.getItem("h2otype.daily-scores.v4")!).records
           .length,
     ),
   ).toBe(2);
@@ -307,14 +307,14 @@ test("shared Daily submission sends the run for server replay and renders the re
           day,
           started_at: "2026-10-19T12:00:00Z",
           used: false,
-          rules_version: 3,
+          rules_version: 4,
         }),
         run: async () => ({
           id,
           day: "2026-10-19",
           started_at: "2026-10-19T12:00:00Z",
           used: false,
-          rules_version: 3,
+          rules_version: 4,
         }),
         list: async () => scores,
         complete: async (record) => {
@@ -339,7 +339,13 @@ test("shared Daily submission sends the run for server replay and renders the re
   await ready(page);
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   const passage = (await page.locator(".passage").textContent())!;
+  const started = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/daily") &&
+      response.request().postDataJSON().action === "begin",
+  );
   await page.getByRole("textbox").fill(passage.slice(0, 100));
+  await started;
   await page.clock.fastForward(15000);
   await page
     .getByRole("button", { name: "Daily rankings", exact: true })

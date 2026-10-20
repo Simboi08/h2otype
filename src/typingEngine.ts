@@ -1,4 +1,4 @@
-import { getCombo } from "./combo";
+import { getCombo, decayCombo } from "./combo";
 
 export type Session = {
   typed: string;
@@ -12,6 +12,7 @@ export type Session = {
   baseXp: number;
   bonusTenths: number;
   streak: number;
+  comboDecayFraction: number;
   bestCombo: number;
 };
 
@@ -27,6 +28,7 @@ export const emptySession = (): Session => ({
   baseXp: 0,
   bonusTenths: 0,
   streak: 0,
+  comboDecayFraction: 0,
   bestCombo: 0,
 });
 
@@ -38,9 +40,15 @@ export function advanceClock(
   if (state.startedAt === null || state.endedAt !== null) return state;
   const deadline =
     durationMs === null ? Infinity : state.startedAt + durationMs;
+  const timestamp = Math.max(state.now, Math.min(now, deadline));
   return {
     ...state,
-    now: Math.max(state.now, Math.min(now, deadline)),
+    ...decayCombo(
+      state.streak,
+      state.comboDecayFraction ?? 0,
+      timestamp - state.now,
+    ),
+    now: timestamp,
     endedAt: now >= deadline ? deadline : null,
   };
 }
@@ -64,6 +72,8 @@ export function editSession(
       ...current,
       typed: next,
       streak: next === current.typed ? current.streak : 0,
+      comboDecayFraction:
+        next === current.typed ? current.comboDecayFraction : 0,
     };
   if (!next.startsWith(current.typed)) return current;
   const added = next.slice(current.typed.length);
@@ -74,11 +84,13 @@ export function editSession(
   ).length;
   const credited = new Set(current.credited);
   let xpAdded = 0;
-  let { streak, bestCombo, bonusTenths } = current;
+  let { streak, bestCombo, bonusTenths, comboDecayFraction } = current;
   [...added].forEach((char, index) => {
     const position = typedLength + index;
-    if (char !== target[position]) streak = 0;
-    else if (!credited.has(position)) {
+    if (char !== target[position]) {
+      streak = 0;
+      comboDecayFraction = 0;
+    } else if (!credited.has(position)) {
       streak++;
       bestCombo = Math.max(bestCombo, streak);
       bonusTenths += getCombo(streak).bonusTenths;
@@ -92,12 +104,16 @@ export function editSession(
     baseXp: current.baseXp + xpAdded,
     bonusTenths,
     streak,
+    comboDecayFraction,
     bestCombo,
     xpEarned: current.baseXp + xpAdded + Math.floor(bonusTenths / 10),
     typed: next,
     startedAt,
-    now,
-    endedAt: nextCharacters.length === target.length ? now : null,
+    now: Math.max(current.now, now),
+    endedAt:
+      nextCharacters.length === target.length
+        ? Math.max(current.now, now)
+        : null,
     attempts: current.attempts + [...added].length,
     correctAttempts: current.correctAttempts + correctAdded,
   };

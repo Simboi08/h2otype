@@ -215,7 +215,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
     day,
     started_at: new Date(now - 60000).toISOString(),
     used: false,
-    rules_version: 3,
+    rules_version: 4,
     player_id: player,
   };
   const db: DailyDatabase = {
@@ -232,7 +232,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
       new Request("https://h2otype.test/api/daily", {
         method: "POST",
         body: JSON.stringify({
-          rulesVersion: 3,
+          rulesVersion: 4,
           ...(body as Record<string, unknown>),
         }),
       }),
@@ -256,7 +256,7 @@ test("shared ranking server replays scores, rejects malformed or premature runs,
   };
   run.rules_version = 1;
   expect((await call(submission)).status).toBe(409);
-  run.rules_version = 3;
+  run.rules_version = 4;
   run.started_at = new Date(now - 1000).toISOString();
   expect((await call(submission)).status).toBe(409);
   run.started_at = new Date(now - 60000).toISOString();

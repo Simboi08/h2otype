@@ -3,7 +3,8 @@ import { expect, test } from "./practice-fixture";
 test("typing marks characters, supports correction, and expires with honest accuracy", async ({
   page,
 }) => {
-  await page.clock.install();
+  await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-20T12:00:01Z"));
   await page.goto("/");
   await page.getByRole("button", { name: "30s", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Type the passage" });

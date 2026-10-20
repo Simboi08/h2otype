@@ -104,7 +104,7 @@ Do not start later milestones until the current one is reasonably stable.
 - [x] Light edge bursts at combo tier gains, following graphics/effects controls.
 - [x] Harder 25/60/120/200/350-character tiers, rewarding up to 3× XP and Daily points.
 - [x] Preserve saved XP and separate Daily scoring versions.
-- Next: collect playtest feedback on difficulty and effects. Supabase activation, achievements and unlockable themes remain deferred.
+- Next: collect playtest feedback on difficulty and effects. Supabase activation is now requested; achievements and unlockable themes remain deferred.
 
 ## Reading flow and defaults — 2026-10-20
 - [x] Default landing mode: Sprint 15s.
@@ -121,10 +121,19 @@ Do not start later milestones until the current one is reasonably stable.
 - [ ] Each Sprint duration (15s/30s/60s) gets its own Daily passage.
 - [ ] Unlockable caret styles.
 - [ ] Earned in-game currency and a randomized pet-unlock system; economy and reward rules still need planning.
-- Achievements and unlockable themes remain deferred. Supabase activation remains deferred until requested.
+- Achievements and unlockable themes remain deferred. Supabase activation is now requested; hosting/project configuration and live verification are tracked below.
 
 ## Caret, celebration and Daily reminder — 2026-10-19
 - [x] Blink the caret only before typing; keep it solid for the rest of the run, including after deleting text.
 - [x] More finish confetti: 2.5× the pieces, larger/wider/longer bursts, preserving the amount slider and effects settings.
 - [x] Compact Daily availability/today's-best display beneath the logo, with direct challenge access and UTC rollover.
-- [ ] Public leaderboard — future implementation; existing optional backend preparation remains inactive until requested.
+- [x] Supabase guest leaderboard implementation and setup guide.
+- [ ] User project configuration and live hosted submission verification.
+
+## Combo decay and perimeter confetti — 2026-10-20
+- [x] Spread finish confetti along every screen border, retaining current budgets and controls.
+- [x] Steady active-time combo decay, faster at higher tiers, with fractional carry and typing refill.
+- [x] Preserve earned XP/best combo and share decay logic with Daily server replay.
+- [x] Rules version 4 separation and repeatable Supabase upgrade, retaining old scores.
+- [x] Create shared run tokens on first typing so waiting on Daily cannot expire them.
+- [ ] Verify the user's hosted Supabase connection after SQL, environment variables and latest deployment are ready.

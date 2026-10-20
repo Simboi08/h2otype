@@ -113,4 +113,12 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [x] Blink the caret only before typing; keep it solid for the rest of the run, including after deleting text.
 - [x] More finish confetti: 2.5× the pieces, larger/wider/longer bursts, preserving the amount slider and effects settings.
 - [x] Compact Daily availability/today's-best display beneath the logo, with direct challenge access and UTC rollover.
-- [ ] Public leaderboard — future implementation; existing optional backend preparation remains inactive until requested.
+- [x] Supabase guest leaderboard implementation/setup guide (requested for activation below).
+- [ ] Verify the real hosted database connection after user configuration.
+
+## Perimeter confetti, combo decay and Supabase — 2026-10-20
+- [x] Move finish sprays away from the upper corners: full-height side coverage plus smaller top/bottom bursts.
+- [x] Combo steadily drains, with faster decay at higher tiers; fresh correct typing refills it. Already earned XP/points remain safe.
+- [x] Connect Daily through the private Supabase REST adapter, with guest identities and server replay; document SQL and Vercel setup first.
+- [x] Start online run tokens on first typing and isolate new decay-based scores as Daily rules 4.
+- [ ] User finishes SQL/environment setup and verifies a real hosted submission. Never share service keys in chat.

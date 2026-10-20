@@ -28,18 +28,53 @@ export function advanceCombo(
   return streak;
 }
 
-export function getCombo(streak: number) {
+export const comboDecayRates = [0.75, 1.5, 2.5, 4, 6, 8] as const;
+
+// Integrate across tier boundaries so delayed ticks and server replay agree exactly.
+export function decayCombo(
+  streak: number,
+  fraction: number,
+  elapsedMs: number,
+) {
+  let charge = Math.max(0, streak - fraction);
+  let seconds = Math.max(0, elapsedMs) / 1000;
+  while (charge > 1e-9 && seconds > 1e-9) {
+    const whole = Math.ceil(charge - 1e-9);
+    const tier = comboThresholds.filter(
+      (threshold) => whole >= threshold,
+    ).length;
+    const boundary = tier ? comboThresholds[tier - 1] - 1 : 0;
+    const rate = comboDecayRates[tier];
+    const duration = (charge - boundary) / rate;
+    if (seconds < duration) {
+      charge -= seconds * rate;
+      break;
+    }
+    charge = boundary;
+    seconds -= duration;
+  }
+  const remaining = Math.max(0, Math.ceil(charge - 1e-9));
+  return {
+    streak: remaining,
+    comboDecayFraction: Math.max(0, Math.min(1 - 1e-9, remaining - charge)),
+  };
+}
+
+export function getCombo(streak: number, fraction = 0) {
   const tier = comboThresholds.filter(
     (threshold) => streak >= threshold,
   ).length;
-  const start = tier ? comboThresholds[tier - 1] : 0;
   const next = comboThresholds[tier] ?? null;
   return {
     tier,
     bonusTenths: comboBonusTenths[tier],
     multiplier: 1 + comboBonusTenths[tier] / 10,
     next,
-    percent: next === null ? 100 : ((streak - start) / (next - start)) * 100,
+    // One fixed scale prevents a falling tier from making the bar jump upward.
+    percent: Math.max(
+      0,
+      Math.min(100, ((streak - fraction) / comboThresholds[4]) * 100),
+    ),
     pitch: Math.pow(
       2,
       Math.min(7, Math.max(0, streak - comboThresholds[0]) / 40) / 12,
