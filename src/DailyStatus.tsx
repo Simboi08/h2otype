@@ -79,13 +79,24 @@ export default function DailyStatus({ onPlay }: { onPlay: () => void }) {
       title={`${label} · 15s · scores on this browser`}
     >
       <span aria-live="polite">
-        {best ? (
-          <>
-            Daily best · <strong>{best.score.toLocaleString()}</strong>
-          </>
-        ) : (
-          "Daily available"
-        )}
+        <span className="daily-status-full">
+          {best ? (
+            <>
+              Daily best · <strong>{best.score.toLocaleString()}</strong>
+            </>
+          ) : (
+            "Daily available"
+          )}
+        </span>
+        <span className="daily-status-short" aria-hidden="true">
+          {best ? (
+            <>
+              Best · <strong>{best.score.toLocaleString()}</strong>
+            </>
+          ) : (
+            "Daily ready"
+          )}
+        </span>
       </span>
     </button>
   );

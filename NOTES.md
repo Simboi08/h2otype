@@ -122,3 +122,11 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [x] Connect Daily through the private Supabase REST adapter, with guest identities and server replay; document SQL and Vercel setup first.
 - [x] Start online run tokens on first typing and isolate new decay-based scores as Daily rules 4.
 - [ ] User finishes SQL/environment setup and verifies a real hosted submission. Never share service keys in chat.
+
+## Leaderboard discoverability and publishing — 2026-10-20
+- [x] View the leaderboard without finishing a Daily first.
+- [x] Prompt for the first qualifying online Daily score; remember the display name.
+- [x] Automatically update a guest's entry on better runs for the rest of the UTC day.
+- [x] Keep rank visible until the next Daily; show own rank beyond the top 50.
+- [x] Fix native API startup imports and show actionable submission errors/retry.
+- [ ] Verify the live Vercel API after the user deploys the update.

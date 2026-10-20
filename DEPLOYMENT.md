@@ -36,7 +36,10 @@ rankings across visitors:
    from **Project Settings → API Keys → Legacy anon, service_role API keys**
    (reveal `service_role`, not `anon`). This integration uses that legacy JWT.
    Keep these on the server; never give the key a `VITE_` prefix, paste it into
-   source files, or share it in chat.
+   source files, or share it in chat. Modern Supabase server secret keys are also
+   supported: save a newly created private key under `SUPABASE_SECRET_KEY` instead
+   of `SUPABASE_SERVICE_ROLE_KEY` if using that option. No publishable key or JWKS
+   URL is required for this guest leaderboard.
    In Vercel, open **Project → Settings → Environment Variables** and select
    **Production** (and **Preview** if testing a branch deployment) for all three
    values. The URL is under Supabase **Project Settings → Data API**.
@@ -44,8 +47,11 @@ rankings across visitors:
    **latest commit** after saving the variables so Vite includes the shared
    rankings interface. Cloudflare Pages also needs the two private values
    available to its Functions runtime.
-4. Complete Daily, open Daily rankings, enter a display name and choose
-   **Submit score**. A successful submission appears on the guest leaderboard.
+4. The **Leaderboard** button beneath the logo is available before playing.
+   Complete Daily: the first qualifying connected run prompts for a display name
+   and **Submit score**. The prompt explains that better runs update automatically
+   for the rest of that UTC day. Your rank appears beside Leaderboard; midnight
+   clears today's badge and asks again. **Not now** leaves the score local.
    Keep the flag false/unset if you only want the static game.
 
 The server issues a run token when the first character starts a test, checks
@@ -77,8 +83,9 @@ under their original versions. The SQL also supports version 3 for an older
 own rules and lists that version's scores. Older browser-local records remain in
 separate keys; lifetime XP and preferences are preserved.
 
-After deploying, complete a Daily and submit your display name. Reload and open
-Daily rankings to check that your best appears under shared rankings. Opening
+After deploying, complete a Daily and accept the name prompt. Reload and use
+Leaderboard to check that your best appears under shared rankings. Beat that
+score to check automatic updates without another prompt. Opening
 rankings on another browser confirms it came from Supabase rather than local
 storage. If the shared section is missing, confirm the build flag and source
 commit; if it says unavailable, check the two server variables, SQL execution and
@@ -86,3 +93,20 @@ Vercel function logs. Never include keys when sharing logs or screenshots.
 
 ## When the public site has not updated
 The current implementation branch is `codex/milestone-1-typing-engine`. A push there only updates deployments watching that branch. If production watches `main`, merge the tested branch into `main` on GitHub and check Vercel Deployments for that merge commit. A redeploy of an older deployment rebuilds its old commit. Alternatively, configure Vercel to use the implementation branch as production and deploy its latest commit. Check the deployment source commit before refreshing the site.
+
+
+## Submission troubleshooting
+- The Leaderboard button is always visible. If only local rankings are shown,
+  save `VITE_DAILY_LEADERBOARD=true` and build the latest commit again.
+- Results now display the actual connection error rather than silently losing
+  the token. If that run never connected, reconnect and play a fresh Daily; the
+  server cannot verify an offline run retroactively.
+- A valid submission can be retried with its original token after a temporary
+  error, even after switching modes. Browser storage keeps guest identity, name,
+  daily opt-in and last confirmed best/rank; pending run traces stay in memory
+  for this visit. Reloading during a failed submission requires a fresh run.
+- The API must deploy with the latest native .ts import fix. `node api/daily.ts`
+  on Node 24 checks that the server can load without Vite's import resolver.
+  Check Vercel function logs if the host returns an HTML error instead of JSON.
+- The current SQL from the previous setup still works; this update needs no new
+  SQL migration. A live hosted submission must be checked after deployment.

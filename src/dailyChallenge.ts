@@ -1,11 +1,11 @@
-import { generateWords } from "./wordBank";
+import { generateWords } from "./wordBank.ts";
 import {
   advanceClock,
   editSession,
   emptySession,
   getMetrics,
-} from "./typingEngine";
-import type { Session } from "./typingEngine";
+} from "./typingEngine.ts";
+import type { Session } from "./typingEngine.ts";
 
 export const dailyDuration = 15;
 export const dailyRulesVersion = 4;

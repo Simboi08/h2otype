@@ -347,9 +347,9 @@ test("shared Daily submission sends the run for server replay and renders the re
   await page.getByRole("textbox").fill(passage.slice(0, 100));
   await started;
   await page.clock.fastForward(15000);
-  await page
-    .getByRole("button", { name: "Daily rankings", exact: true })
-    .click();
+  await expect(
+    page.getByRole("dialog", { name: "Daily rankings" }),
+  ).toBeVisible();
   await page.getByLabel("Display name", { exact: false }).fill("Simon");
   await page.getByRole("button", { name: "Submit score", exact: true }).click();
   await expect(

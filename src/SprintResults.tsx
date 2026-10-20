@@ -9,7 +9,9 @@ import RewardSummary from "./RewardSummary";
 import { dailyScore } from "./dailyChallenge";
 import type { DailyChallenge, DailyEvent } from "./dailyChallenge";
 import { recordDaily } from "./dailyRecords";
-import DailyRankings from "./DailyRankings";
+import DailyPublicationStatus from "./DailyPublicationStatus";
+import { useDailyPublishing } from "./dailyPublishingContext";
+import type { DailyRun } from "./dailyLeaderboard";
 
 type Props = {
   duration: SprintDuration;
@@ -19,7 +21,7 @@ type Props = {
   wordSet: WordSet;
   challenge?: DailyChallenge;
   events: RefObject<DailyEvent[]>;
-  dailyRun: RefObject<Promise<string | null> | null>;
+  dailyRun: RefObject<Promise<DailyRun | null> | null>;
 };
 export default function SprintResults({
   duration,
@@ -31,6 +33,7 @@ export default function SprintResults({
   events,
   dailyRun,
 }: Props) {
+  const { store: publishing } = useDailyPublishing();
   const heading = useRef<HTMLHeadingElement>(null);
   const recorded = useRef(false);
   const [id] = useState(() => crypto.randomUUID());
@@ -64,6 +67,18 @@ export default function SprintResults({
           combo: session.bestCombo,
         });
         queueMicrotask(() => setDaily(result));
+        publishing.offer(
+          {
+            id,
+            day: challenge.day,
+            score: dailyScore(session),
+            wpm,
+            accuracy,
+            combo: session.bestCombo,
+          },
+          events.current,
+          dailyRun.current,
+        );
       }
     } else {
       const result = recordSprint(
@@ -75,7 +90,19 @@ export default function SprintResults({
       queueMicrotask(() => setRecord(result));
     }
     heading.current?.focus({ preventScroll: true });
-  }, [duration, wpm, accuracy, eligible, wordSet, challenge, session, id]);
+  }, [
+    duration,
+    wpm,
+    accuracy,
+    eligible,
+    wordSet,
+    challenge,
+    session,
+    id,
+    publishing,
+    events,
+    dailyRun,
+  ]);
   return (
     <section
       className={`sprint-results results-updated ${challenge ? "daily-results" : ""}`}
@@ -90,6 +117,7 @@ export default function SprintResults({
       <div className="results-heading">
         <h2
           id="results-title"
+          data-daily-run={challenge ? id : undefined}
           tabIndex={-1}
           ref={heading}
           aria-keyshortcuts="Tab Enter"
@@ -166,15 +194,7 @@ export default function SprintResults({
       <div className="results-footer">
         <p>Errors include corrected mistakes. Tab or Enter to restart.</p>
         <div className="results-actions">
-          {challenge && (
-            <DailyRankings
-              entry={entry}
-              records={daily?.records ?? []}
-              eligible={eligible}
-              events={events}
-              run={dailyRun}
-            />
-          )}
+          {challenge && <DailyPublicationStatus entry={entry} />}
           <button className="restart-button" onClick={onRestart}>
             Restart
           </button>
