@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import DailyStatus from "./DailyStatus";
+import DailyLeaderboardButton from "./DailyLeaderboardButton";
 import CustomizationSettings from "./CustomizationSettings";
 import PreferenceSlider from "./PreferenceSlider";
 import ProgressIndicator from "./ProgressIndicator";
@@ -117,6 +118,7 @@ export default function App() {
               <span className="brand-dot" />
             </a>
             <DailyStatus onPlay={() => setMode("daily")} />
+            <DailyLeaderboardButton />
           </div>
           <nav className="mode-switch" aria-label="Typing mode">
             <button

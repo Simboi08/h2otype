@@ -8,6 +8,7 @@ import {
 export type DailyEnvironment = {
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  SUPABASE_SECRET_KEY?: string;
 };
 export type Run = {
   id: string;
@@ -22,6 +23,10 @@ export type DailyDatabase = {
   run: (id: string) => Promise<Run | null>;
   list: (day: string) => Promise<unknown[]>;
   complete: (record: Record<string, unknown>) => Promise<void>;
+  standing?: (
+    day: string,
+    player: string,
+  ) => Promise<Record<string, unknown> | null>;
 };
 const uuid = (value: unknown): value is string =>
   typeof value === "string" &&
@@ -34,16 +39,26 @@ const validDay = (value: unknown): value is string =>
   Number.isFinite(Date.parse(value + "T00:00:00Z")) &&
   new Date(value + "T00:00:00Z").toISOString().slice(0, 10) === value;
 function supabase(env: DailyEnvironment): DailyDatabase {
-  async function rest(path: string, method = "GET", body?: unknown) {
+  const key = (env.SUPABASE_SERVICE_ROLE_KEY ||
+    env.SUPABASE_SECRET_KEY)!.trim();
+  async function request(
+    path: string,
+    method = "GET",
+    body?: unknown,
+    headers: Record<string, string> = {},
+  ) {
     const response = await fetch(
       `${env.SUPABASE_URL!.replace(/\/$/, "")}/rest/v1/${path}`,
       {
         method,
         headers: {
-          apikey: env.SUPABASE_SERVICE_ROLE_KEY!,
-          Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY!}`,
+          apikey: key,
+          ...(key.startsWith("sb_secret_")
+            ? {}
+            : { Authorization: `Bearer ${key}` }),
           "Content-Type": "application/json",
           Prefer: "return=representation",
+          ...headers,
         },
         body: body === undefined ? undefined : JSON.stringify(body),
         signal: AbortSignal.timeout(6000),
@@ -51,6 +66,10 @@ function supabase(env: DailyEnvironment): DailyDatabase {
       },
     );
     if (!response.ok) throw new Error("Database unavailable");
+    return response;
+  }
+  async function rest(path: string, method = "GET", body?: unknown) {
+    const response = await request(path, method, body);
     const text = await response.text();
     return text ? JSON.parse(text) : null;
   }
@@ -70,8 +89,36 @@ function supabase(env: DailyEnvironment): DailyDatabase {
       )[0] ?? null,
     list: (day) =>
       rest(
-        `daily_scores?day=eq.${day}&rules_version=eq.${dailyRulesVersion}&select=display_name,score,wpm,accuracy,best_combo&order=score.desc,accuracy.desc,wpm.desc&limit=50`,
+        `daily_scores?day=eq.${day}&rules_version=eq.${dailyRulesVersion}&select=player_id,display_name,score,wpm,accuracy,best_combo&order=score.desc,accuracy.desc,wpm.desc&limit=50`,
       ),
+    standing: async (day, player) => {
+      const scope = `day=eq.${day}&rules_version=eq.${dailyRulesVersion}`;
+      const own = (
+        await rest(
+          `daily_scores?${scope}&player_id=eq.${player}&select=display_name,score,wpm,accuracy,best_combo&limit=1`,
+        )
+      )[0];
+      if (!own) return null;
+      const { score, accuracy, wpm } = own;
+      if (
+        ![score, accuracy, wpm].every(
+          (value) => Number.isSafeInteger(value) && value >= 0,
+        )
+      )
+        throw new Error("Invalid standing");
+      const response = await request(
+        `daily_scores?${scope}&or=(score.gt.${score},and(score.eq.${score},accuracy.gt.${accuracy}),and(score.eq.${score},accuracy.eq.${accuracy},wpm.gt.${wpm}))&select=score`,
+        "HEAD",
+        undefined,
+        { Prefer: "count=exact" },
+      );
+      const count = Number(
+        response.headers.get("content-range")?.split("/")[1],
+      );
+      if (!Number.isSafeInteger(count) || count < 0)
+        throw new Error("Invalid rank");
+      return { ...own, rank: count + 1 };
+    },
     complete: async (record) => {
       await rest("rpc/complete_daily", "POST", record);
     },
@@ -86,7 +133,11 @@ export async function handleDaily(
 ) {
   const reply = (data: unknown, status = 200) =>
     Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
-  if (!database && (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY))
+  if (
+    !database &&
+    (!env.SUPABASE_URL ||
+      !(env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SECRET_KEY))
+  )
     return reply({ error: "Shared rankings are not connected yet." }, 503);
   if (request.method !== "POST") return reply({ error: "Use POST." }, 405);
   const origin = request.headers.get("origin");
@@ -111,11 +162,29 @@ export async function handleDaily(
       409,
     );
   const db = database ?? supabase(env);
+  async function leaderboard(day: string, player?: unknown) {
+    const [scores, standing] = await Promise.all([
+      db.list(day),
+      uuid(player) && db.standing ? db.standing(day, player) : undefined,
+    ]);
+    return {
+      scores: scores.map((record) => {
+        const { player_id, ...score } = record as Record<string, unknown>;
+        return {
+          ...score,
+          ...(uuid(player) && player_id
+            ? { is_you: player_id === player }
+            : {}),
+        };
+      }),
+      ...(standing !== undefined ? { standing } : {}),
+    };
+  }
   try {
     if (body.action === "list") {
       if (!validDay(body.day))
         return reply({ error: "Invalid challenge date." }, 400);
-      return reply({ scores: await db.list(body.day) });
+      return reply(await leaderboard(body.day, body.player));
     }
     if (body.action === "begin") {
       if (body.day !== dailyDay(new Date(now)))
@@ -147,7 +216,7 @@ export async function handleDaily(
       );
     if (run.used)
       return run.player_id === body.player
-        ? reply({ scores: await db.list(run.day) })
+        ? reply(await leaderboard(run.day, body.player))
         : reply({ error: "This run has already been submitted." }, 409);
     const elapsed = now - Date.parse(run.started_at);
     // Two seconds of transport tolerance; a browser cannot immediately submit a fabricated test.
@@ -178,7 +247,7 @@ export async function handleDaily(
       p_accuracy: replay.metrics.accuracy,
       p_combo: replay.session.bestCombo,
     });
-    return reply({ scores: await db.list(run.day) });
+    return reply(await leaderboard(run.day, body.player));
   } catch {
     return reply(
       {

@@ -9,6 +9,7 @@ import {
 
 import { useFinishCelebration } from "./useFinishCelebration";
 import { useCompletionSound } from "./useCompletionSound";
+import type { DailyRun } from "./dailyLeaderboard";
 import { beginDaily } from "./dailyLeaderboard";
 import { createDaily, dailyEdit, dailyDuration } from "./dailyChallenge";
 import type { DailyEvent } from "./dailyChallenge";
@@ -38,7 +39,7 @@ export default function TypingPractice({
   // Each generated run gets fresh words, with enough text for a full minute.
   const [challenge, setChallenge] = useState(createDaily);
   const events = useRef<DailyEvent[]>([]);
-  const dailyRun = useRef<Promise<string | null> | null>(null);
+  const dailyRun = useRef<Promise<DailyRun | null> | null>(null);
   const createPassage = () =>
     mode === "daily"
       ? challenge.passage

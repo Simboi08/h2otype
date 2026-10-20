@@ -137,3 +137,12 @@ Do not start later milestones until the current one is reasonably stable.
 - [x] Rules version 4 separation and repeatable Supabase upgrade, retaining old scores.
 - [x] Create shared run tokens on first typing so waiting on Daily cannot expire them.
 - [ ] Verify the user's hosted Supabase connection after SQL, environment variables and latest deployment are ready.
+
+## Discoverable leaderboard and automatic Daily bests — 2026-10-20
+- [x] Always-available leaderboard button in every mode, with today's saved rank.
+- [x] One explicit name/automatic-update opt-in per UTC day; remember it across reloads.
+- [x] Automatically submit better online runs using the original guest identity.
+- [x] Preserve run snapshots through restart/mode changes and allow failed submission retry.
+- [x] Exact own rank outside the top 50, shared tie ordering and private guest IDs.
+- [x] Native Node server import fix and modern server-key support; no new SQL needed.
+- [ ] Verify the user's live Vercel deployment after merging these fixes.

@@ -108,8 +108,18 @@ attempts per day for thirty days. Only full-duration tests with correct text
 qualify. Daily scores stay separate from Sprint speed records.
 
 The optional shared guest leaderboard needs a database connection. Its server
-replays the run and calculates points itself; visitors explicitly submit a display
-name, and only their best score that day is kept. See [DEPLOYMENT.md](DEPLOYMENT.md)
+replays the run and calculates points itself. The **Leaderboard** button beneath
+the logo opens rankings in any mode, before playing. Your first qualifying online
+Daily score prompts for a public display name and permission to keep your entry
+updated for that UTC day. Better runs then submit automatically; slower/equal
+runs do not. The name and daily permission survive reloads, and midnight asks
+again. Your saved rank appears beside Leaderboard; the dialog also shows your
+exact standing outside the top 50. Not now dismisses without publishing.
+
+Submissions keep their original run even if you restart or switch modes. Failed
+submissions show a retry action, while a test that never connected requires a
+fresh run after reconnecting. Local scores stay available throughout. The server
+keeps only your best submitted entry per guest and day. See [DEPLOYMENT.md](DEPLOYMENT.md)
 for step-by-step Vercel/Cloudflare publishing and Supabase configuration (no player accounts required). Daily rules version 4 keeps decay-based rankings separate from older scores. Without that setup,
 the static game and local Daily rankings still work normally.
 

@@ -1,233 +1,237 @@
-import { useRef, useState } from "react";
-import type { RefObject } from "react";
-import type { DailyRecord } from "./dailyRecords";
-import type { DailyEvent } from "./dailyChallenge";
-import { dailyRequest, sharedRankings } from "./dailyLeaderboard";
-import type { RankedScore } from "./dailyLeaderboard";
+import { useEffect, useRef, useState } from "react";
+import { sharedRankings } from "./dailyLeaderboard";
+import { useDailyPublishing } from "./dailyPublishingContext";
 import { trapDialogFocus } from "./dialogFocus";
 
-export default function DailyRankings({
-  entry,
-  records,
-  eligible,
-  events,
-  run,
-}: {
-  entry: DailyRecord;
-  records: DailyRecord[];
-  eligible: boolean;
-  events: RefObject<DailyEvent[]>;
-  run: RefObject<Promise<string | null> | null>;
-}) {
+export default function DailyRankings() {
+  const { store, state } = useDailyPublishing();
   const dialog = useRef<HTMLDialogElement>(null);
-  const [global, setGlobal] = useState<RankedScore[]>([]);
-  const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(false);
-  async function open() {
-    dialog.current?.showModal();
-    if (!sharedRankings) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      setGlobal(
-        (await dailyRequest({ action: "list", day: entry.day })).scores,
-      );
-    } catch {
-      setMessage(
-        "Shared rankings are unavailable. Your local scores are below.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function submit() {
-    if (busy || sent || !eligible || !name.trim()) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      const id = await run.current;
-      if (!id)
-        throw new Error(
-          "This run could not connect. Play again to submit; your local score is saved.",
-        );
-      let player = "";
-      try {
-        player = localStorage.getItem("h2otype.daily-player.v1") ?? "";
-      } catch {
-        /* A per-visit guest remains usable. */
-      }
-      if (!/^[0-9a-f-]{36}$/.test(player)) player = crypto.randomUUID();
-      try {
-        localStorage.setItem("h2otype.daily-player.v1", player);
-      } catch {
-        /* No persistence required to submit. */
-      }
-      const result = await dailyRequest({
-        action: "submit",
-        id,
-        player,
-        name: name.trim(),
-        events: events.current,
-      });
-      setGlobal(result.scores);
-      setSent(true);
-      setMessage("Score submitted. Your best score today counts.");
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Could not submit. Try again.",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
+  const restore = useRef<HTMLElement | null>(null);
+  const [name, setName] = useState(state.guest.name);
+  const day = state.selectedDay;
+  const attempt = day ? state.attempts[day] : undefined;
+  const records = day ? store.localRecords(day) : [];
+  useEffect(() => {
+    if (!state.prompt || document.querySelector("dialog[open]")) return;
+    const results = document.querySelector<HTMLElement>("#results-title");
+    if (results?.dataset.dailyRun === state.prompt)
+      store.open(state.today, false);
+  }, [store, state.prompt, state.today]);
+  useEffect(() => {
+    if (day && !dialog.current?.open) {
+      restore.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+      dialog.current?.showModal();
+      dialog.current
+        ?.querySelector<HTMLInputElement>("#daily-name:not(:disabled)")
+        ?.focus();
+    } else if (!day && dialog.current?.open) dialog.current.close();
+    if (!day) return;
+    const refresh = setInterval(() => {
+      if (!document.hidden) void store.refresh();
+    }, 30000);
+    return () => clearInterval(refresh);
+  }, [day, store]);
+  const status = [
+    attempt?.status === "sent"
+      ? "Score submitted. Your best score today counts; better runs update automatically."
+      : attempt?.error,
+    state.message,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
-    <>
-      <button
-        className="restart-button"
-        aria-haspopup="dialog"
-        onClick={() => void open()}
-      >
-        Daily rankings
-      </button>
-      <dialog
-        className="settings-dialog daily-rankings"
-        ref={dialog}
-        aria-labelledby="rankings-title"
-        onKeyDown={trapDialogFocus}
-        onClose={() =>
-          document
-            .querySelector<HTMLElement>("#results-title")
-            ?.focus({ preventScroll: true })
-        }
-        onClick={(event) => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          if (
-            event.target === event.currentTarget &&
-            (event.clientX < rect.left ||
-              event.clientX > rect.right ||
-              event.clientY < rect.top ||
-              event.clientY > rect.bottom)
-          )
-            dialog.current?.close();
-        }}
-      >
-        <div className="dialog-heading">
-          <h2 id="rankings-title">Daily rankings</h2>
-          <button
-            className="close-button"
-            aria-label="Close rankings"
-            onClick={() => dialog.current?.close()}
-          >
-            ×
-          </button>
-        </div>
-        <p className="settings-note">
-          {entry.day} · 15 seconds · English 100 · resets at midnight UTC
-        </p>
-        {sharedRankings && (
-          <>
-            <h3>Guest leaderboard</h3>
-            {global.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {global.map((score, index) => (
-                    <tr key={index}>
+    <dialog
+      className="settings-dialog daily-rankings"
+      ref={dialog}
+      aria-labelledby="rankings-title"
+      onKeyDown={trapDialogFocus}
+      onClose={() => {
+        store.close();
+        const target =
+          document.querySelector<HTMLElement>(
+            "#results-title, #zen-title, .typing-input:not([readonly])",
+          ) ?? (restore.current?.isConnected ? restore.current : null);
+        target?.focus({ preventScroll: true });
+      }}
+      onClick={(event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        if (
+          event.target === event.currentTarget &&
+          (event.clientX < rect.left ||
+            event.clientX > rect.right ||
+            event.clientY < rect.top ||
+            event.clientY > rect.bottom)
+        )
+          dialog.current?.close();
+      }}
+    >
+      <div className="dialog-heading">
+        <h2 id="rankings-title">Daily rankings</h2>
+        <button
+          className="close-button"
+          aria-label="Close rankings"
+          onClick={() => dialog.current?.close()}
+        >
+          ×
+        </button>
+      </div>
+      <p className="settings-note">
+        {day} · 15 seconds · English 100 · resets at midnight UTC
+      </p>
+      {sharedRankings ? (
+        <>
+          <h3>Guest leaderboard</h3>
+          {state.standing && (
+            <p className="your-standing">
+              Your rank <strong>#{state.standing.rank}</strong> ·{" "}
+              {state.standing.score.toLocaleString()} points
+            </p>
+          )}
+          {attempt && attempt.status !== "sent" && attempt.token && (
+            <form
+              className="daily-submit"
+              onSubmit={(event) => {
+                event.preventDefault();
+                void store.confirm(name);
+              }}
+            >
+              <p className="settings-note">
+                {state.guest.acceptedDay === day
+                  ? "Update your daily best."
+                  : "Submit your Daily best?"}{" "}
+                Once submitted, better runs update your entry automatically
+                until midnight UTC.
+              </p>
+              <label htmlFor="daily-name">
+                Display name <small>Visible to other players</small>
+              </label>
+              <input
+                id="daily-name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                minLength={1}
+                maxLength={20}
+                autoComplete="nickname"
+                required
+                disabled={attempt.status === "sending"}
+              />
+              <button
+                className="restart-button"
+                disabled={attempt.status === "sending" || !name.trim()}
+              >
+                {attempt.status === "sending" ? "Submitting…" : "Submit score"}
+              </button>
+              <button
+                className="restart-button"
+                type="button"
+                disabled={attempt.status === "sending"}
+                onClick={() => dialog.current?.close()}
+              >
+                Not now
+              </button>
+            </form>
+          )}
+          {state.scores.length ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Player</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {state.scores.map((score, index) => {
+                  const rank =
+                    state.scores.findIndex(
+                      (other) =>
+                        other.score === score.score &&
+                        other.accuracy === score.accuracy &&
+                        other.wpm === score.wpm,
+                    ) + 1;
+                  return (
+                    <tr
+                      key={index}
+                      className={score.is_you ? "current-score" : undefined}
+                    >
+                      <td>{rank}</td>
                       <td>
-                        {index > 0 &&
-                        score.score === global[index - 1].score &&
-                        score.accuracy === global[index - 1].accuracy &&
-                        score.wpm === global[index - 1].wpm
-                          ? "="
-                          : index + 1}
+                        {score.display_name}
+                        {score.is_you ? " · you" : ""}
                       </td>
-                      <td>{score.display_name}</td>
                       <td>{score.score.toLocaleString()}</td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <p className="settings-note">
-                {busy ? "Loading rankings…" : "No submitted scores yet."}
-              </p>
-            )}
-            {eligible && !sent && (
-              <form
-                className="daily-submit"
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void submit();
-                }}
-              >
-                <label htmlFor="daily-name">
-                  Display name <small>Visible to other players</small>
-                </label>
-                <input
-                  id="daily-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  minLength={1}
-                  maxLength={20}
-                  autoComplete="nickname"
-                  required
-                />
-                <button
-                  className="restart-button"
-                  disabled={busy || !name.trim()}
-                >
-                  Submit score
-                </button>
-              </form>
-            )}
-          </>
-        )}
-        <h3>Scores on this browser</h3>
-        {records.length ? (
-          <table>
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Score</th>
-                <th>WPM</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((score, index) => (
-                <tr
-                  key={score.id}
-                  className={
-                    score.id === entry.id ? "current-score" : undefined
-                  }
-                >
-                  <td>
-                    {index + 1}
-                    {score.id === entry.id ? " · this run" : ""}
-                  </td>
-                  <td>{score.score.toLocaleString()}</td>
-                  <td>{score.wpm}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="settings-note">Finish the full test to save a score.</p>
-        )}
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <p className="settings-note">
+              {state.loading
+                ? "Loading rankings…"
+                : state.message
+                  ? "Shared rankings could not load."
+                  : "No submitted scores yet. Play Daily to join."}
+            </p>
+          )}
+          <button
+            className="restart-button"
+            disabled={state.loading}
+            onClick={() => void store.refresh()}
+          >
+            Refresh rankings
+          </button>
+        </>
+      ) : (
         <p className="settings-note">
-          Ranked by score, then accuracy, then WPM. Combo bonuses increase
-          points. Only your best submitted run per day enters the guest
-          leaderboard.
+          Shared rankings are not enabled on this deployment. Local scores are
+          below.
         </p>
-        <p role="status">{message}</p>
-      </dialog>
-    </>
+      )}
+      <h3>Scores on this browser</h3>
+      {records.length ? (
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Score</th>
+              <th>WPM</th>
+            </tr>
+          </thead>
+          <tbody>
+            {records.map((score, index) => (
+              <tr
+                key={score.id}
+                className={
+                  score.id === attempt?.entry.id ? "current-score" : undefined
+                }
+              >
+                <td>{index + 1}</td>
+                <td>{score.score.toLocaleString()}</td>
+                <td>{score.wpm}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p className="settings-note">
+          Finish the full Daily test to save a score.
+        </p>
+      )}
+      <p className="settings-note">
+        Ranked by score, then accuracy, then WPM. Only your best submitted run
+        per day enters the guest leaderboard.
+      </p>
+      {!state.storageAvailable && (
+        <p className="settings-storage-note">
+          Your name and guest identity can only be kept for this visit because
+          browser storage is unavailable.
+        </p>
+      )}
+      <p role="status">{status}</p>
+    </dialog>
   );
 }

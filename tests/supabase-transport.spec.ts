@@ -73,8 +73,19 @@ test("Supabase transport authenticates privately, versions queries and submits s
     expect(url.searchParams.get("rules_version")).toBe(
       `eq.${dailyRulesVersion}`,
     );
+    if (init?.method === "HEAD") {
+      expect(url.searchParams.get("or")).toContain(`score.gt.${replay.score}`);
+      expect(headers.get("prefer")).toBe("count=exact");
+      return new Response(null, { headers: { "Content-Range": "*/62" } });
+    }
+    if (url.searchParams.has("player_id")) {
+      expect(url.searchParams.get("player_id")).toBe(`eq.${player}`);
+      return Response.json(scores);
+    }
     expect(url.searchParams.get("limit")).toBe("50");
-    return Response.json(scores);
+    return Response.json(
+      scores.map((score) => ({ ...score, player_id: player })),
+    );
   };
   const call = (body: object) =>
     handleDaily(
@@ -104,7 +115,12 @@ test("Supabase transport authenticates privately, versions queries and submits s
     const response = await call(submission);
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(await response.json()).toEqual({ scores });
+    const publicResult = await response.json();
+    expect(JSON.stringify(publicResult)).not.toContain(player);
+    expect(publicResult).toEqual({
+      scores: scores.map((score) => ({ ...score, is_you: true })),
+      standing: { ...scores[0], rank: 63 },
+    });
     expect(
       calls.find((item) => item.path === "rpc/complete_daily")?.body,
     ).toEqual({

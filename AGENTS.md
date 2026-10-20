@@ -15,7 +15,7 @@ Prioritize fun, satisfying game feedback: stronger effects default on, with clea
 - Support light, dark, and system theme, defaulting to system.
 - Keep gameplay calculations and word generation in pure, independently testable functions. Preserve generator state when resuming Zen and keep best scores separate by word set and duration.
 - First-correct positions earn base XP plus capped combo bonuses; keep reward calculation independent of visual/audio preferences, carry fractional bonus tenths, and prevent correction/key-repeat farming. Decay combo charge by active elapsed time, faster at higher tiers, using the same pure integration in gameplay and Daily replay; never deduct earned rewards. Shake only at combo tier gains.
-- Persist settings, XP and records locally. Daily supports an optional Supabase guest leaderboard through private server handlers; keep it optional and never put service credentials in the browser. No accounts are required.
+- Persist settings, XP and records locally. Daily supports an optional Supabase guest leaderboard through private server handlers; keep it optional and never put service credentials in the browser. No accounts are required. Keep Leaderboard accessible before playing, prompt once per UTC day for a public name/automatic-update opt-in, and publish better runs automatically after consent. Submission tokens/edit traces must survive mode changes in memory; preserve local play and actionable retry errors.
 - Explain major changes in beginner-friendly terms and document important tradeoffs.
 - Update PROGRESS.md after each milestone: completed, tested, known issues, next task.
 - Do not override DESIGN.md product decisions without recording the change.
