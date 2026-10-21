@@ -172,7 +172,18 @@ async function finish(page: Page, characters: number) {
 }
 const rankings = (page: Page) =>
   page.getByRole("dialog", { name: "Daily rankings" });
+async function openSubmission(page: Page) {
+  await expect(rankings(page)).not.toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Daily results" }),
+  ).toBeFocused();
+  const invite = page.getByRole("button", { name: "Open daily leaderboard" });
+  await expect(invite).toHaveAttribute("data-pending", "true");
+  await invite.click();
+  await expect(invite).toHaveAttribute("data-pending", "false");
+}
 async function confirm(page: Page, name = "Simon") {
+  if (!(await rankings(page).isVisible())) await openSubmission(page);
   await expect(rankings(page)).toBeVisible();
   await expect(page.getByLabel("Display name", { exact: false })).toBeFocused();
   await page.getByLabel("Display name", { exact: false }).fill(name);
@@ -244,6 +255,7 @@ test("midnight clears today's rank and asks again with the remembered name", asy
   await expect(page.locator(".leaderboard-button")).not.toContainText("#69");
   await page.keyboard.press("Tab");
   await finish(page, 50);
+  await openSubmission(page);
   await expect(rankings(page)).toBeVisible();
   await expect(page.getByLabel("Display name", { exact: false })).toHaveValue(
     "Simon",
@@ -268,7 +280,7 @@ test("missing backend explains failure and retains local scores without promptin
   expect(
     await page.evaluate(
       () =>
-        JSON.parse(localStorage.getItem("h2otype.daily-scores.v4")!).records[0]
+        JSON.parse(localStorage.getItem("h2otype.daily-scores.v5")!).records[0]
           .score,
     ),
   ).toBe(1275);
@@ -297,6 +309,7 @@ test("failed submission survives mode switches and retries the same immutable ru
   await ready(page);
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   await finish(page, 100);
+  await openSubmission(page);
   await page.getByLabel("Display name", { exact: false }).fill("Simon");
   await page.getByRole("button", { name: "Submit score", exact: true }).click();
   await expect(rankings(page).getByRole("status")).toContainText("try again");
@@ -321,6 +334,7 @@ test("a late list response cannot erase a newly submitted standing or block Subm
   await ready(page);
   await page.getByRole("button", { name: "Daily", exact: true }).click();
   await finish(page, 100);
+  await openSubmission(page);
   await expect.poll(() => Boolean(api.delayedList)).toBe(true);
   await confirm(page);
   await api.delayedList!.fulfill({ json: { scores: [], standing: null } });
@@ -395,6 +409,7 @@ test("slow begin delivery waits for token maturity without weakening the 15-seco
   await response;
   await page.clock.fastForward(8000);
   await expect(page.locator("[role=timer]")).toHaveText("0s remaining");
+  await openSubmission(page);
   await page.getByLabel("Display name", { exact: false }).fill("Simon");
   await page.getByRole("button", { name: "Submit score", exact: true }).click();
   expect(submits).toBe(0);
@@ -472,4 +487,33 @@ test("Vercel non-JSON failures appear once with the original run guidance", asyn
   expect(text!.match(/The leaderboard server is unavailable\./g)).toHaveLength(
     1,
   );
+});
+
+test("Daily invitation pulses without opening, becomes static for motion preferences and dismisses without publishing", async ({
+  page,
+}) => {
+  const api = await backend(page);
+  await ready(page);
+  await page.getByRole("button", { name: "Daily", exact: true }).click();
+  await finish(page, 100);
+  const invite = page.getByRole("button", { name: "Open daily leaderboard" });
+  await expect(invite).toHaveAttribute("data-pending", "true");
+  const animation = () =>
+    invite.evaluate(
+      (button) => getComputedStyle(button, "::after").animationName,
+    );
+  expect(await animation()).toBe("leaderboard-invite");
+  await expect(rankings(page)).not.toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await animation()).toBe("none");
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.keyboard.press("F2");
+  await page.getByRole("slider", { name: "Graphics quality" }).press("Home");
+  await page.keyboard.press("Escape");
+  expect(await animation()).toBe("none");
+  await expect(invite).toHaveAttribute("aria-description", /Daily best ready/);
+  await openSubmission(page);
+  await page.getByRole("button", { name: "Not now", exact: true }).click();
+  await expect(invite).toHaveAttribute("data-pending", "false");
+  expect(api.submitCalls).toBe(0);
 });

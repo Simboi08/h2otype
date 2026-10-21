@@ -130,6 +130,28 @@ main {
 .leaderboard-button:hover {
   text-decoration: underline;
 }
+.leaderboard-button[data-pending="true"]::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1px solid var(--accent);
+  pointer-events: none;
+  animation: leaderboard-invite 1.4s ease-in-out infinite;
+}
+@keyframes leaderboard-invite {
+  50% {
+    box-shadow: 0 0 8px var(--accent);
+  }
+}
+:root[data-graphics="low"] .leaderboard-button::after,
+:root[data-effects="0"] .leaderboard-button::after {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .leaderboard-button::after {
+    animation: none !important;
+  }
+}
 .brand-group {
   transform: translateY(-12px);
 }

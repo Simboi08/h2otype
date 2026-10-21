@@ -1,6 +1,7 @@
 import { useDailyPublishing } from "./dailyPublishingContext";
 export default function DailyLeaderboardButton() {
   const { store, state } = useDailyPublishing();
+  const pending = Boolean(state.prompt);
   const rank =
     state.guest.best?.day === state.today ? state.guest.rank : undefined;
   return (
@@ -8,11 +9,19 @@ export default function DailyLeaderboardButton() {
       className="leaderboard-button"
       aria-label="Open daily leaderboard"
       aria-haspopup="dialog"
+      aria-description={
+        pending
+          ? "Daily best ready. Open to choose a public name and submit your score."
+          : undefined
+      }
+      data-pending={pending}
       onClick={() => store.open()}
       title={
         rank
           ? `Daily leaderboard · Your rank #${rank.toLocaleString()}`
-          : "Daily leaderboard"
+          : pending
+            ? "Daily best ready — open to submit your score"
+            : "Daily leaderboard"
       }
       data-ranked={Boolean(rank)}
     >

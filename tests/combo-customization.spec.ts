@@ -218,13 +218,13 @@ test("Zen pause/reload clear streaks while the feedback toggle keeps reward acco
   const input = page.getByRole("textbox");
   const passage = await page.locator(".passage").innerText();
   await input.pressSequentially(passage.slice(0, 20));
-  await expect(page.getByRole("meter")).toHaveCount(0);
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "20");
   await input.press("Escape");
   await expect(page.getByRole("meter")).toHaveCount(0);
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await expect(page.getByRole("meter")).toHaveCount(0);
   await input.pressSequentially(passage.slice(20, 40));
-  await expect(page.getByRole("meter")).toHaveCount(0);
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "20");
   await page.keyboard.press("F2");
   await page
     .getByRole("switch", { name: "Combo feedback", exact: true })

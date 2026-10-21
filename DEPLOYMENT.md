@@ -48,8 +48,8 @@ rankings across visitors:
    rankings interface. Cloudflare Pages also needs the two private values
    available to its Functions runtime.
 4. The **Leaderboard** button beneath the logo is available before playing.
-   Complete Daily: the first qualifying connected run prompts for a display name
-   and **Submit score**. The prompt explains that better runs update automatically
+   Complete Daily: the first qualifying connected run highlights **Leaderboard**. Open it
+   to enter a display name and choose **Submit score**. The prompt explains that better runs update automatically
    for the rest of that UTC day. Your rank appears beside Leaderboard; midnight
    clears today's badge and asks again. **Not now** leaves the score local.
    Keep the flag false/unset if you only want the static game.
@@ -76,14 +76,14 @@ cover the actual REST adapter's private authentication, versioned queries,
 server-calculated submissions and connection failures, as well as the SQL upgrade
 in a PostgreSQL-compatible local engine.
 
-Daily uses **rules version 4** for time-decaying combos. Run the current SQL
+Daily uses **rules version 5** for faster time-decaying combos. Run the current SQL
 before deploying the matching client/handlers; rerunning it preserves old scores
-under their original versions. The SQL also supports version 3 for an older
-15-second deployment during rollout, but each deployed handler only accepts its
+under their original versions. The SQL also supports versions 3 and 4 for older
+15-second deployments during rollout, but each deployed handler only accepts its
 own rules and lists that version's scores. Older browser-local records remain in
 separate keys; lifetime XP and preferences are preserved.
 
-After deploying, complete a Daily and accept the name prompt. Reload and use
+After deploying, complete a Daily, open the highlighted Leaderboard button and submit a name. Reload and use
 Leaderboard to check that your best appears under shared rankings. Beat that
 score to check automatic updates without another prompt. Opening
 rankings on another browser confirms it came from Supabase rather than local
@@ -111,16 +111,16 @@ The current implementation branch is `codex/milestone-1-typing-engine`. A push t
   containing only emitted JavaScript/JSON, then checks requests and score replay.
   `npm run build` includes this check automatically. Check Vercel function logs if
   the host returns an HTML error instead of JSON.
-- The current SQL from the previous setup still works; this update needs no new
-  SQL migration. A live hosted submission must be checked after deployment.
+- The compiled-import repair alone needs no SQL migration. The faster-combo
+  rules-5 release below does require rerunning the updated SQL. A live hosted submission must be checked after deployment.
 
 
 ## Recovering from the missing dailyApi.ts error
 If logs show `Cannot find module '/var/task/server/dailyApi.ts' imported from
 '/var/task/api/daily.js'`, deploy the compiled-import fix. Rebuilding the same old
 commit repeats the bug. Merge the fix into the branch Vercel watches and wait for
-its new deployment to become Ready. Your existing Supabase SQL and environment
-variables remain applicable.
+its new deployment to become Ready. Your environment variables remain applicable. If deploying the faster-combo
+rules-5 update too, rerun the updated SQL as described below.
 
 Open `https://h2otype.vercel.app/api/daily` after deploying. With server credentials
 configured, a browser GET should return JSON `{"error":"Use POST."}` (HTTP 405),
@@ -129,3 +129,8 @@ a private window to test the first-name prompt and submission; failed offline
 attempts cannot acquire run tokens retroactively. Confirm ranking and then a
 better run's automatic update. A live hosted submission is still required to
 validate the actual project credentials.
+
+## Faster-combo rules 5 upgrade
+Before deploying this update, copy the entire contents of `supabase/daily.sql` into Supabase → SQL Editor → New query and Run. Do not type the file path as SQL. It is safe to rerun: existing rows remain and versions 3/4/5 are accepted separately, allowing the old deployment to run while the new one ships. Version-4 rankings stay stored but do not compete with version-5 runs. Lifetime XP is unchanged. No new environment variables or keys are required.
+
+After the Vercel deployment is Ready, play a fresh Daily. Results should stay visible and the Leaderboard button should pulse. Open it to choose a public name and submit; improvements then publish automatically for that day. Low/Off/reduced motion show a static invitation border.

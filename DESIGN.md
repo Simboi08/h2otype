@@ -1,5 +1,20 @@
 # h2otype — Design specification v0.7
 
+## Stable combo rail and expiry cleanup — 2026-10-20
+This follow-up supersedes the retained empty meter and full-bar upgrade animation below.
+- Hide combo feedback when actual engine charge reaches zero, and show it again only when fresh correct positions rebuild charge. Keep the meter while positive charge remains, even below the first bonus tier.
+- Use a single persistent fill with five equal-width milestone sections. Each filled section corresponds to the next multiplier threshold; carry progress forward on upgrades and backward on downgrades. Remove the tier-keyed fill remount and the separate forced-100% Web Animation that competed with live progress.
+- Keep 100ms linear width interpolation, current reduced-motion/effects behavior, exact reward labels, scoring rules 5 and all existing drain/reward math. This is a display correction, with no new SQL migration.
+
+## Tablet particles, staged combo and voluntary Daily invitation — 2026-10-20
+These requests supersede the fixed 350-unit meter, slower drain and automatic name dialog below.
+- Render per-letter particles in a body-level canvas, measuring its actual CSS bounds for coordinates and bitmap resolution. Listen for visual-viewport resize as well as window resize. Accept partially visible glyphs during scrolling/subpixel font layout; reject only wholly clipped glyphs. Keep the existing right-facing fan, bounded sprites/RAF and lifecycle cleanup.
+- Settings reports renderer readiness, unavailable canvas, device reduced-motion suppression, Effects Off or Particles Off. Preserve saved choices and reduced-motion accessibility. Software-keyboard viewport changes must not permanently disable drawing; real iPad Chrome needs device verification, even when tablet Chromium tests pass.
+- Double active-time drain to 1.5/3/5/8/12/16 units per second at tiers 0–5. Keep upgrade thresholds, bonuses and fractional integration shared with server replay. Never remove earned XP or rewrite old balances.
+- Each stage shows progress toward its next actual threshold. A tier gain visibly completes the bar before starting the next stage; a downgrade rolls back to the preceding stage. Use 100ms linear fill transitions matching clock samples. Show building progress below tier 1 and retain an empty meter after idle expiry; mistakes/restart/pause can still clear the feedback. At the maximum tier show total charge reserve instead of a nonexistent next upgrade.
+- Use Daily rules version 5 and separate local scores, passage seeds, tokens and shared ranks. SQL accepts 3/4/5 during deployment; old scores remain isolated and old XP stays intact. Run the updated SQL before deploying version 5.
+- A ready first/better Daily without daily consent highlights the header Leaderboard button with a pulsing border and descriptive accessible text. Never automatically open or focus the name dialog. Opening acknowledges the cue; the existing voluntary name/automatic-update consent remains. Low/Off/reduced motion use a static border. Existing daily consent continues to publish improvements automatically.
+
 ## Vercel compiled API fix — 2026-10-20
 - Match runtime imports to emitted JavaScript (.js) in Vercel/Cloudflare handlers and the entire shared scoring dependency graph. TypeScript/Vite resolve those specifiers to source files during development. JSON word-bank data must remain present in the packaged function.
 - Validate a throwaway compiled JavaScript artifact without source TypeScript files as part of every production build. Exercise request handling and full score replay, not just a source import. The previously passing native .ts source check did not reflect Vercel's output.

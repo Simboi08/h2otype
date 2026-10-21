@@ -36,11 +36,19 @@ export function useTypingFeedback(enabled: boolean) {
     preferences.graphicsTier !== "low" &&
     !reducedMotion;
   const active = enabled && preferences.comboFeedback;
-  const [combo, setCombo] = useState({ active, streak: 0, fraction: 0 });
+  const [combo, setCombo] = useState({
+    active,
+    streak: 0,
+    fraction: 0,
+  });
   // Clear stopped/disabled decorations; active clock updates follow engine charge.
   if (combo.active !== active) setCombo({ active, streak: 0, fraction: 0 });
   const reset = useCallback(() => {
-    setCombo((current) => ({ ...current, streak: 0, fraction: 0 }));
+    setCombo((current) => ({
+      ...current,
+      streak: 0,
+      fraction: 0,
+    }));
     pending.current = null;
     clearEdge.current?.();
     particles.current?.clear();
@@ -91,7 +99,11 @@ export function useTypingFeedback(enabled: boolean) {
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
     const streak = active ? after.streak : 0;
-    setCombo({ active, streak, fraction: after.comboDecayFraction });
+    setCombo({
+      active,
+      streak,
+      fraction: after.comboDecayFraction,
+    });
     if (!streak) clearEdge.current?.();
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
@@ -178,8 +190,16 @@ export function useTypingFeedback(enabled: boolean) {
     if (!letter || !window) return;
     const bounds = letter.getBoundingClientRect();
     const viewport = window.getBoundingClientRect();
-    if (bounds.top < viewport.top || bounds.bottom > viewport.bottom) return;
-    particles.current?.emit(bounds.right + 2, bounds.y + bounds.height / 2);
+    // Font metrics and scrolling can leave a visible glyph fractionally clipped
+    // (notably at non-integer device scales). Only reject fully hidden letters.
+    if (bounds.bottom <= viewport.top || bounds.top >= viewport.bottom) return;
+    particles.current?.emit(
+      bounds.right + 2,
+      Math.max(
+        viewport.top,
+        Math.min(viewport.bottom, bounds.y + bounds.height / 2),
+      ),
+    );
   });
   useEffect(() => {
     if (
@@ -223,7 +243,7 @@ export function useTypingFeedback(enabled: boolean) {
       </>
     ),
     comboMeter:
-      active && getCombo(combo.streak).tier > 0 ? (
+      active && combo.streak > 0 ? (
         <ComboMeter streak={combo.streak} fraction={combo.fraction} />
       ) : null,
     layer:

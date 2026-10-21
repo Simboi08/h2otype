@@ -76,14 +76,29 @@
   color: var(--secondary);
 }
 .combo-track {
+  position: relative;
   height: 4px;
   background: var(--border);
+}
+/* Five stable sections: filling one corresponds to its multiplier milestone. */
+.combo-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(20% - 1px),
+    var(--surface) calc(20% - 1px),
+    var(--surface) 20%
+  );
 }
 .combo-track > span {
   display: block;
   height: 100%;
   background: var(--combo-color);
-  transition: width 140ms ease-out;
+  transition: width 100ms linear;
 }
 :root[data-effects="2"] .combo-meter {
   box-shadow: 0 0 26px #f1782840;

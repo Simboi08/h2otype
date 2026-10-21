@@ -8,7 +8,7 @@ import {
 import type { Session } from "./typingEngine.js";
 
 export const dailyDuration = 15;
-export const dailyRulesVersion = 4;
+export const dailyRulesVersion = 5;
 export type DailyChallenge = { day: string; passage: string };
 export type DailyEvent = {
   at: number;

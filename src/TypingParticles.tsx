@@ -1,5 +1,6 @@
-import { useEffect, useImperativeHandle, useRef } from "react";
+import { useCallback, useEffect, useImperativeHandle, useRef } from "react";
 import type { Ref } from "react";
+import { createPortal } from "react-dom";
 import type { GraphicsTier, ParticleStyle } from "./preferences";
 import { graphicsProfiles, particleVelocity } from "./graphics";
 
@@ -33,12 +34,21 @@ export default function TypingParticles({
   const previous = useRef(0);
   const drawing = useRef<CanvasRenderingContext2D | null>(null);
 
-  function clear() {
+  const clearCanvas = useCallback(() => {
+    const ctx = drawing.current;
+    if (!ctx) return;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
+  }, []);
+
+  const clear = useCallback(() => {
     if (frame.current !== null) cancelAnimationFrame(frame.current);
     frame.current = null;
     particles.current = [];
-    drawing.current?.clearRect(0, 0, innerWidth, innerHeight);
-  }
+    clearCanvas();
+  }, [clearCanvas]);
   function draw(now: number) {
     const ctx = drawing.current;
     if (!ctx) return;
@@ -46,7 +56,7 @@ export default function TypingParticles({
       frame.current = requestAnimationFrame(draw);
       return;
     }
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    clearCanvas();
     const dt = Math.min(0.04, Math.max(0, now - previous.current) / 1000);
     previous.current = now;
     particles.current = particles.current.filter(
@@ -73,7 +83,12 @@ export default function TypingParticles({
   useImperativeHandle(ref, () => ({
     clear,
     emit(x, y) {
-      if (!drawing.current || document.hidden) return;
+      if (!drawing.current || !canvas.current || document.hidden) return;
+      // Use the canvas coordinate space, including mobile keyboard/pinch zoom
+      // offsets. A body portal avoids ancestor clipping/compositing on Safari.
+      const bounds = canvas.current.getBoundingClientRect();
+      x -= bounds.left;
+      y -= bounds.top;
       const now = performance.now();
       const color = getComputedStyle(document.documentElement)
         .getPropertyValue("--accent")
@@ -105,13 +120,23 @@ export default function TypingParticles({
     try {
       drawing.current = element.getContext("2d");
     } catch {
-      return;
+      drawing.current = null;
     }
+    element.dataset.renderer = drawing.current ? "ready" : "unavailable";
+    window.dispatchEvent(new Event("typing-particle-status"));
+    if (!drawing.current) return;
     const resize = () => {
-      clear();
       const ratio = Math.min(devicePixelRatio || 1, profile.resolution);
-      element.width = Math.round(innerWidth * ratio);
-      element.height = Math.round(innerHeight * ratio);
+      const bounds = element.getBoundingClientRect();
+      const width = Math.round(bounds.width * ratio);
+      const height = Math.round(bounds.height * ratio);
+      // A visual-viewport event need not change layout dimensions. Avoid
+      // erasing a fresh burst repeatedly during software-keyboard animation.
+      if (element.width !== width || element.height !== height) {
+        clear();
+        element.width = width;
+        element.height = height;
+      }
       drawing.current?.setTransform(ratio, 0, 0, ratio, 0, 0);
     };
     resize();
@@ -119,15 +144,18 @@ export default function TypingParticles({
       if (document.hidden) clear();
     };
     window.addEventListener("resize", resize);
+    window.visualViewport?.addEventListener("resize", resize);
     document.addEventListener("visibilitychange", visibility);
     return () => {
       clear();
       drawing.current = null;
       window.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", visibility);
     };
-  }, [profile.resolution]);
-  return (
-    <canvas ref={canvas} className="typing-particles" aria-hidden="true" />
+  }, [profile.resolution, clear]);
+  return createPortal(
+    <canvas ref={canvas} className="typing-particles" aria-hidden="true" />,
+    document.body,
   );
 }

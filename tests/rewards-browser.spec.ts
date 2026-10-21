@@ -115,18 +115,19 @@ test("shake only rewards actual tier upgrades, with no pulses between upgrades",
   await ready(page);
   const passage = (await page.locator(".passage").textContent())!;
   const input = page.getByRole("textbox");
-  await input.pressSequentially(passage.slice(0, 25));
+  await input.pressSequentially(passage.slice(0, 26));
   await page.clock.runFor(300);
-  await page.keyboard.insertText(passage.slice(25, 61));
+  await page.keyboard.insertText(passage.slice(26, 62));
   await page.clock.runFor(300);
-  await page.keyboard.insertText(passage.slice(61, 120));
+  await page.keyboard.insertText(passage.slice(62, 120));
   expect(
     await page.evaluate(
       () =>
         (window as typeof window & { shakeDurations: number[] }).shakeDurations,
     ),
   ).toEqual([220, 220]);
-  await input.press(passage[120]);
+  // Replenish beyond the next threshold after faster fractional drain.
+  await page.keyboard.insertText(passage.slice(120, 122));
   expect(
     await page.evaluate(
       () =>
@@ -213,7 +214,7 @@ test("Daily fixes its text and duration, saves score-ranked attempts, and preser
   expect(
     await page.evaluate(
       () =>
-        JSON.parse(localStorage.getItem("h2otype.daily-scores.v4")!).records
+        JSON.parse(localStorage.getItem("h2otype.daily-scores.v5")!).records
           .length,
     ),
   ).toBe(2);
@@ -307,14 +308,14 @@ test("shared Daily submission sends the run for server replay and renders the re
           day,
           started_at: "2026-10-19T12:00:00Z",
           used: false,
-          rules_version: 4,
+          rules_version: 5,
         }),
         run: async () => ({
           id,
           day: "2026-10-19",
           started_at: "2026-10-19T12:00:00Z",
           used: false,
-          rules_version: 4,
+          rules_version: 5,
         }),
         list: async () => scores,
         complete: async (record) => {
@@ -347,6 +348,7 @@ test("shared Daily submission sends the run for server replay and renders the re
   await page.getByRole("textbox").fill(passage.slice(0, 100));
   await started;
   await page.clock.fastForward(15000);
+  await page.getByRole("button", { name: "Open daily leaderboard" }).click();
   await expect(
     page.getByRole("dialog", { name: "Daily rankings" }),
   ).toBeVisible();

@@ -23,20 +23,26 @@ const charge = (state: { streak: number; comboDecayFraction: number }) =>
   state.streak - state.comboDecayFraction;
 
 test("higher tiers drain faster and fractional decay is independent of timer frequency", () => {
-  expect(comboDecayRates).toEqual([0.75, 1.5, 2.5, 4, 6, 8]);
-  for (const threshold of [25, 60, 120, 200, 350]) {
-    expect(getCombo(threshold, 0.5).percent).toBeLessThan(
-      getCombo(threshold).percent,
-    );
-    expect(getCombo(threshold - 1).percent).toBeLessThan(
-      getCombo(threshold, 0.5).percent,
+  expect(comboDecayRates).toEqual([1.5, 3, 5, 8, 12, 16]);
+  for (const [previous, next] of [
+    [0, 25],
+    [25, 60],
+    [60, 120],
+    [120, 200],
+    [200, 350],
+  ]) {
+    expect(getCombo(previous).percent).toBe(0);
+    expect(getCombo(next - 1).percent).toBeGreaterThan(95);
+    expect(getCombo(next).tier).toBe(getCombo(next - 1).tier + 1);
+    expect(getCombo(previous + 10, 0.5).percent).toBeLessThan(
+      getCombo(previous + 10).percent,
     );
   }
   expect(getCombo(1000).percent).toBe(100);
-  expect(charge(decayCombo(30, 0, 1000))).toBeCloseTo(28.5);
-  expect(charge(decayCombo(100, 0, 1000))).toBeCloseTo(97.5);
-  expect(charge(decayCombo(400, 0, 1000))).toBeCloseTo(392);
-  expect(charge(decayCombo(350, 0, 1000))).toBeCloseTo(343.75); // steps down into the slower tier
+  expect(charge(decayCombo(30, 0, 1000))).toBeCloseTo(27);
+  expect(charge(decayCombo(100, 0, 1000))).toBeCloseTo(95);
+  expect(charge(decayCombo(400, 0, 1000))).toBeCloseTo(384);
+  expect(charge(decayCombo(350, 0, 1000))).toBeCloseTo(337.75); // steps down into the slower tier
   let frequent = { streak: 400, comboDecayFraction: 0 };
   for (let time = 0; time < 120000; time += 100)
     frequent = decayCombo(frequent.streak, frequent.comboDecayFraction, 100);
@@ -58,11 +64,11 @@ test("decay drains the active multiplier without removing XP or historical best 
   let session = editSession(emptySession(), text.slice(0, 100), text, 0, null);
   const xp = session.xpEarned;
   session = advanceClock(session, 20000, null);
-  expect(session.streak).toBe(54);
-  expect(charge(session)).toBeCloseTo(53.6);
+  expect(session.streak).toBe(24);
+  expect(charge(session)).toBeCloseTo(23.8);
   expect(session.xpEarned).toBe(xp);
   expect(session.bestCombo).toBe(100);
-  expect(getCombo(session.streak).multiplier).toBe(1.2);
+  expect(getCombo(session.streak).multiplier).toBe(1);
   expect(getCombo(session.streak).pitch).toBeLessThan(getCombo(100).pitch);
   const filled = editSession(session, text.slice(0, 101), text, 20000, null);
   expect(charge(filled)).toBeCloseTo(charge(session) + 1);
@@ -96,7 +102,7 @@ test("Zen pause/resume and old snapshots retain XP while clearing fractional com
   let zen = createZen("english100", 1234);
   zen = editZen(zen, zen.passage.slice(0, 100), 0);
   zen = advanceZen(zen, 1000);
-  expect(charge(zen.session)).toBeCloseTo(97.5);
+  expect(charge(zen.session)).toBeCloseTo(95);
   const paused = pauseZen(zen, 1000);
   expect(charge(paused.session)).toBe(0);
   expect(advanceZen(paused, 999999).session).toEqual(paused.session);
@@ -205,7 +211,7 @@ test("idle combo meter drains smoothly, loses tiers and refills in Sprint and Ze
     await page.clock.runFor(1000);
     await expect(page.getByRole("meter")).toHaveAttribute(
       "aria-valuenow",
-      "98",
+      "95",
     );
     expect(await width()).toBeLessThan(before);
     expect(await page.locator(".xp-value").textContent()).toBe(xp);
@@ -238,4 +244,74 @@ test("actual finish confetti launches along all four edges without taking focus 
   );
   await page.keyboard.press("Tab");
   await expect(page.locator(".finish-confetti i")).toHaveCount(0);
+});
+
+test("meter drains linearly, hides at expiry and returns only with fresh charge", async ({
+  page,
+}) => {
+  await ready(page);
+  await page.getByRole("button", { name: "Zen", exact: true }).click();
+  const text = (await page.locator(".passage").textContent())!;
+  await page.getByRole("textbox").fill(text.slice(0, 25));
+  await expect(page.locator(".combo-track > span")).toHaveCSS(
+    "transition-timing-function",
+    "linear",
+  );
+  await page.clock.runFor(500);
+  await expect(page.locator(".combo-meter")).toHaveAttribute("data-tier", "0");
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "24");
+  await page.clock.runFor(20000);
+  await expect(page.getByRole("meter")).toHaveCount(0);
+  await expect(page.getByText("Build combo", { exact: true })).toHaveCount(0);
+  await page.clock.runFor(1000);
+  await expect(page.getByRole("meter")).toHaveCount(0);
+  await page.keyboard.insertText(text[25]);
+  await expect(page.getByRole("meter")).toHaveAttribute("aria-valuenow", "1");
+  await expect(page.locator(".combo-meter")).toContainText("Build combo");
+  await expect(page.getByRole("textbox")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("meter")).toHaveCount(0);
+});
+
+test("all five milestone sections carry forward without remounting, flashing full or bouncing on tier loss", async ({
+  page,
+}) => {
+  await ready(page);
+  await page.getByRole("button", { name: "60s", exact: true }).click();
+  for (const [index, threshold] of [25, 60, 120, 200, 350].entries()) {
+    await page.keyboard.press("Tab");
+    const text = (await page.locator(".passage").textContent())!;
+    await page.getByRole("textbox").fill(text.slice(0, threshold - 1));
+    const fill = await page.locator(".combo-track > span").elementHandle();
+    await page.keyboard.insertText(text[threshold - 1]);
+    await expect(page.locator(".combo-meter")).toHaveAttribute(
+      "data-tier",
+      String(index + 1),
+    );
+    expect(
+      await fill!.evaluate(
+        (n) => n === document.querySelector(".combo-track > span"),
+      ),
+    ).toBe(true);
+    const target = (index + 1) * 20;
+    const samples: number[] = [];
+    for (let frame = 0; frame < 24; frame++) {
+      await page.clock.runFor(16);
+      samples.push(
+        await fill!.evaluate(
+          (n) =>
+            (n.getBoundingClientRect().width /
+              n.parentElement!.getBoundingClientRect().width) *
+            100,
+        ),
+      );
+    }
+    // Allow the small real drain between timer samples, never a full-bar flash
+    // or the old stage reset from nearly full to zero and back.
+    expect(Math.max(...samples)).toBeLessThanOrEqual(target + 0.1);
+    expect(Math.min(...samples)).toBeGreaterThan(target - 3);
+    for (let frame = 1; frame < samples.length; frame++)
+      expect(Math.abs(samples[frame] - samples[frame - 1])).toBeLessThan(2);
+    expect(await fill!.evaluate((n) => n.isConnected)).toBe(true);
+  }
 });
