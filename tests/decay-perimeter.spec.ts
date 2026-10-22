@@ -207,12 +207,12 @@ test("idle combo meter drains smoothly, loses tiers and refills in Sprint and Ze
       page
         .locator(".combo-track > span")
         .evaluate((n) => parseFloat((n as HTMLElement).style.width));
-    await page.clock.runFor(300); // let the initial whole-bar upgrade finish
+    await page.clock.runFor(500); // let rollover and the carried charge settle
     const before = await width();
     await page.clock.runFor(1000);
     await expect(page.getByRole("meter")).toHaveAttribute(
       "aria-valuenow",
-      "94",
+      "93",
     );
     expect(await width()).toBeLessThan(before);
     expect(await page.locator(".xp-value").textContent()).toBe(xp);

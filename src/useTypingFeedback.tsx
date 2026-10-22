@@ -36,21 +36,30 @@ export function useTypingFeedback(enabled: boolean) {
     preferences.graphicsTier !== "low" &&
     !reducedMotion;
   const active = enabled && preferences.comboFeedback;
+  const peakTier = useRef(0);
+  const comboEpoch = useRef(0);
   const [combo, setCombo] = useState({
     active,
     streak: 0,
     fraction: 0,
     earned: 0,
+    stage: 0,
+    epoch: 0,
   });
   // Clear stopped/disabled decorations; active clock updates follow engine charge.
   if (combo.active !== active)
-    setCombo({ active, streak: 0, fraction: 0, earned: 0 });
+    setCombo({ active, streak: 0, fraction: 0, earned: 0, stage: 0, epoch: 0 });
   const reset = useCallback(() => {
+    peakTier.current = 0;
+    comboEpoch.current++;
+    const epoch = comboEpoch.current;
     setCombo((current) => ({
       ...current,
       streak: 0,
       fraction: 0,
       earned: 0,
+      stage: 0,
+      epoch,
     }));
     pending.current = null;
     clearEdge.current?.();
@@ -85,14 +94,30 @@ export function useTypingFeedback(enabled: boolean) {
   const onClock = useCallback(
     (session: Session) => {
       if (!enabled) return;
+      if (session.streak === 0 && peakTier.current > 0) comboEpoch.current++;
+      peakTier.current =
+        session.streak > 0
+          ? Math.max(peakTier.current, getCombo(session.streak).tier)
+          : 0;
+      const stage = peakTier.current;
+      const epoch = comboEpoch.current;
       setCombo((current) => {
         const streak = active ? session.streak : 0;
         const fraction = active ? session.comboDecayFraction : 0;
         return current.active === active &&
           current.streak === streak &&
-          current.fraction === fraction
+          current.fraction === fraction &&
+          current.stage === stage &&
+          current.epoch === epoch
           ? current
-          : { active, streak, fraction, earned: current.earned };
+          : {
+              active,
+              streak,
+              fraction,
+              earned: current.earned,
+              stage,
+              epoch,
+            };
       });
       if (!session.streak) clearEdge.current?.();
     },
@@ -102,18 +127,37 @@ export function useTypingFeedback(enabled: boolean) {
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
     const streak = active ? after.streak : 0;
+    // Includes mistakes inside multi-character keyboard/composition commits.
+    const clockBefore = advanceClock(before, after.now, null);
+    const broken =
+      clockBefore.streak === 0 ||
+      after.typed.length < before.typed.length ||
+      after.attempts - after.correctAttempts >
+        before.attempts - before.correctAttempts;
+    if (broken) {
+      if (peakTier.current > 0) comboEpoch.current++;
+      peakTier.current = 0;
+    }
+    const previousPeak = peakTier.current;
+    const reached = getCombo(after.streak).tier;
+    peakTier.current = after.streak > 0 ? Math.max(previousPeak, reached) : 0;
+    const stage = peakTier.current;
+    const epoch = comboEpoch.current;
     setCombo((current) => ({
       active,
       streak,
       fraction: after.comboDecayFraction,
       earned: current.earned + Math.max(0, after.baseXp - before.baseXp),
+      stage,
+      epoch,
     }));
     if (!streak) clearEdge.current?.();
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
-    const tier = active
-      ? comboImpact(advanceClock(before, after.now, null).streak, after.streak)
-      : 0;
+    const tier =
+      active && reached > previousPeak
+        ? comboImpact(broken ? 0 : clockBefore.streak, after.streak)
+        : 0;
     if (
       tier &&
       !reducedMotion &&
@@ -252,6 +296,8 @@ export function useTypingFeedback(enabled: boolean) {
           streak={combo.streak}
           fraction={combo.fraction}
           earned={combo.earned}
+          stage={combo.stage}
+          epoch={combo.epoch}
         />
       ) : null,
     layer:

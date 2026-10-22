@@ -136,7 +136,7 @@ test("charging sparks originate at the moving fill edge, stop on idle and clear 
         }
       ).sparkPoints,
   );
-  expect(points.length).toBeGreaterThan(0);
+  expect(points.length).toBeGreaterThanOrEqual(12);
   expect(
     points.every(
       (point) =>
@@ -286,4 +286,135 @@ test("resize and hide cancel in-flight charging and upgrades without replay", as
   await page.getByRole("button", { name: "Resume", exact: true }).click();
   await page.clock.runFor(300);
   await expect(pixels(page)).toHaveCount(0);
+});
+
+test("threshold recrossings never roll back the earned stage or repeat local, edge or screen upgrade effects", async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  await page.addInitScript(() => {
+    const events = { local: 0, edge: 0, shake: 0 };
+    (window as typeof window & { comboEvents: typeof events }).comboEvents =
+      events;
+    const animate = Element.prototype.animate;
+    Element.prototype.animate = function (frames, options) {
+      const element = this as HTMLElement;
+      if (
+        element.parentElement?.classList.contains("combo-meter-particles") &&
+        element.dataset.kind === "upgrade"
+      )
+        events.local++;
+      if (element.parentElement?.classList.contains("combo-edge-particles"))
+        events.edge++;
+      if (element.classList.contains("practice-surface")) events.shake++;
+      return animate.call(this, frames, options);
+    };
+  });
+  await ready(page);
+  const events = () =>
+    page.evaluate(() => ({
+      ...(
+        window as typeof window & {
+          comboEvents: { local: number; edge: number; shake: number };
+        }
+      ).comboEvents,
+    }));
+  for (const [index, threshold] of [25, 60, 120, 200, 350].entries()) {
+    await page.keyboard.press("Tab");
+    const passage = await text(page);
+    let typed = threshold;
+    await page.getByRole("textbox").fill(passage.slice(0, typed));
+    await page.clock.runFor(80);
+    const first = await events();
+    for (let recross = 0; recross < 3; recross++) {
+      await page.clock.runFor(400);
+      await expect(page.locator(".combo-meter")).toHaveAttribute(
+        "data-stage",
+        String(index + 1),
+      );
+      await expect(page.locator(".combo-heading strong")).toHaveText(
+        `Combo ${index + 1}`,
+      );
+      const charge = Number(
+        await page.getByRole("meter").getAttribute("aria-valuenow"),
+      );
+      expect(charge).toBeLessThan(threshold);
+      const add = threshold - charge;
+      await page.keyboard.insertText(passage.slice(typed, typed + add));
+      typed += add;
+      await page.clock.runFor(80);
+      await expect(page.locator(".combo-meter")).toHaveAttribute(
+        "data-phase",
+        "track",
+      );
+      expect(
+        await page
+          .locator(".combo-track > span")
+          .evaluate((n) => parseFloat((n as HTMLElement).style.width)),
+      ).toBeGreaterThan(10);
+      expect(await events()).toEqual(first);
+    }
+    // A real mistake starts a new combo; the same first stage may be earned again.
+    await page.keyboard.insertText("#");
+    await expect(page.getByRole("meter")).toHaveCount(0);
+    await page.keyboard.press("Backspace");
+    await page.keyboard.insertText(passage.slice(typed, typed + 25));
+    await page.clock.runFor(80);
+    await expect(page.locator(".combo-meter")).toHaveAttribute(
+      "data-stage",
+      "1",
+    );
+    expect((await events()).local).toBe(first.local + 12);
+  }
+});
+
+test("regular correct typing keeps the fill moving forward and emits denser bounded charging sparks", async ({
+  page,
+}) => {
+  await ready(page);
+  const passage = await text(page);
+  await page.getByRole("textbox").fill(passage.slice(0, 10));
+  await page.clock.runFor(100);
+  const widths: number[] = [];
+  for (let char = 10; char < 20; char++) {
+    await page.keyboard.insertText(passage[char]);
+    for (let frame = 0; frame < 6; frame++) {
+      await page.clock.runFor(16);
+      widths.push(
+        await page
+          .locator(".combo-track > span")
+          .evaluate((n) => parseFloat((n as HTMLElement).style.width)),
+      );
+      expect(await pixels(page).count()).toBeLessThanOrEqual(64);
+    }
+  }
+  for (let frame = 1; frame < widths.length; frame++)
+    expect(widths[frame]).toBeGreaterThanOrEqual(widths[frame - 1] - 0.001);
+  await expect(
+    page.locator('.combo-meter-particles i[data-kind="charge"]'),
+  ).not.toHaveCount(0);
+  await page.clock.runFor(1000);
+  await expect(pixels(page)).toHaveCount(0);
+});
+
+test("a mistake inside one keyboard commit begins a fresh stage even when the meter never unmounts", async ({
+  page,
+}) => {
+  await ready(page);
+  const passage = await text(page);
+  await page.getByRole("textbox").fill(passage.slice(0, 200));
+  await page.clock.runFor(80);
+  const fill = await page.locator(".combo-track > span").elementHandle();
+  await expect(page.locator(".combo-meter")).toHaveAttribute("data-stage", "4");
+  await page.keyboard.insertText("#" + passage.slice(201, 226));
+  await page.clock.runFor(80);
+  await expect(page.locator(".combo-meter")).toHaveAttribute("data-stage", "1");
+  await expect(
+    page.locator('.combo-meter-particles i[data-kind="upgrade"]'),
+  ).toHaveCount(12);
+  expect(
+    await fill!.evaluate(
+      (n) => n === document.querySelector(".combo-track > span"),
+    ),
+  ).toBe(true);
 });

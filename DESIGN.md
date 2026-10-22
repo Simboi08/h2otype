@@ -1,5 +1,12 @@
 # h2otype — Design specification v0.7
 
+## Stable combo stages and denser charge sparks — 2026-10-22
+This follow-up supersedes raw-tier rollback in the whole-bar controller.
+- Treat the visual combo stage as the highest stage earned in the current unbroken combo. Preserve it across small or large tier decay until a mistake, deletion, pause/reset/hide or complete charge expiry breaks the combo. Current XP rate still follows exact engine charge and is displayed separately from the earned-stage badge.
+- Keep a stable next-stage goal and show charge as a fraction of that threshold. A new stage still fills the whole bar and resets once, carrying remaining charge into the next goal. Do not remap the bar to the previous stage when decay crosses a boundary, and never repeat local/edge bursts or screen shake for recrossing an already-earned stage. A real break permits earning the stages again.
+- While correct typing continues, hold the visual target against tiny backward clock samples for 220ms after the latest fresh credit. Idle drain then resumes linearly; no gameplay timing, XP, scoring, thresholds or Daily rules change.
+- Double High charging particles per emission from 3 to 6, keep Medium at 3, halve for Balanced, and allow emissions every 30ms rather than 45ms while the fill moves forward. Keep High/Medium live caps at 64/36 and all existing cleanup/motion/quality controls.
+
 ## Whole-bar combo charge and stronger stage rewards — 2026-10-22
 The user explicitly replaces the five-section rail with one full bar per combo stage.
 - Keep current 25/60/120/200/350 thresholds, tier-dependent decay and XP/Daily scoring. Animate the whole bar to full, emit the stage reward, hold briefly and reset once for the next stage. Use one RAF owner for width; never combine a tier-keyed remount, CSS width transition and a separate fill Web Animation. Track live target updates during rollover. Maximum tier stays full until charge drops below its threshold; lost tiers roll back without a reward.

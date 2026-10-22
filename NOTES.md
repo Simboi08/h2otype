@@ -149,3 +149,10 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [x] Forward friction/charging sparks at the moving edge, then a local pixel burst, glow and optional bar shake at full charge.
 - [x] Larger stage-burst particles scaled by combo tier, including existing screen-edge bursts; retain effect/quality/motion controls and bounded cleanup.
 - [ ] Separate leaderboard with player level, average WPM and accuracy. Plan profiles/authentication before implementation: accounts support recovery and multiple devices; guests can remain browser-bound. Include eligible-test/sample counts, separate word sets/durations, aggregate WPM from correct characters/active time and accuracy from attempts, and validate contributions on the server. Existing local XP must not simply become a trusted public rank.
+
+## Combo jitter follow-up — 2026-10-22
+- [x] Stable earned-stage badge and next-stage goal for each unbroken combo; retain exact live XP rate separately.
+- [x] Crossing the same threshold again cannot replay bar/edge bursts or screen shake. True breaks reset eligibility.
+- [x] Suppress tiny backward clock nudges while fresh typing continues; resume linear drain after 220ms idle.
+- [x] Double High charging sparks and increase emission frequency, retaining bounded quality budgets and motion controls.
+- No scoring/database change; separate profile leaderboard remains deferred.

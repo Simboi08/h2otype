@@ -47,7 +47,12 @@ export function createComboSparks(layer: HTMLDivElement) {
     ) {
       const profile = comboSparkProfile(tier, quality, intensity);
       if (!profile.count || document.hidden) return;
-      const count = upgrade ? profile.count : intensity === 1 ? 1 : 3;
+      const chargeCount = quality === "high" ? 6 : 3;
+      const count = upgrade
+        ? profile.count
+        : intensity === 1
+          ? Math.ceil(chargeCount / 2)
+          : chargeCount;
       for (let index = 0; index < count; index++) {
         while (live.size >= profile.maximum) remove(live.keys().next().value!);
         const particle = document.createElement("i");
