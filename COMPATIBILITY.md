@@ -42,3 +42,6 @@ npm test -- --config=playwright.compatibility.config.ts --project=webkit-tablet
 4. Open/close the keyboard and retry, then restart. If drawing is still absent while the status says ready, record the iPadOS/Chrome versions, orientation and status message. A screen recording of the caret and keyboard transition would help diagnose the remaining device-specific behavior.
 
 No analytics, device fingerprinting, remote assets or new application dependencies were added.
+
+## Whole-bar combo follow-up — 2026-10-22
+The compatibility projects also exercise `combo-stage.spec.ts`: stage rollover, rendered-edge spark origins, tier-scaled bursts, bounds, independent shake/motion/quality controls, resize/hide cleanup and pause/resume. These run with the tablet's touch/device-scale configuration alongside the earlier per-letter particle diagnostics. Real iPad/WebKit verification is still separate from Chromium emulation.

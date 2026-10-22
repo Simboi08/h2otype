@@ -2,7 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 import config from "./playwright.config";
 
 export default defineConfig(config, {
-  testMatch: "device-compatibility.spec.ts",
+  testMatch: ["device-compatibility.spec.ts", "combo-stage.spec.ts"],
   projects: [
     {
       name: "chromium-tablet",

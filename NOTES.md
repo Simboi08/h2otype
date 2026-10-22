@@ -143,3 +143,9 @@ See PROGRESS.md for implementation and validation details. Add new feedback here
 - [x] Hide Build combo after charge expires; show it again when fresh correct typing rebuilds charge.
 - [x] Remove milestone flicker/bounce: one persistent fill and five continuous milestone sections, with no forced full-bar animation or tier remount.
 - Scoring/drain remain unchanged; no SQL change for this follow-up.
+
+## Whole-bar combo feel and profile leaderboard idea — 2026-10-22
+- [x] One full bar per upgrade, without segmented sections. Keep current difficulty/reward scaling for later tuning.
+- [x] Forward friction/charging sparks at the moving edge, then a local pixel burst, glow and optional bar shake at full charge.
+- [x] Larger stage-burst particles scaled by combo tier, including existing screen-edge bursts; retain effect/quality/motion controls and bounded cleanup.
+- [ ] Separate leaderboard with player level, average WPM and accuracy. Plan profiles/authentication before implementation: accounts support recovery and multiple devices; guests can remain browser-bound. Include eligible-test/sample counts, separate word sets/durations, aggregate WPM from correct characters/active time and accuracy from attempts, and validate contributions on the server. Existing local XP must not simply become a trusted public rank.

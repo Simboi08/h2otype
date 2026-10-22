@@ -80,25 +80,11 @@
   height: 4px;
   background: var(--border);
 }
-/* Five stable sections: filling one corresponds to its multiplier milestone. */
-.combo-track::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to right,
-    transparent 0,
-    transparent calc(20% - 1px),
-    var(--surface) calc(20% - 1px),
-    var(--surface) 20%
-  );
-}
 .combo-track > span {
   display: block;
   height: 100%;
   background: var(--combo-color);
-  transition: width 100ms linear;
+  width: 0;
 }
 :root[data-effects="2"] .combo-meter {
   box-shadow: 0 0 26px #f1782840;
@@ -298,5 +284,27 @@
   }
   .combo-track > span {
     background: Highlight;
+  }
+}
+
+.combo-meter-particles {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 4;
+  contain: strict;
+}
+.combo-meter-particles i {
+  position: absolute;
+  pointer-events: none;
+  box-shadow: 0 0 5px #ffd27899;
+}
+:root[data-graphics="medium"] .combo-meter-particles i {
+  box-shadow: none;
+}
+@media (forced-colors: active) {
+  .combo-meter-particles {
+    display: none;
   }
 }

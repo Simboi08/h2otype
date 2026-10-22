@@ -1,5 +1,13 @@
 # h2otype — Design specification v0.7
 
+## Whole-bar combo charge and stronger stage rewards — 2026-10-22
+The user explicitly replaces the five-section rail with one full bar per combo stage.
+- Keep current 25/60/120/200/350 thresholds, tier-dependent decay and XP/Daily scoring. Animate the whole bar to full, emit the stage reward, hold briefly and reset once for the next stage. Use one RAF owner for width; never combine a tier-keyed remount, CSS width transition and a separate fill Web Animation. Track live target updates during rollover. Maximum tier stays full until charge drops below its threshold; lost tiers roll back without a reward.
+- Emit forward-shooting friction sparks at the rendered fill edge only while fresh correct credit moves it right. No charging sparks during idle drain, corrections of already credited positions, restored/toggled feedback or paused/finished modes.
+- At full charge emit larger local pixels, a brief bar glow and optional local shake. Scale local and existing screen-edge pixel size with combo tier. Bound live local sprites to High 64 / Medium 36, upgrade bursts to High 12–20 / Medium 7–11 before intensity scaling, and cancel animations/timers on reset, unmount, hide, resize or preference changes.
+- Low/Off/reduced motion use static exact progress and no new decorative particles. Screen shake independently controls the local shake. Per-letter particle choice remains independent of combo decorations; Combo feedback controls both meter and its decorations. Preserve typing focus, compact layout and pointer transparency.
+- A separate public profile leaderboard (level, average WPM, accuracy) is a future feature pending user scope choice. Accounts are recommended for cross-device recovery/sync; guest browser identities remain possible. Server-verified XP and aggregate statistics are needed before presenting trustworthy public rankings. Existing guest Daily rankings stay available without accounts.
+
 ## Stable combo rail and expiry cleanup — 2026-10-20
 This follow-up supersedes the retained empty meter and full-bar upgrade animation below.
 - Hide combo feedback when actual engine charge reaches zero, and show it again only when fresh correct positions rebuild charge. Keep the meter while positive charge remains, even below the first bonus tier.

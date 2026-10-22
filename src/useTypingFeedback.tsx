@@ -40,14 +40,17 @@ export function useTypingFeedback(enabled: boolean) {
     active,
     streak: 0,
     fraction: 0,
+    earned: 0,
   });
   // Clear stopped/disabled decorations; active clock updates follow engine charge.
-  if (combo.active !== active) setCombo({ active, streak: 0, fraction: 0 });
+  if (combo.active !== active)
+    setCombo({ active, streak: 0, fraction: 0, earned: 0 });
   const reset = useCallback(() => {
     setCombo((current) => ({
       ...current,
       streak: 0,
       fraction: 0,
+      earned: 0,
     }));
     pending.current = null;
     clearEdge.current?.();
@@ -89,7 +92,7 @@ export function useTypingFeedback(enabled: boolean) {
           current.streak === streak &&
           current.fraction === fraction
           ? current
-          : { active, streak, fraction };
+          : { active, streak, fraction, earned: current.earned };
       });
       if (!session.streak) clearEdge.current?.();
     },
@@ -99,11 +102,12 @@ export function useTypingFeedback(enabled: boolean) {
   function onEdit(before: Session, after: Session, passage: string) {
     if (!enabled) return;
     const streak = active ? after.streak : 0;
-    setCombo({
+    setCombo((current) => ({
       active,
       streak,
       fraction: after.comboDecayFraction,
-    });
+      earned: current.earned + Math.max(0, after.baseXp - before.baseXp),
+    }));
     if (!streak) clearEdge.current?.();
     const feedback = getTypingFeedback(before, after, passage);
     if (!feedback.accepted) return;
@@ -244,7 +248,11 @@ export function useTypingFeedback(enabled: boolean) {
     ),
     comboMeter:
       active && combo.streak > 0 ? (
-        <ComboMeter streak={combo.streak} fraction={combo.fraction} />
+        <ComboMeter
+          streak={combo.streak}
+          fraction={combo.fraction}
+          earned={combo.earned}
+        />
       ) : null,
     layer:
       enabled &&

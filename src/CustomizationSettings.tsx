@@ -206,8 +206,8 @@ export default function CustomizationSettings() {
           <span>
             <span className="preference-label">Combo feedback</span>
             <span className="preference-description">
-              Show the combo meter and raise sound pitch. Bonus XP stays active
-              with feedback off.
+              Show the combo bar, charging sparks, stage bursts and rising sound
+              pitch. Bonus XP stays active with feedback off.
             </span>
           </span>
           <input
