@@ -105,8 +105,8 @@ export function playScreenBurst(
     const particle = document.createElement("i");
     particle.dataset.edge = path.edge;
     particle.style.background = colors[index % colors.length];
-    particle.style.width = `${kind === "finish" ? 6 + unit * 4 : 3 + unit * 2}px`;
-    particle.style.height = `${kind === "finish" ? 8 + unit * 6 : 3 + unit * 2}px`;
+    particle.style.width = `${kind === "finish" ? 6 + unit * 4 : 5 + Math.min(5, tier) * 1.5 + unit * 2}px`;
+    particle.style.height = `${kind === "finish" ? 8 + unit * 6 : 5 + Math.min(5, tier) * 1.5 + unit * 2}px`;
     particle.style.left = `${path.left}px`;
     particle.style.top = `${path.top}px`;
     layer.append(particle);
