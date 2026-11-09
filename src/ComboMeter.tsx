@@ -6,16 +6,23 @@ export default function ComboMeter({
   streak,
   fraction = 0,
   earned = 0,
+  stage = 0,
+  epoch = 0,
 }: {
   streak: number;
   fraction?: number;
   earned?: number;
+  stage?: number;
+  epoch?: number;
 }) {
-  const { tier, next, multiplier } = getCombo(streak, fraction);
+  const { tier, multiplier } = getCombo(streak, fraction);
+  const next = comboThresholds[stage] ?? null;
   const { fill, meter, layer, allowed } = useComboMotion(
     streak,
     fraction,
     earned,
+    stage,
+    epoch,
   );
   if (streak <= 0) return null;
   return (
@@ -24,15 +31,12 @@ export default function ComboMeter({
         ref={meter}
         className="combo-meter"
         data-tier={tier}
-        title="Fill the whole bar to unlock the next XP multiplier. Typing replenishes combo; higher tiers drain faster."
+        data-stage={stage}
+        title={`Fill the whole bar for the next combo stage${next ? ` at ${next} charge` : "; maximum stage reached"}. The XP rate follows current charge.`}
       >
         <div className="combo-heading">
-          <strong>
-            {tier ? `${multiplier.toFixed(1)}× XP` : "Build combo"}
-          </strong>
-          <span>
-            {next ? `Next ${getCombo(next).multiplier.toFixed(1)}×` : "MAX"}
-          </span>
+          <strong>{stage ? `Combo ${stage}` : "Build combo"}</strong>
+          <span>{multiplier.toFixed(1)}× XP</span>
         </div>
         <div
           className="combo-track"
@@ -41,7 +45,7 @@ export default function ComboMeter({
           aria-valuemin={0}
           aria-valuemax={comboThresholds[4]}
           aria-valuenow={Math.min(streak, comboThresholds[4])}
-          aria-valuetext={`${streak} combo charge; combo tier ${tier}; ${multiplier.toFixed(1)} times XP${next ? `; next tier at ${next}` : "; maximum tier"}`}
+          aria-valuetext={`${streak} combo charge; earned stage ${stage}; current reward tier ${tier}; ${multiplier.toFixed(1)} times XP${next ? `; next earned stage at ${next}` : "; maximum earned stage"}`}
         >
           <span ref={fill} />
         </div>

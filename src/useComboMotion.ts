@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
-import { getCombo } from "./combo";
+import { comboThresholds } from "./combo";
 import { usePreferences } from "./preferences";
 import { useReducedMotion } from "./useReducedMotion";
 import { createComboSparks } from "./comboSparks";
@@ -10,6 +10,8 @@ export function useComboMotion(
   streak: number,
   fraction: number,
   earned: number,
+  stage: number,
+  epoch: number,
 ) {
   const fill = useRef<HTMLSpanElement>(null);
   const meter = useRef<HTMLDivElement>(null);
@@ -38,6 +40,7 @@ export function useComboMotion(
     lastBurst: -Infinity,
     configuration: "",
     rollTier: 0,
+    epoch,
   });
 
   useLayoutEffect(() => {
@@ -79,13 +82,39 @@ export function useComboMotion(
 
   useLayoutEffect(() => {
     const motion = state.current;
-    const combo = getCombo(streak, fraction);
+    if (motion.epoch !== epoch) {
+      if (motion.frame !== null) cancelAnimationFrame(motion.frame);
+      sparks.current?.clear();
+      animations.current.forEach((animation) => animation.cancel());
+      animations.current = [];
+      Object.assign(motion, {
+        epoch,
+        tier: 0,
+        earned: 0,
+        displayed: 0,
+        target: 0,
+        phase: "track",
+        frame: null,
+        lastBurst: -Infinity,
+      });
+    }
+    const goal = comboThresholds[stage] ?? comboThresholds[4];
+    const target = Math.max(
+      0,
+      Math.min(100, ((streak - fraction) / goal) * 100),
+    );
     const oldTier = motion.tier;
     const fresh = earned > motion.earned;
     motion.earned = earned;
-    motion.tier = combo.tier;
-    motion.target = combo.percent;
+    motion.tier = stage;
     const now = performance.now();
+    if (fresh) motion.freshUntil = now + 220;
+    // Brief typing momentum prevents a 100ms decay sample from tugging the
+    // fill backward between correct keys. Actual XP/charge remain exact.
+    motion.target =
+      allowed && !fresh && now < motion.freshUntil
+        ? Math.max(motion.target, target)
+        : target;
     const configuration = `${allowed}:${preferences.graphicsTier}:${preferences.effectIntensity}:${preferences.screenShake}`;
     const changed =
       motion.configuration !== "" && motion.configuration !== configuration;
@@ -105,21 +134,18 @@ export function useComboMotion(
       paint(motion.target);
       return;
     }
-    if (fresh) motion.freshUntil = now + 160;
     if (motion.phase !== "track") {
-      if (fresh && combo.tier > oldTier)
-        motion.rollTier = Math.max(motion.rollTier, combo.tier);
+      if (fresh && stage > oldTier)
+        motion.rollTier = Math.max(motion.rollTier, stage);
       return;
     }
     cancelFrame();
-    if (fresh && combo.tier > oldTier) {
+    if (fresh && stage > oldTier) {
       motion.phase = "complete";
-      motion.rollTier = combo.tier;
+      motion.rollTier = stage;
       motion.to = 100;
     } else {
       motion.phase = "track";
-      // A lost tier is a single stage rollback, not a fake refill/upgrade.
-      if (combo.tier < oldTier) paint(motion.target);
       motion.to = motion.target;
     }
     if (motion.phase === "track" && motion.displayed === motion.to) {
@@ -196,7 +222,7 @@ export function useComboMotion(
       if (
         motion.displayed > previous &&
         timestamp <= motion.freshUntil &&
-        timestamp - motion.lastSpark >= 45 &&
+        timestamp - motion.lastSpark >= 30 &&
         fill.current
       ) {
         motion.lastSpark = timestamp;
@@ -220,13 +246,7 @@ export function useComboMotion(
           paint(100);
         } else if (motion.phase === "hold") {
           motion.phase = "track";
-          paint(
-            motion.tier < motion.rollTier
-              ? motion.target
-              : motion.tier === 5
-                ? 100
-                : 0,
-          );
+          paint(motion.tier === comboThresholds.length ? 100 : 0);
           motion.from = motion.displayed;
           motion.to = motion.target;
           motion.start = timestamp;
@@ -243,6 +263,8 @@ export function useComboMotion(
     streak,
     fraction,
     earned,
+    stage,
+    epoch,
     allowed,
     preferences.graphicsTier,
     preferences.effectIntensity,
